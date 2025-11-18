@@ -1,0 +1,98 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ============================== -->
+    <!-- 🎨 COLORES PRINCIPALES DEL TEMA -->
+    <!-- ============================== -->
+
+    <Color x:Key="PrimaryColor">#F8BBD9</Color>
+    <Color x:Key="SecondaryColor">#E1BEE7</Color>
+    <Color x:Key="AccentColor">#f8acb3</Color>
+
+    <!-- ============================== -->
+    <!-- 🎨 BRUSHES -->
+    <!-- ============================== -->
+
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="TextBrush" Color="#333333" />
+    <SolidColorBrush x:Key="ErrorBrush" Color="Red" />
+
+    <!-- ============================== -->
+    <!-- 🔤 FUENTE GLOBAL: MONTSERRAT -->
+    <!-- ============================== -->
+
+    <!-- Aplica la fuente a TODOS los controles -->
+    <Style TargetType="Control">
+        <Setter Property="FontFamily"
+                Value="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat" />
+    </Style>
+
+    <!-- También aplica a TextBlock -->
+    <Style TargetType="TextBlock">
+        <Setter Property="FontFamily"
+                Value="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat" />
+    </Style>
+
+    <!-- ============================== -->
+    <!-- 🚫 DESACTIVAR EL ESTILO VERDE DE MATERIAL DESIGN -->
+    <!-- ============================== -->
+
+    <!-- TextBox sin colores del tema Material -->
+    <Style TargetType="TextBox" BasedOn="{x:Null}">
+        <Setter Property="BorderBrush" Value="#CCCCCC"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="White"/>
+    </Style>
+
+    <!-- PasswordBox igual que TextBox -->
+    <Style TargetType="PasswordBox" BasedOn="{x:Null}">
+        <Setter Property="BorderBrush" Value="#CCCCCC"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Padding" Value="5"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="White"/>
+    </Style>
+
+    <!-- CheckBox sin verde -->
+    <Style TargetType="CheckBox" BasedOn="{x:Null}">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FontFamily"
+                Value="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"/>
+        <Setter Property="FontSize" Value="14" />
+    </Style>
+
+    <!-- ============================== -->
+    <!-- ⭐ BOTÓN PRINCIPAL DEL LOGIN -->
+    <!-- ============================== -->
+
+    <Style x:Key="PrimaryButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Width" Value="250" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontFamily"
+                Value="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat" />
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border CornerRadius="5" Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
