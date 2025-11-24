@@ -32,7 +32,16 @@ namespace ProyectoRuben
 
         private void btnLogin_Click(object sender, RoutedEventArgs e)
         {
-
+            if(txtUsuario.Text=="admin" && txtPassword.Password=="admin")
+            {
+                MainWindow mainWindow = new MainWindow();
+                mainWindow.Show();
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Usuario o contraseña incorrectos", "Error de autenticación", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void txtOlvidar_Click(object sender, MouseButtonEventArgs e)

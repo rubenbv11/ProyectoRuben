@@ -55,7 +55,7 @@
 
                 <!-- Logo y Título -->
                 <StackPanel Grid.Row="0" Margin="0,20,0,30">
-                    <Image Source="/navbar-logo.png" Width="120" Height="65" Margin="0,0,0,15"/>
+                    <Image Source="/logo.png" Width="120" Height="65" Margin="0,0,0,15"/>
                     <TextBlock Text="Peluquería Charo" FontSize="18" FontWeight="Bold" 
                               Foreground="White" HorizontalAlignment="Center"/>
                     <TextBlock Text="Sistema de Gestión" FontSize="12" Foreground="#EEEEEE" 
