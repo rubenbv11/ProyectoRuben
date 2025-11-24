@@ -1,4 +1,8 @@
-﻿using MahApps.Metro.Controls;
+﻿using Castle.Core.Logging;
+using MahApps.Metro.Controls;
+using Microsoft.Extensions.Logging;
+using ProyectoRuben.Backen.Modelo;
+using pruebaNavegacion.Backend.Servicios;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,9 +24,14 @@ namespace ProyectoRuben
     /// </summary>
     public partial class Login : Window
     {
+        private GestioninventarioyserviciosContext _context;
+        private UsuarioRepository _usuarioRepository;
+        private ILogger<UsuarioRepository> _logger;
         public Login()
         {
             InitializeComponent();
+            _context = new GestioninventarioyserviciosContext();
+            _usuarioRepository = new UsuarioRepository(_context, _logger);
         }
 
         private void btnCerrar_Click(object sender, RoutedEventArgs e)
@@ -30,17 +39,27 @@ namespace ProyectoRuben
 
         }
 
-        private void btnLogin_Click(object sender, RoutedEventArgs e)
+        private async void btnLogin_Click(object sender, RoutedEventArgs e)
         {
-            if(txtUsuario.Text=="admin" && txtPassword.Password=="admin")
+            if (!string.IsNullOrEmpty(txtUsuario.Text) && !string.IsNullOrEmpty(txtPassword.Password))
             {
-                MainWindow mainWindow = new MainWindow();
-                mainWindow.Show();
-                this.Close();
+                bool isAuthenticated = await _usuarioRepository.LoginAsync(txtUsuario.Text, txtPassword.Password);
+                if (!isAuthenticated)
+                {
+                    MessageBox.Show("Usuario o clave incorrectos.", "Error de autenticación", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                else
+                {
+                    MainWindow ventanaPrincipal = new MainWindow();
+                    ventanaPrincipal.Show();
+                    this.Close();
+                }
+
             }
             else
             {
-                MessageBox.Show("Usuario o contraseña incorrectos", "Error de autenticación", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Por favor, introduzca usuario y clave.", "Error de autenticación", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
