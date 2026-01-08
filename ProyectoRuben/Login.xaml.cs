@@ -1,4 +1,5 @@
 ﻿using Castle.Core.Logging;
+using di.proyecto.clase._2025.Frontend.Mensajes;
 using MahApps.Metro.Controls;
 using Microsoft.Extensions.Logging;
 using ProyectoRuben.Backen.Modelo;
@@ -46,11 +47,12 @@ namespace ProyectoRuben
                 bool isAuthenticated = await _usuarioRepository.LoginAsync(txtUsuario.Text, txtPassword.Password);
                 if (!isAuthenticated)
                 {
-                    MessageBox.Show("Usuario o clave incorrectos.", "Error de autenticación", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MensajeError.Mostrar("Error de autenticación", "Usuario o clave incorrectos.", 3);
                     return;
                 }
                 else
                 {
+                    MensajeInformacion.Mostrar("Acceso correcto", "Bienvenido.", 2);
                     MainWindow ventanaPrincipal = new MainWindow();
                     ventanaPrincipal.Show();
                     this.Close();
@@ -59,7 +61,7 @@ namespace ProyectoRuben
             }
             else
             {
-                MessageBox.Show("Por favor, introduzca usuario y clave.", "Error de autenticación", MessageBoxButton.OK, MessageBoxImage.Error);
+                MensajeAdvertencia.Mostrar("Datos incompletos", "Por favor, introduzca usuario y clave.", 3);
             }
         }
 

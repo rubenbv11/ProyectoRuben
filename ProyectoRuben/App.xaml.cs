@@ -11,7 +11,7 @@ namespace ProyectoRuben
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            var splash = new SplashScreen("logo.png");
+            var splash = new SplashScreen("/Recursos/Imagenes/logo.png");
             splash.Show(false);
 
             // Tiempo mínimo visible
