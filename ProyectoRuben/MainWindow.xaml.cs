@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using ProyectoRuben.Backen.Modelo;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -18,7 +18,6 @@ namespace ProyectoRuben
             InicializarVentana();
             CargarDatosDashboard();
         }
-
         private void InicializarVentana()
         {
             // Configurar el timer para actualizar la fecha y hora

@@ -35,6 +35,8 @@ namespace ProyectoRuben
             _usuarioRepository = new UsuarioRepository(_context, _logger);
         }
 
+      
+
         private void btnCerrar_Click(object sender, RoutedEventArgs e)
         {
 
