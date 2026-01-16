@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ProyectoRuben.Backend.Servicios
 {
-    public interface IRolesPermisosRepository : IGenericRepository<RolesPermiso>
+    public interface IRolesPermisosRepository : IGenericRepository<RolesPermisos>
     {
         Task<IEnumerable<Permiso>> GetPermisosByRoleIdAsync(int roleId);
     }

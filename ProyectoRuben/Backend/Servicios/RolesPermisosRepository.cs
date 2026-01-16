@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProyectoRuben.Backen.Modelo;
-using ProyectoRuben.Backend.Servicios;
 using pruebaNavegacion.Backend.Servicios;
 using System;
 using System.Collections.Generic;
@@ -9,9 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProyectoRuben.Backend.Modelo
+namespace ProyectoRuben.Backend.Servicios
 {
-    public class RolesPermisosRepository : GenericRepository<RolesPermiso>, IRolesPermisosRepository
+    public class RolesPermisosRepository : GenericRepository<RolesPermisos>, IRolesPermisosRepository
     {
         public RolesPermisosRepository(GestioninventarioyserviciosContext context, ILogger<RolesPermisosRepository> logger) : base(context, logger) { }
         public async Task<IEnumerable<Permiso>> GetPermisosByRoleIdAsync(int roleId) =>

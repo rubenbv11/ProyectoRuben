@@ -41,6 +41,8 @@ public partial class GestioninventarioyserviciosContext : DbContext
 
     public virtual DbSet<VistaAgendaDiarium> VistaAgendaDiaria { get; set; }
 
+    public virtual DbSet<RolesPermisos> RolesPermisos { get; set; }
+
     public virtual DbSet<VistaClientesVip> VistaClientesVips { get; set; }
 
     public virtual DbSet<VistaDashboardFinanciero> VistaDashboardFinancieros { get; set; }
@@ -137,24 +139,7 @@ public partial class GestioninventarioyserviciosContext : DbContext
         modelBuilder.Entity<Role>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
-
-            entity.HasMany(d => d.Permisos).WithMany(p => p.Roles)
-                .UsingEntity<Dictionary<string, object>>(
-                    "RolesPermiso",
-                    r => r.HasOne<Permiso>().WithMany()
-                        .HasForeignKey("PermisosId")
-                        .HasConstraintName("fk_ROLES_PERMISOS_PERMISOS"),
-                    l => l.HasOne<Role>().WithMany()
-                        .HasForeignKey("RolesId")
-                        .HasConstraintName("fk_ROLES_PERMISOS_ROLES"),
-                    j =>
-                    {
-                        j.HasKey("RolesId", "PermisosId").HasName("PRIMARY");
-                        j.ToTable("roles_permisos");
-                        j.HasIndex(new[] { "PermisosId" }, "fk_ROLES_PERMISOS_PERMISOS_idx");
-                        j.IndexerProperty<int>("RolesId").HasColumnName("ROLES_ID");
-                        j.IndexerProperty<int>("PermisosId").HasColumnName("PERMISOS_ID");
-                    });
+            entity.HasIndex(e => e.Nombre, "Nombre_UNIQUE").IsUnique();
         });
 
         modelBuilder.Entity<Servicio>(entity =>
@@ -164,6 +149,35 @@ public partial class GestioninventarioyserviciosContext : DbContext
             entity.Property(e => e.Activo).HasDefaultValueSql("'1'");
             entity.Property(e => e.Duracion).HasComment("Duración en minutos");
             entity.Property(e => e.FechaCreacion).HasDefaultValueSql("CURRENT_TIMESTAMP");
+        });
+
+        modelBuilder.Entity<Permiso>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+            entity.HasIndex(e => e.Nombre, "Nombre_UNIQUE").IsUnique();
+        });
+
+        modelBuilder.Entity<RolesPermisos>(entity =>
+        {
+            entity.HasKey(e => new { e.RolesId, e.PermisosId }).HasName("PRIMARY");
+
+            entity.ToTable("roles_permisos");
+            entity.HasIndex(e => e.PermisosId, "fk_ROLES_PERMISOS_PERMISOS_idx");
+
+            entity.Property(e => e.RolesId).HasColumnName("ROLES_ID");
+            entity.Property(e => e.PermisosId).HasColumnName("PERMISOS_ID");
+
+            entity.HasOne(d => d.Roles)
+                .WithMany(p => p.RolesPermisos)
+                .HasForeignKey(d => d.RolesId)
+                .OnDelete(DeleteBehavior.Cascade) 
+                .HasConstraintName("fk_ROLES_PERMISOS_ROLES");
+
+            entity.HasOne(d => d.Permisos)
+                .WithMany(p => p.RolesPermisos)
+                .HasForeignKey(d => d.PermisosId)
+                .OnDelete(DeleteBehavior.Cascade) 
+                .HasConstraintName("fk_ROLES_PERMISOS_PERMISOS");
         });
 
         modelBuilder.Entity<ServicioProducto>(entity =>

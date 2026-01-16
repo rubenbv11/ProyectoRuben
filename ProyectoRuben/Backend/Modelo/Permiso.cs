@@ -22,5 +22,5 @@ public partial class Permiso
 
     [ForeignKey("PermisosId")]
     [InverseProperty("Permisos")]
-    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
+    public virtual ICollection<RolesPermisos> RolesPermisos { get; set; } = new List<RolesPermisos>();
 }
