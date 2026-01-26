@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using ProyectoRuben.Backen.Modelo;
+using ProyectoRuben.MVVM;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -11,13 +14,24 @@ namespace ProyectoRuben
     public partial class MainWindow : Window
     {
         private DispatcherTimer timer;
+        private readonly MVDashboard _mvDashboard;
+        private readonly IServiceProvider _serviceProvider;
 
-        public MainWindow()
+        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider)
         {
             InitializeComponent();
+            _mvDashboard = mVDashboard;
+            _serviceProvider = serviceProvider;
+            this.DataContext = _mvDashboard;
             InicializarVentana();
-            CargarDatosDashboard();
+
+            this.Loaded += MainWindow_Loaded;
         }
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await _mvDashboard.Inicializa();
+        }
+
         private void InicializarVentana()
         {
             // Configurar el timer para actualizar la fecha y hora
@@ -25,6 +39,7 @@ namespace ProyectoRuben
             timer.Interval = TimeSpan.FromSeconds(1);
             timer.Tick += Timer_Tick;
             timer.Start();
+            txtFechaHora.Text = DateTime.Now.ToString("dddd, dd 'de' MMMM yyyy - HH:mm:ss");
 
             // Actualizar fecha/hora inmediatamente
             ActualizarFechaHora();
@@ -44,10 +59,10 @@ namespace ProyectoRuben
         // MÉTODOS DE NAVEGACIÓN DEL MENÚ
         // ============================================
 
-        private void btnDashboard_Click(object sender, RoutedEventArgs e)
+        private async void btnDashboard_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Dashboard";
-            CargarDatosDashboard();
+            await _mvDashboard.Inicializa();
         }
 
         private void btnReservas_Click(object sender, RoutedEventArgs e)
@@ -155,7 +170,7 @@ namespace ProyectoRuben
                 timer.Stop();
 
                 // Abrir ventana de login
-                Login loginWindow = new Login();
+                var loginWindow = _serviceProvider.GetRequiredService<Login>();
                 loginWindow.Show();
 
                 // Cerrar esta ventana
@@ -163,84 +178,16 @@ namespace ProyectoRuben
             }
         }
 
-        // ============================================
-        // CARGA DE DATOS DEL DASHBOARD
-        // ============================================
-
-        private void CargarDatosDashboard()
-        {
-            // Cargar estadísticas
-            txtReservasHoy.Text = "12";
-            txtClientesAtendidos.Text = "245";
-            txtIngresosHoy.Text = "€850,00";
-            txtProductosBajoStock.Text = "8";
-
-            // Cargar próximas citas
-            CargarProximasCitas();
-        }
-
-        private void CargarProximasCitas()
-        {
-            // Datos de ejemplo
-            var proximasCitas = new List<CitaViewModel>
-            {
-                new CitaViewModel
-                {
-                    Hora = "09:30",
-                    Cliente = "María González López",
-                    Servicio = "Corte + Color",
-                    Empleado = "Ana López",
-                    Estado = "Confirmada"
-                },
-                new CitaViewModel
-                {
-                    Hora = "10:30",
-                    Cliente = "Carlos Mendoza Ruiz",
-                    Servicio = "Corte Caballero",
-                    Empleado = "Pedro Ramírez",
-                    Estado = "Confirmada"
-                },
-                new CitaViewModel
-                {
-                    Hora = "11:00",
-                    Cliente = "Laura Jiménez Pérez",
-                    Servicio = "Manicura Permanente",
-                    Empleado = "Sofía Castro",
-                    Estado = "Pendiente"
-                },
-                new CitaViewModel
-                {
-                    Hora = "12:00",
-                    Cliente = "Jorge Herrera Sánchez",
-                    Servicio = "Tratamiento Keratina",
-                    Empleado = "Ana López",
-                    Estado = "Confirmada"
-                },
-                new CitaViewModel
-                {
-                    Hora = "14:00",
-                    Cliente = "Elena Ruiz Moreno",
-                    Servicio = "Mechas Californianas",
-                    Empleado = "Ana López",
-                    Estado = "Confirmada"
-                },
-                new CitaViewModel
-                {
-                    Hora = "16:00",
-                    Cliente = "David Sánchez Díaz",
-                    Servicio = "Corte + Barba",
-                    Empleado = "Pedro Ramírez",
-                    Estado = "Pendiente"
-                }
-            };
-
-            dgProximasCitas.ItemsSource = proximasCitas;
-        }
-
+        
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
             timer?.Stop();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 

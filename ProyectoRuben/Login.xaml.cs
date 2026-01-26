@@ -1,6 +1,7 @@
 ﻿using Castle.Core.Logging;
 using di.proyecto.clase._2025.Frontend.Mensajes;
 using MahApps.Metro.Controls;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ProyectoRuben.Backen.Modelo;
 using pruebaNavegacion.Backend.Servicios;
@@ -25,14 +26,13 @@ namespace ProyectoRuben
     /// </summary>
     public partial class Login : Window
     {
-        private GestioninventarioyserviciosContext _context;
-        private UsuarioRepository _usuarioRepository;
-        private ILogger<UsuarioRepository> _logger;
-        public Login()
+        private IUsuarioRepository _usuarioRepository;
+        private readonly IServiceProvider _serviceProvider;
+        public Login(IUsuarioRepository usuarioRepository, IServiceProvider serviceProvider)
         {
             InitializeComponent();
-            _context = new GestioninventarioyserviciosContext();
-            _usuarioRepository = new UsuarioRepository(_context, _logger);
+            _usuarioRepository = usuarioRepository;
+            _serviceProvider = serviceProvider;
         }
 
       
@@ -55,7 +55,8 @@ namespace ProyectoRuben
                 else
                 {
                     MensajeInformacion.Mostrar("Acceso correcto", "Bienvenido.", 2);
-                    MainWindow ventanaPrincipal = new MainWindow();
+
+                    var ventanaPrincipal = _serviceProvider.GetRequiredService<MainWindow>();
                     ventanaPrincipal.Show();
                     this.Close();
                 }
