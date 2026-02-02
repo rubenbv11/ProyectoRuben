@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ProyectoRuben.Backen.Modelo; 
 using ProyectoRuben.Backend.Servicios;
+using ProyectoRuben.Frontend;
 using ProyectoRuben.MVVM; 
 using pruebaNavegacion.Backend.Servicios; 
 using System;
@@ -50,10 +51,12 @@ namespace ProyectoRuben
             // --- D. ViewModels ---
             services.AddTransient<MVDashboard>();
             services.AddTransient<MVUsuario>();
+            services.AddTransient<MVReservas>();
 
             // --- E. Ventanas (Vistas) ---
             services.AddTransient<MainWindow>(); 
-            services.AddTransient<Login>();     
+            services.AddTransient<Login>();   
+            services.AddTransient<UCReservas>();
         }
 
         protected override void OnStartup(StartupEventArgs e)

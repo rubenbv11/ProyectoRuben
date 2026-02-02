@@ -1,0 +1,119 @@
+﻿<UserControl x:Class="ProyectoRuben.Frontend.UCReservas"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="900"
+             Background="White">
+
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Margin="0,0,20,0" Effect="{StaticResource DropShadow}" 
+                CornerRadius="10" Background="White" VerticalAlignment="Top">
+            <StackPanel Margin="10">
+                <TextBlock Text="Selecciona Fecha" 
+                           FontWeight="Bold" 
+                           Foreground="{StaticResource PrimaryBrush}"
+                           HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+                <Calendar SelectedDate="{Binding FechaSeleccionada, Mode=TwoWay}"
+                          SelectionMode="SingleDate"
+                          Style="{StaticResource MaterialDesignCalendarPortrait}"/>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" FontSize="20" FontWeight="SemiBold" Foreground="#444" Margin="0,0,0,15">
+                <Run Text="Reservas para el: "/>
+                <Run Text="{Binding FechaSeleccionada, StringFormat=dd/MM/yyyy}" Foreground="{StaticResource AccentBrush}"/>
+            </TextBlock>
+
+            <DataGrid Grid.Row="1" 
+          ItemsSource="{Binding ListaReservas}"
+          AutoGenerateColumns="False"
+          CanUserAddRows="False"
+          IsReadOnly="True"
+          Style="{StaticResource MaterialDesignDataGrid}"
+          VerticalScrollBarVisibility="Auto">
+
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu>
+                                    <MenuItem Header="Editar" 
+                                  Command="{Binding DataContext.EditarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                  CommandParameter="{Binding}">
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Kind="Pencil"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <MenuItem Header="Cambiar Estado" 
+                                  Command="{Binding DataContext.CambiarEstadoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                  CommandParameter="{Binding}">
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Kind="SwapHorizontal"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+
+                                    <Separator/>
+
+                                    <MenuItem Header="Eliminar" Foreground="Red" Click="MenuEliminar_Click">
+                                        <MenuItem.Icon>
+                                            <materialDesign:PackIcon Kind="Delete" Foreground="Red"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </DataGrid.RowStyle>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Hora" Binding="{Binding Hora, StringFormat=hh\\:mm}" Width="80"/>
+                    <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nombre}" Width="*"/>
+                    <DataGridTextColumn Header="Servicio" Binding="{Binding Servicio.Nombre}" Width="*"/>
+                    <DataGridTextColumn Header="Empleado" Binding="{Binding Empleado.Nombre}" Width="*"/>
+
+                    <DataGridTemplateColumn Header="Estado" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="#EEE" CornerRadius="4" Padding="5,2">
+                                    <TextBlock Text="{Binding Estado}" HorizontalAlignment="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ListaReservas.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+
+                <materialDesign:PackIcon Kind="CalendarBlank" Width="50" Height="50" Foreground="#DDD" HorizontalAlignment="Center"/>
+                <TextBlock Text="No hay reservas para este día" Foreground="#AAA" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

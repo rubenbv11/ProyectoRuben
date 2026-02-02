@@ -68,7 +68,13 @@ namespace ProyectoRuben
         private void btnReservas_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Gestión de Reservas";
-            MessageBox.Show("Navegando a Reservas...", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            var vmReservas = _serviceProvider.GetRequiredService<MVReservas>();
+
+            var vistaReservas = new ProyectoRuben.Frontend.UCReservas();
+            vistaReservas.DataContext = vmReservas;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(vistaReservas);
         }
 
         private void btnClientes_Click(object sender, RoutedEventArgs e)
