@@ -1,4 +1,5 @@
-﻿using ProyectoRuben.Backen.Modelo;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
 using ProyectoRuben.MVVM;
 using System;
@@ -23,11 +24,16 @@ namespace ProyectoRuben.Frontend
     /// </summary>
     public partial class UCReservas : UserControl
     {
+        private AgregarReserva _agregarReserva;
+        private readonly IServiceProvider _serviceProvider;
+        private MVReservas _mvReservas;
 
-        public UCReservas()
+        public UCReservas(AgregarReserva agregarReserva,IServiceProvider serviceProvider,MVReservas mVReservas)
         {
-
             InitializeComponent();
+            _agregarReserva = agregarReserva;
+            _serviceProvider = serviceProvider;
+            _mvReservas = mVReservas;
         }
         private async void MenuEliminar_Click(object sender, RoutedEventArgs e)
         {
@@ -43,6 +49,16 @@ namespace ProyectoRuben.Frontend
                         await vm.EliminarReserva(reserva.Id);
                     }
                 }
+            }
+        }
+
+        private async void Agregar_Reserva(object sender, RoutedEventArgs e)
+        {
+            _agregarReserva = _serviceProvider.GetRequiredService<AgregarReserva>();
+            _agregarReserva.ShowDialog();
+            if(_agregarReserva.DialogResult == true)
+            {
+                _mvReservas.listaReservas.Refresh();
             }
         }
     }

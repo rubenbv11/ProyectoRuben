@@ -25,6 +25,7 @@
                 <Calendar SelectedDate="{Binding FechaSeleccionada, Mode=TwoWay}"
                           SelectionMode="SingleDate"
                           Style="{StaticResource MaterialDesignCalendarPortrait}"/>
+
             </StackPanel>
         </Border>
 
@@ -32,6 +33,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Grid.Row="0" FontSize="20" FontWeight="SemiBold" Foreground="#444" Margin="0,0,0,15">
@@ -70,7 +72,7 @@
 
                                     <Separator/>
 
-                                    <MenuItem Header="Eliminar" Foreground="Red" Click="MenuEliminar_Click">
+                                    <MenuItem Header="Eliminar" Foreground="Red" >
                                         <MenuItem.Icon>
                                             <materialDesign:PackIcon Kind="Delete" Foreground="Red"/>
                                         </MenuItem.Icon>
@@ -114,6 +116,8 @@
                 <materialDesign:PackIcon Kind="CalendarBlank" Width="50" Height="50" Foreground="#DDD" HorizontalAlignment="Center"/>
                 <TextBlock Text="No hay reservas para este día" Foreground="#AAA" Margin="0,10,0,0"/>
             </StackPanel>
+
+            <Button Grid.Row="2" Content="Agregar Reserva" Width="200"  Margin="0,20,0,0" HorizontalAlignment="Right" Click="Agregar_Reserva"/>
         </Grid>
     </Grid>
 </UserControl>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using ProyectoRuben.Backen.Modelo;
+using ProyectoRuben.Frontend;
 using ProyectoRuben.MVVM;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,13 +17,15 @@ namespace ProyectoRuben
         private DispatcherTimer timer;
         private readonly MVDashboard _mvDashboard;
         private readonly IServiceProvider _serviceProvider;
+        private readonly UCReservas _uCReservas;
 
-        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider)
+        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider,UCReservas uCReservas)
         {
             InitializeComponent();
             _mvDashboard = mVDashboard;
             _serviceProvider = serviceProvider;
             this.DataContext = _mvDashboard;
+            _uCReservas = uCReservas;
             InicializarVentana();
 
             this.Loaded += MainWindow_Loaded;
@@ -71,10 +74,10 @@ namespace ProyectoRuben
 
             var vmReservas = _serviceProvider.GetRequiredService<MVReservas>();
 
-            var vistaReservas = new ProyectoRuben.Frontend.UCReservas();
-            vistaReservas.DataContext = vmReservas;
+
+            _uCReservas.DataContext = vmReservas;
             DashboardContent.Children.Clear();
-            DashboardContent.Children.Add(vistaReservas);
+            DashboardContent.Children.Add(_uCReservas);
         }
 
         private void btnClientes_Click(object sender, RoutedEventArgs e)

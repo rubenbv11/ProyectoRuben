@@ -28,11 +28,13 @@ namespace ProyectoRuben
     {
         private IUsuarioRepository _usuarioRepository;
         private readonly IServiceProvider _serviceProvider;
-        public Login(IUsuarioRepository usuarioRepository, IServiceProvider serviceProvider)
+        private readonly MainWindow _ventanaPrincipal;
+        public Login(IUsuarioRepository usuarioRepository, IServiceProvider serviceProvider,MainWindow ventanaPrincipal)
         {
             InitializeComponent();
             _usuarioRepository = usuarioRepository;
             _serviceProvider = serviceProvider;
+            _ventanaPrincipal = ventanaPrincipal;
         }
 
       
@@ -56,8 +58,7 @@ namespace ProyectoRuben
                 {
                     MensajeInformacion.Mostrar("Acceso correcto", "Bienvenido.", 2);
 
-                    var ventanaPrincipal = _serviceProvider.GetRequiredService<MainWindow>();
-                    ventanaPrincipal.Show();
+                    _ventanaPrincipal.Show();
                     this.Close();
                 }
 

@@ -57,13 +57,14 @@ namespace ProyectoRuben
             services.AddTransient<MainWindow>(); 
             services.AddTransient<Login>();   
             services.AddTransient<UCReservas>();
+            services.AddTransient<AgregarReserva>();
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
             var loginWindow = _serviceProvider.GetRequiredService<Login>();
             loginWindow.Show();
+            base.OnStartup(e);
         }
     }
 }

@@ -5,13 +5,17 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Linq;
 
 namespace ProyectoRuben.MVVM
 {
     public class MVReservas : MVBase
     {
         private readonly IReservaRepository _reservaRepository;
+
+        private Reserva _reserva;
 
         private DateTime _fechaSeleccionada;
         public DateTime FechaSeleccionada
@@ -26,8 +30,8 @@ namespace ProyectoRuben.MVVM
             }
         }
 
-        private ObservableCollection<Reserva> _listaReservas;
-        public ObservableCollection<Reserva> ListaReservas
+        private ListCollectionView _listaReservas;
+        public ListCollectionView listaReservas
         {
             get => _listaReservas;
             set => SetProperty(ref _listaReservas, value);
@@ -40,8 +44,8 @@ namespace ProyectoRuben.MVVM
         public MVReservas(IReservaRepository reservaRepository)
         {
             _reservaRepository = reservaRepository;
-            _listaReservas = new ObservableCollection<Reserva>();
             FechaSeleccionada = DateTime.Today;
+            _reserva = new Reserva();
 
             EditarCommand = new RelayCommand(EditarReserva);
             CambiarEstadoCommand = new RelayCommand(CambiarEstadoReserva);
@@ -55,7 +59,7 @@ namespace ProyectoRuben.MVVM
             try
             {
                 var reservas = await _reservaRepository.GetReservasByFechaAsync(FechaSeleccionada);
-                ListaReservas = new ObservableCollection<Reserva>(reservas);
+                listaReservas = new ListCollectionView(reservas.ToList());
             }
             catch (Exception ex)
             {
