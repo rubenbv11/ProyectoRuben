@@ -34,6 +34,7 @@ namespace ProyectoRuben.Frontend
             _agregarReserva = agregarReserva;
             _serviceProvider = serviceProvider;
             _mvReservas = mVReservas;
+            DataContext = _mvReservas;
         }
         private async void MenuEliminar_Click(object sender, RoutedEventArgs e)
         {

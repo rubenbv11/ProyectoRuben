@@ -62,4 +62,5 @@ public partial class Reserva
     [ForeignKey("ServicioId")]
     [InverseProperty("Reservas")]
     public virtual Servicio Servicio { get; set; } = null!;
+    public DateTime FechaReserva { get; internal set; }
 }

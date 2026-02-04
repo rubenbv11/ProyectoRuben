@@ -25,7 +25,7 @@ namespace ProyectoRuben.MVVM
             {
                 if (SetProperty(ref _fechaSeleccionada, value))
                 {
-                    _ = CargarReservas();
+                    _ = Inicializa();
                 }
             }
         }
@@ -54,7 +54,7 @@ namespace ProyectoRuben.MVVM
             EliminarCommand = new RelayCommand(async (param) => await EliminarReserva((int)param));
         }
 
-        public async Task CargarReservas()
+        public async Task Inicializa()
         {
             try
             {
@@ -88,7 +88,7 @@ namespace ProyectoRuben.MVVM
             try
             {
                 await _reservaRepository.RemoveByIdAsync(id);
-                await CargarReservas();
+                await Inicializa();
                 SnackbarMessageQueue.Enqueue("Reserva eliminada correctamente.");
             }
             catch (Exception ex)
@@ -96,5 +96,19 @@ namespace ProyectoRuben.MVVM
                 SnackbarMessageQueue.Enqueue($"Error al eliminar: {ex.Message}");
             }
         }
+
+        public async Task GuardarReserva()
+        {
+            try
+            {
+                await _reservaRepository.AddAsync(_reserva);
+                SnackbarMessageQueue.Enqueue("Reserva guardada correctamente.");
+            }
+            catch (Exception ex)
+            {
+                SnackbarMessageQueue.Enqueue($"Error al guardar: {ex.Message}");
+            }
+        }
+
     }
 }

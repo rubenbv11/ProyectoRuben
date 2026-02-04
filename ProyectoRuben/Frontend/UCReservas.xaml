@@ -42,7 +42,7 @@
             </TextBlock>
 
             <DataGrid Grid.Row="1" 
-          ItemsSource="{Binding ListaReservas}"
+          ItemsSource="{Binding listaReservas}"
           AutoGenerateColumns="False"
           CanUserAddRows="False"
           IsReadOnly="True"

@@ -1,27 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ProyectoRuben.Backen.Modelo;
+using ProyectoRuben.Backend.Servicios;
+using ProyectoRuben.MVVM;
+using System;
+using System.Linq; // Importante para el ToList()
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ProyectoRuben.Frontend
 {
-    /// <summary>
-    /// Interaction logic for Window1.xaml
-    /// </summary>
     public partial class AgregarReserva : Window
     {
-        public AgregarReserva()
+        private MVReservas _mVReservas;
+         
+
+        public AgregarReserva(MVReservas mVReservas)
         {
             InitializeComponent();
+            _mVReservas = mVReservas;
         }
+
+        private async void AgregarReserva_Loaded(object sender, RoutedEventArgs e)
+        {
+            await _mVReservas.Inicializa();
+            this.AddHandler(Validation.ErrorEvent, new RoutedEventHandler(_mVReservas.OnErrorEvent));
+            DataContext = _mVReservas;
+        }
+        private void Cancelar_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+        private async void Guardar_Click(object sender, RoutedEventArgs e)
+        {
+            await _mVReservas.GuardarReserva();
+            DialogResult = true;
+            Close();
+        }
+
     }
 }
