@@ -49,39 +49,11 @@
           Style="{StaticResource MaterialDesignDataGrid}"
           VerticalScrollBarVisibility="Auto">
 
-                <DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
-                        <Setter Property="ContextMenu">
-                            <Setter.Value>
-                                <ContextMenu>
-                                    <MenuItem Header="Editar" 
-                                  Command="{Binding DataContext.EditarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                  CommandParameter="{Binding}">
-                                        <MenuItem.Icon>
-                                            <materialDesign:PackIcon Kind="Pencil"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-
-                                    <MenuItem Header="Cambiar Estado" 
-                                  Command="{Binding DataContext.CambiarEstadoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                  CommandParameter="{Binding}">
-                                        <MenuItem.Icon>
-                                            <materialDesign:PackIcon Kind="SwapHorizontal"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-
-                                    <Separator/>
-
-                                    <MenuItem Header="Eliminar" Foreground="Red" >
-                                        <MenuItem.Icon>
-                                            <materialDesign:PackIcon Kind="Delete" Foreground="Red"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                </ContextMenu>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </DataGrid.RowStyle>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Editar Reserva" Click="Editar_Reserva"/>
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
 
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Hora" Binding="{Binding Hora, StringFormat=hh\\:mm}" Width="80"/>
