@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
@@ -60,6 +60,7 @@ namespace ProyectoRuben
             services.AddTransient<UCReservas>();
             services.AddTransient<UCClientes>();
             services.AddTransient<AgregarReserva>();
+            services.AddTransient<AgregarCliente>();
         }
 
         protected override void OnStartup(StartupEventArgs e)
