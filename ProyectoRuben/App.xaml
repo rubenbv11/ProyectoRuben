@@ -28,6 +28,7 @@
             <!-- Converters personalizados -->
             <converters:StringToFirstCharConverter x:Key="StringToFirstCharConverter"/>
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:StockBajoConverter x:Key="StockBajoConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
