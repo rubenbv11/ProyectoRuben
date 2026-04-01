@@ -21,8 +21,9 @@ namespace ProyectoRuben
         private readonly UCClientes _uCClientes;
         private readonly UCServicios _uCServicios;
         private readonly UCProductos _uCProductos;
+        private readonly UCCaja _uCCaja;
 
-        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider, UCReservas uCReservas, UCClientes uCClientes, UCServicios uCServicios, UCProductos uCProductos)
+        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider, UCReservas uCReservas, UCClientes uCClientes, UCServicios uCServicios, UCProductos uCProductos, UCCaja uCCaja)
         {
             InitializeComponent();
             _mvDashboard = mVDashboard;
@@ -32,6 +33,7 @@ namespace ProyectoRuben
             _uCClientes = uCClientes;
             _uCServicios = uCServicios;
             _uCProductos = uCProductos;
+            _uCCaja = uCCaja;
             InicializarVentana();
 
             this.Loaded += MainWindow_Loaded;
@@ -115,8 +117,11 @@ namespace ProyectoRuben
 
         private void btnFacturacion_Click(object sender, RoutedEventArgs e)
         {
-            txtTituloPagina.Text = "Facturación";
-            MessageBox.Show("Navegando a Facturación...", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+            txtTituloPagina.Text = "Caja - Punto de Venta";
+            var vmCaja = _serviceProvider.GetRequiredService<MVCaja>();
+            _uCCaja.DataContext = vmCaja;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(_uCCaja);
         }
 
         private void btnReportes_Click(object sender, RoutedEventArgs e)
