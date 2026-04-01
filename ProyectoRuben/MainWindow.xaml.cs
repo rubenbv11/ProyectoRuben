@@ -18,14 +18,16 @@ namespace ProyectoRuben
         private readonly MVDashboard _mvDashboard;
         private readonly IServiceProvider _serviceProvider;
         private readonly UCReservas _uCReservas;
+        private readonly UCClientes _uCClientes;
 
-        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider,UCReservas uCReservas)
+        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider, UCReservas uCReservas, UCClientes uCClientes)
         {
             InitializeComponent();
             _mvDashboard = mVDashboard;
             _serviceProvider = serviceProvider;
             this.DataContext = _mvDashboard;
             _uCReservas = uCReservas;
+            _uCClientes = uCClientes;
             InicializarVentana();
 
             this.Loaded += MainWindow_Loaded;
@@ -83,7 +85,10 @@ namespace ProyectoRuben
         private void btnClientes_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Gestión de Clientes";
-            MessageBox.Show("Navegando a Clientes...", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+            var vmClientes = _serviceProvider.GetRequiredService<MVClientes>();
+            _uCClientes.DataContext = vmClientes;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(_uCClientes);
         }
 
         private void btnServicios_Click(object sender, RoutedEventArgs e)
@@ -187,7 +192,7 @@ namespace ProyectoRuben
             }
         }
 
-        
+
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);

@@ -3,25 +3,50 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ============================== -->
-    <!-- 🎨 COLORES PRINCIPALES DEL TEMA -->
+    <!-- COLORES PRINCIPALES DEL TEMA - Neutro Moderno -->
     <!-- ============================== -->
 
-    <Color x:Key="PrimaryColor">#F8BBD9</Color>
-    <Color x:Key="SecondaryColor">#E1BEE7</Color>
-    <Color x:Key="AccentColor">#f8acb3</Color>
+    <Color x:Key="PrimaryColor">#2D3436</Color>
+    <Color x:Key="SecondaryColor">#636E72</Color>
+    <Color x:Key="AccentColor">#D4A574</Color>
+    <Color x:Key="GoldAccent">#C9A86C</Color>
+    <Color x:Key="LightGray">#F5F6F7</Color>
+    <Color x:Key="MediumGray">#DFE6E9</Color>
 
     <!-- ============================== -->
-    <!-- 🎨 BRUSHES -->
+    <!-- BRUSHES - Neutro Moderno -->
     <!-- ============================== -->
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource PrimaryColor}" />
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource SecondaryColor}" />
     <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
-    <SolidColorBrush x:Key="TextBrush" Color="#333333" />
-    <SolidColorBrush x:Key="ErrorBrush" Color="Red" />
+    <SolidColorBrush x:Key="GoldBrush" Color="{StaticResource GoldAccent}" />
+    <SolidColorBrush x:Key="LightGrayBrush" Color="{StaticResource LightGray}" />
+    <SolidColorBrush x:Key="MediumGrayBrush" Color="{StaticResource MediumGray}" />
+    <SolidColorBrush x:Key="TextBrush" Color="#2D3436" />
+    <SolidColorBrush x:Key="TextLightBrush" Color="#636E72" />
+    <SolidColorBrush x:Key="ErrorBrush" Color="#D63031" />
 
     <!-- ============================== -->
-    <!-- 🔤 FUENTE GLOBAL: MONTSERRAT -->
+    <!-- EFECTOS Y SOMBRAS -->
+    <!-- ============================== -->
+
+    <DropShadowEffect x:Key="DropShadow" 
+                      BlurRadius="15" 
+                      ShadowDepth="2" 
+                      Direction="270" 
+                      Color="#000000" 
+                      Opacity="0.08"/>
+
+    <DropShadowEffect x:Key="DropShadowLight" 
+                      BlurRadius="8" 
+                      ShadowDepth="1" 
+                      Direction="270" 
+                      Color="#000000" 
+                      Opacity="0.05"/>
+
+    <!-- ============================== -->
+    <!-- FUENTE GLOBAL: MONTSERRAT -->
     <!-- ============================== -->
 
     <!-- Aplica la fuente a TODOS los controles -->
@@ -37,7 +62,7 @@
     </Style>
 
     <!-- ============================== -->
-    <!-- 🚫 DESACTIVAR EL ESTILO VERDE DE MATERIAL DESIGN -->
+    <!-- ESTILOS PERSONALIZADOS -->
     <!-- ============================== -->
 
     <!-- TextBox sin colores del tema Material -->
@@ -69,7 +94,7 @@
     </Style>
 
     <!-- ============================== -->
-    <!-- ⭐ BOTÓN PRINCIPAL DEL LOGIN -->
+    <!-- BOTON PRINCIPAL -->
     <!-- ============================== -->
 
     <Style x:Key="PrimaryButton" TargetType="Button">
@@ -93,6 +118,102 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- ============================== -->
+    <!-- ESTILO TARJETA/CARD -->
+    <!-- ============================== -->
+
+    <Style x:Key="CardStyle" TargetType="Border">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="20"/>
+        <Setter Property="Effect" Value="{StaticResource DropShadow}"/>
+    </Style>
+
+    <!-- ============================== -->
+    <!-- BOTON SECUNDARIO -->
+    <!-- ============================== -->
+
+    <Style x:Key="SecondaryButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource MediumGrayBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Padding" Value="16,0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="FontFamily" Value="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border CornerRadius="6" Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================== -->
+    <!-- BADGE/ETIQUETA DE ESTADO -->
+    <!-- ============================== -->
+
+    <Style x:Key="StatusBadge" TargetType="Border">
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="Background" Value="{StaticResource MediumGrayBrush}"/>
+    </Style>
+
+    <!-- ============================== -->
+    <!-- ESTILO CALENDARIO PERSONALIZADO -->
+    <!-- ============================== -->
+
+    <Style x:Key="NeutroCalendarStyle" TargetType="Calendar">
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="CalendarDayButtonStyle">
+            <Setter.Value>
+                <Style TargetType="CalendarDayButton">
+                    <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+                    <Setter Property="FontSize" Value="13"/>
+                    <Setter Property="MinWidth" Value="32"/>
+                    <Setter Property="MinHeight" Value="32"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsToday" Value="True">
+                            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsInactive" Value="True">
+                            <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="CalendarButtonStyle">
+            <Setter.Value>
+                <Style TargetType="CalendarButton">
+                    <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+                    <Setter Property="FontSize" Value="13"/>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============================== -->
+    <!-- ESTILO VENTANA DIALOGO -->
+    <!-- ============================== -->
+
+    <Style x:Key="DialogWindowStyle" TargetType="Window">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
     </Style>
 
 </ResourceDictionary>

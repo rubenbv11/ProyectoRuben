@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using ProyectoRuben.Backen.Modelo; 
+using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
 using ProyectoRuben.Frontend;
-using ProyectoRuben.MVVM; 
-using pruebaNavegacion.Backend.Servicios; 
+using ProyectoRuben.MVVM;
+using pruebaNavegacion.Backend.Servicios;
 using System;
 using System.Windows;
 
@@ -20,7 +20,7 @@ namespace ProyectoRuben
         public App()
         {
             ServiceCollection services = new ServiceCollection();
-            ConfigureServices(services);           
+            ConfigureServices(services);
             _serviceProvider = services.BuildServiceProvider();
         }
 
@@ -40,7 +40,7 @@ namespace ProyectoRuben
             services.AddScoped<IFacturaRepository, FacturaRepository>();
             services.AddScoped<IProductoRepository, ProductoRepository>();
             services.AddScoped<IServicioRepository, ServicioRepository>();
-           services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IPermisoRepository, PermisoRepository>();
             services.AddScoped<IRolesPermisosRepository, RolesPermisosRepository>();
             services.AddScoped<IOfertaRepository, OfertaRepository>();
@@ -52,17 +52,19 @@ namespace ProyectoRuben
             services.AddTransient<MVDashboard>();
             services.AddTransient<MVUsuario>();
             services.AddTransient<MVReservas>();
+            services.AddTransient<MVClientes>();
 
             // --- E. Ventanas (Vistas) ---
-            services.AddTransient<MainWindow>(); 
-            services.AddTransient<Login>();   
+            services.AddTransient<MainWindow>();
+            services.AddTransient<Login>();
             services.AddTransient<UCReservas>();
+            services.AddTransient<UCClientes>();
             services.AddTransient<AgregarReserva>();
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            var loginWindow = _serviceProvider.GetRequiredService<Login>();
+            var loginWindow = _serviceProvider.GetRequiredService<MainWindow>();
             loginWindow.Show();
             base.OnStartup(e);
         }

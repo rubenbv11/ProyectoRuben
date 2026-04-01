@@ -6,29 +6,38 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900"
-             Background="White">
+             Background="{StaticResource LightGrayBrush}">
 
-    <Grid Margin="20">
+    <Grid Margin="24">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Margin="0,0,20,0" Effect="{StaticResource DropShadow}" 
-                CornerRadius="10" Background="White" VerticalAlignment="Top">
-            <StackPanel Margin="10">
+        <!-- Panel Izquierdo: Calendario -->
+        <Border Grid.Column="0" 
+                Margin="0,0,24,0" 
+                Style="{StaticResource CardStyle}"
+                VerticalAlignment="Top">
+            <StackPanel>
                 <TextBlock Text="Selecciona Fecha" 
-                           FontWeight="Bold" 
-                           Foreground="{StaticResource PrimaryBrush}"
-                           HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                           FontSize="16"
+                           FontWeight="SemiBold" 
+                           Foreground="{StaticResource TextBrush}"
+                           HorizontalAlignment="Center" 
+                           Margin="0,0,0,16"/>
 
-                <Calendar SelectedDate="{Binding FechaSeleccionada, Mode=TwoWay}"
+                <Calendar x:Name="CalendarioReservas"
+                          SelectedDate="{Binding FechaSeleccionada, Mode=TwoWay}"
                           SelectionMode="SingleDate"
-                          Style="{StaticResource MaterialDesignCalendarPortrait}"/>
-
+                          Style="{StaticResource NeutroCalendarStyle}"
+                          Foreground="{StaticResource TextBrush}"
+                          Background="White"
+                          BorderThickness="0"/>
             </StackPanel>
         </Border>
 
+        <!-- Panel Derecho: Lista de Reservas -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -36,60 +45,291 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0" FontSize="20" FontWeight="SemiBold" Foreground="#444" Margin="0,0,0,15">
-                <Run Text="Reservas para el: "/>
-                <Run Text="{Binding FechaSeleccionada, StringFormat=dd/MM/yyyy}" Foreground="{StaticResource AccentBrush}"/>
-            </TextBlock>
+            <!-- Encabezado -->
+            <Border Grid.Row="0" 
+                    Background="White" 
+                    CornerRadius="12" 
+                    Padding="20,16" 
+                    Margin="0,0,0,16"
+                    Effect="{StaticResource DropShadowLight}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-            <DataGrid Grid.Row="1" 
-          ItemsSource="{Binding listaReservas}"
-          AutoGenerateColumns="False"
-          CanUserAddRows="False"
-          IsReadOnly="True"
-          Style="{StaticResource MaterialDesignDataGrid}"
-          VerticalScrollBarVisibility="Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="CalendarMonth" 
+                                                  Width="28" Height="28" 
+                                                  Foreground="{StaticResource AccentBrush}"
+                                                  VerticalAlignment="Center"
+                                                  Margin="0,0,12,0"/>
+                        <StackPanel>
+                            <TextBlock Text="Reservas del dia" 
+                                       FontSize="12" 
+                                       Foreground="{StaticResource TextLightBrush}"/>
+                            <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}">
+                                <Run Text="{Binding FechaSeleccionada, StringFormat='{}{0:dddd, dd MMMM yyyy}'}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
 
-                <DataGrid.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Editar Reserva" Click="Editar_Reserva"/>
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
+                    <Button Grid.Column="1" 
+                            Style="{StaticResource PrimaryButton}"
+                            Width="180"
+                            Height="38"
+                            Click="Agregar_Reserva">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" 
+                                                      Width="18" Height="18" 
+                                                      VerticalAlignment="Center"
+                                                      Margin="0,0,8,0"/>
+                            <TextBlock Text="Nueva Reserva" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
 
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Hora" Binding="{Binding Hora, StringFormat=hh\\:mm}" Width="80"/>
-                    <DataGridTextColumn Header="Cliente" Binding="{Binding Cliente.Nombre}" Width="*"/>
-                    <DataGridTextColumn Header="Servicio" Binding="{Binding Servicio.Nombre}" Width="*"/>
-                    <DataGridTextColumn Header="Empleado" Binding="{Binding Empleado.Nombre}" Width="*"/>
+            <!-- DataGrid de Reservas -->
+            <Border Grid.Row="1" 
+                    Background="White" 
+                    CornerRadius="12" 
+                    Padding="0"
+                    Effect="{StaticResource DropShadow}">
+                <Grid>
+                    <!-- DataGrid -->
+                    <DataGrid ItemsSource="{Binding listaReservas}"
+                              AutoGenerateColumns="False"
+                              CanUserAddRows="False"
+                              IsReadOnly="True"
+                              HeadersVisibility="Column"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="{StaticResource MediumGrayBrush}"
+                              Background="Transparent"
+                              BorderThickness="0"
+                              RowHeight="56"
+                              ColumnHeaderHeight="48"
+                              VerticalScrollBarVisibility="Auto"
+                              Margin="16">
 
-                    <DataGridTemplateColumn Header="Estado" Width="100">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <Border Background="#EEE" CornerRadius="4" Padding="5,2">
-                                    <TextBlock Text="{Binding Estado}" HorizontalAlignment="Center"/>
-                                </Border>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                </DataGrid.Columns>
-            </DataGrid>
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="FontSize" Value="13"/>
+                                <Setter Property="Padding" Value="12,0"/>
+                                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                                <Setter Property="BorderBrush" Value="{StaticResource MediumGrayBrush}"/>
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
 
-            <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ListaReservas.Count}" Value="0">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource LightGrayBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource MediumGrayBrush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
 
-                <materialDesign:PackIcon Kind="CalendarBlank" Width="50" Height="50" Foreground="#DDD" HorizontalAlignment="Center"/>
-                <TextBlock Text="No hay reservas para este día" Foreground="#AAA" Margin="0,10,0,0"/>
-            </StackPanel>
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Padding" Value="12,0"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+                                <Setter Property="FontSize" Value="14"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.CellStyle>
 
-            <Button Grid.Row="2" Content="Agregar Reserva" Width="200"  Margin="0,20,0,0" HorizontalAlignment="Right" Click="Agregar_Reserva"/>
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Editar Reserva" >
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Pencil"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Eliminar Reserva" 
+                                          Command="{Binding EliminarCommand}" 
+                                          CommandParameter="{Binding Id}">
+                                    <MenuItem.Icon>
+                                        <materialDesign:PackIcon Kind="Delete"/>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+
+                        <DataGrid.Columns>
+                            <!-- Columna Hora -->
+                            <DataGridTemplateColumn Header="Hora" Width="90">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="ClockOutline" 
+                                                                      Width="16" Height="16" 
+                                                                      Foreground="{StaticResource AccentBrush}"
+                                                                      VerticalAlignment="Center"
+                                                                      Margin="0,0,8,0"/>
+                                            <TextBlock Text="{Binding Hora, StringFormat=HH:mm}" 
+                                                       FontWeight="Medium"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Columna Cliente -->
+                            <DataGridTemplateColumn Header="Cliente" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="32" Height="32" 
+                                                    CornerRadius="16" 
+                                                    Background="{StaticResource AccentBrush}"
+                                                    Margin="0,0,12,0">
+                                                <TextBlock Text="{Binding Cliente.Nombre, Converter={x:Null}}" 
+                                                           Foreground="White" 
+                                                           FontWeight="SemiBold"
+                                                           FontSize="12"
+                                                           HorizontalAlignment="Center" 
+                                                           VerticalAlignment="Center"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding Cliente.Nombre}" 
+                                                       VerticalAlignment="Center"
+                                                       FontWeight="Medium"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Columna Servicio -->
+                            <DataGridTemplateColumn Header="Servicio" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Servicio.Nombre}" FontWeight="Medium"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Columna Empleado -->
+                            <DataGridTemplateColumn Header="Empleado" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Empleado.Nombre}" 
+                                                   Foreground="{StaticResource TextLightBrush}"
+                                                   VerticalAlignment="Center"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Columna Estado con Badge -->
+                            <DataGridTemplateColumn Header="Estado" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="12" 
+                                                Padding="12,6" 
+                                                HorizontalAlignment="Left">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{StaticResource MediumGrayBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Estado}" Value="Confirmada">
+                                                            <Setter Property="Background" Value="#E8F5E9"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Estado}" Value="Pendiente">
+                                                            <Setter Property="Background" Value="#FFF3E0"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Estado}" Value="Cancelada">
+                                                            <Setter Property="Background" Value="#FFEBEE"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Estado}" Value="Completada">
+                                                            <Setter Property="Background" Value="#E3F2FD"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding Estado}" 
+                                                       FontSize="12" 
+                                                       FontWeight="Medium"
+                                                       HorizontalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Estado}" Value="Confirmada">
+                                                                <Setter Property="Foreground" Value="#2E7D32"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Estado}" Value="Pendiente">
+                                                                <Setter Property="Foreground" Value="#EF6C00"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Estado}" Value="Cancelada">
+                                                                <Setter Property="Foreground" Value="#C62828"/>
+                                                            </DataTrigger>
+                                                            <DataTrigger Binding="{Binding Estado}" Value="Completada">
+                                                                <Setter Property="Foreground" Value="#1565C0"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Estado vacio -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding listaReservas.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <Border Width="80" Height="80" 
+                                CornerRadius="40" 
+                                Background="{StaticResource LightGrayBrush}"
+                                Margin="0,0,0,16">
+                            <materialDesign:PackIcon Kind="CalendarBlankOutline" 
+                                                      Width="40" Height="40" 
+                                                      Foreground="{StaticResource TextLightBrush}" 
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                        </Border>
+                        <TextBlock Text="No hay reservas" 
+                                   FontSize="18" 
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextBrush}" 
+                                   HorizontalAlignment="Center"/>
+                        <TextBlock Text="No se encontraron reservas para este dia" 
+                                   FontSize="14"
+                                   Foreground="{StaticResource TextLightBrush}" 
+                                   HorizontalAlignment="Center"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="error.jpg" />
+    <None Remove="Recursos\Imagenes\logo.jpg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,7 +31,8 @@
 
   <ItemGroup>
     <Resource Include="Recursos\Imagenes\error.jpg" />
-    <Resource Include="Recursos\Imagenes\logo.png" />
+    <Resource Include="Recursos\Imagenes\logo.jpg" />
+    <Resource Include="Recursos\Imagenes\logo2.png" />
   </ItemGroup>
 
 </Project>
