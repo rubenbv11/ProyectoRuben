@@ -1,4 +1,4 @@
-﻿<Application x:Class="ProyectoRuben.App"
+<Application x:Class="ProyectoRuben.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:ProyectoRuben"
@@ -11,7 +11,8 @@
 
                 <!-- Material Design principal - Neutro Moderno -->
                 <mat:BundledTheme BaseTheme="Light"
-                                  PrimaryColor="Grey" />
+                                  PrimaryColor="Grey"
+                                  SecondaryColor="Brown" />
 
                 <!-- Recursos obligatorios de Material Design -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />

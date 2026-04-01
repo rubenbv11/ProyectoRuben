@@ -1,4 +1,4 @@
-﻿using di.proyecto.clase._2025.Frontend.Mensajes ;
+using di.proyecto.clase._2025.Frontend.Mensajes ;
 using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
 using pruebaNavegacion.MVVM;
@@ -137,7 +137,7 @@ namespace ProyectoRuben.MVVM
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar($"Error al agregar cliente: {ex.Message}", "Error");
+                MensajeError.Mostrar("Error", $"Error al agregar cliente: {ex.Message}");
             }
         }
 
@@ -148,7 +148,7 @@ namespace ProyectoRuben.MVVM
         {
             if (cliente == null)
             {
-                MensajeAdvertencia.Mostrar("Por favor, selecciona un cliente para editar.", "Advertencia");
+                MensajeAdvertencia.Mostrar("Advertencia", "Por favor, selecciona un cliente para editar.");
                 return;
             }
 
@@ -169,7 +169,7 @@ namespace ProyectoRuben.MVVM
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar($"Error al editar cliente: {ex.Message}", "Error");
+                MensajeError.Mostrar("Error", $"Error al editar cliente: {ex.Message}");
             }
         }
 
@@ -183,7 +183,7 @@ namespace ProyectoRuben.MVVM
                 var cliente = await GetByIdAsync(_clienteRepository, clienteId);
                 if (cliente == null)
                 {
-                    MensajeError.Mostrar("Cliente no encontrado.", "Error");
+                    MensajeError.Mostrar("Error", "Cliente no encontrado.");
                     return;
                 }
 
@@ -205,7 +205,7 @@ namespace ProyectoRuben.MVVM
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar($"Error al desactivar cliente: {ex.Message}", "Error");
+                MensajeError.Mostrar("Error", $"Error al desactivar cliente: {ex.Message}");
             }
         }
 
@@ -216,7 +216,7 @@ namespace ProyectoRuben.MVVM
         {
             if (cliente == null)
             {
-                MensajeAdvertencia.Mostrar("Por favor, selecciona un cliente.", "Advertencia");
+                MensajeAdvertencia.Mostrar("Advertencia", "Por favor, selecciona un cliente.");
                 return;
             }
 
@@ -225,19 +225,19 @@ namespace ProyectoRuben.MVVM
                 if (string.IsNullOrWhiteSpace(cliente.HistorialCitas))
                 {
                     MensajeInformacion.Mostrar(
-                        $"El cliente {cliente.Nombre} no tiene historial de citas registrado.",
-                        "Historial Vacío");
+                        "Historial Vacio",
+                        $"El cliente {cliente.Nombre} no tiene historial de citas registrado.");
                 }
                 else
                 {
                     MensajeInformacion.Mostrar(
-                        $"Historial de {cliente.Nombre}:\n\n{cliente.HistorialCitas}",
-                        "Historial de Citas");
+                        "Historial de Citas",
+                        $"Historial de {cliente.Nombre}:\n\n{cliente.HistorialCitas}");
                 }
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar($"Error al mostrar historial: {ex.Message}", "Error");
+                MensajeError.Mostrar("Error", $"Error al mostrar historial: {ex.Message}");
             }
         }
     }
