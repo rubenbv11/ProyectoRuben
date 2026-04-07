@@ -19,8 +19,11 @@ namespace ProyectoRuben
         private readonly IServiceProvider _serviceProvider;
         private readonly UCReservas _uCReservas;
         private readonly UCClientes _uCClientes;
+        private readonly UCServicios _uCServicios;
+        private readonly UCProductos _uCProductos;
+        private readonly UCCaja _uCCaja;
 
-        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider, UCReservas uCReservas, UCClientes uCClientes)
+        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider, UCReservas uCReservas, UCClientes uCClientes, UCServicios uCServicios, UCProductos uCProductos, UCCaja uCCaja)
         {
             InitializeComponent();
             _mvDashboard = mVDashboard;
@@ -28,6 +31,9 @@ namespace ProyectoRuben
             this.DataContext = _mvDashboard;
             _uCReservas = uCReservas;
             _uCClientes = uCClientes;
+            _uCServicios = uCServicios;
+            _uCProductos = uCProductos;
+            _uCCaja = uCCaja;
             InicializarVentana();
 
             this.Loaded += MainWindow_Loaded;
@@ -94,19 +100,28 @@ namespace ProyectoRuben
         private void btnServicios_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Gestión de Servicios";
-            MessageBox.Show("Navegando a Servicios...", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+            var vmServicios = _serviceProvider.GetRequiredService<MVServicios>();
+            _uCServicios.DataContext = vmServicios;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(_uCServicios);
         }
 
         private void btnProductos_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Gestión de Productos";
-            MessageBox.Show("Navegando a Productos...", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+            var vmProductos = _serviceProvider.GetRequiredService<MVProductos>();
+            _uCProductos.DataContext = vmProductos;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(_uCProductos);
         }
 
         private void btnFacturacion_Click(object sender, RoutedEventArgs e)
         {
-            txtTituloPagina.Text = "Facturación";
-            MessageBox.Show("Navegando a Facturación...", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+            txtTituloPagina.Text = "Caja - Punto de Venta";
+            var vmCaja = _serviceProvider.GetRequiredService<MVCaja>();
+            _uCCaja.DataContext = vmCaja;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(_uCCaja);
         }
 
         private void btnReportes_Click(object sender, RoutedEventArgs e)

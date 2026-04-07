@@ -1,6 +1,7 @@
-﻿using di.proyecto.clase._2025.Frontend.Mensajes ;
+﻿using di.proyecto.clase._2025.Frontend.Mensajes;
 using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
+using ProyectoRuben.Frontend;
 using pruebaNavegacion.MVVM;
 using System;
 using System.Collections.ObjectModel;
@@ -54,6 +55,13 @@ namespace ProyectoRuben.MVVM
             }
         }
 
+        private Cliente _clienteNuevo;
+        public Cliente ClienteNuevo
+        {
+            get => _clienteNuevo;
+            set => SetProperty(ref _clienteNuevo, value);
+        }
+
         public ICommand AgregarClienteCommand { get; }
         public ICommand EditarClienteCommand { get; }
         public ICommand DesactivarClienteCommand { get; }
@@ -63,6 +71,7 @@ namespace ProyectoRuben.MVVM
         {
             _clienteRepository = clienteRepository ?? throw new ArgumentNullException(nameof(clienteRepository));
             Clientes = new ObservableCollection<Cliente>();
+            InicializarClienteNuevo();
 
             AgregarClienteCommand = new RelayCommand(_ => AgregarCliente());
             EditarClienteCommand = new RelayCommand(async (param) => await EditarCliente(param as Cliente));
@@ -109,6 +118,22 @@ namespace ProyectoRuben.MVVM
         }
 
         /// <summary>
+        /// Inicializa un nuevo cliente con valores por defecto.
+        /// </summary>
+        private void InicializarClienteNuevo()
+        {
+            ClienteNuevo = new Cliente
+            {
+                Nombre = string.Empty,
+                Telefono = string.Empty,
+                Email = string.Empty,
+                Contacto = string.Empty,
+                Activo = true,
+                FechaRegistro = DateTime.Now
+            };
+        }
+
+        /// <summary>
         /// Aplica el filtro de búsqueda por nombre.
         /// </summary>
         private void AplicarFiltro()
@@ -124,20 +149,48 @@ namespace ProyectoRuben.MVVM
         {
             try
             {
-                // Aquí se abrirá un diálogo para agregar cliente
-                // Por ahora, mostramos una notificación
-                SnackbarMessageQueue.Enqueue("Función 'Agregar Cliente' disponible próximamente.");
-
-                // En el futuro:
-                // var dialogo = new AgregarClienteDialog();
-                // if (dialogo.ShowDialog() == true)
-                // {
-                //     await CargarClientes();
-                // }
+                var dialogo = new AgregarCliente(this);
+                dialogo.ShowDialog();
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar($"Error al agregar cliente: {ex.Message}", "Error");
+                MensajeError.Mostrar("Error", $"Error al abrir formulario de cliente: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Guarda un nuevo cliente en la base de datos.
+        /// </summary>
+        public async Task GuardarCliente()
+        {
+            try
+            {
+                // Validar nombre obligatorio
+                if (string.IsNullOrWhiteSpace(ClienteNuevo.Nombre))
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "El nombre del cliente es obligatorio.");
+                    return;
+                }
+
+                // Asegurar que el contacto tiene un valor (usar nombre como default)
+                if (string.IsNullOrWhiteSpace(ClienteNuevo.Contacto))
+                {
+                    ClienteNuevo.Contacto = ClienteNuevo.Nombre;
+                }
+
+                // Guardar en base de datos
+                await AddAsync(_clienteRepository, ClienteNuevo);
+
+                // Notificar éxito
+                SnackbarMessageQueue.Enqueue($"Cliente {ClienteNuevo.Nombre} guardado correctamente");
+
+                // Recargar lista y reinicializar formulario
+                await CargarClientes();
+                InicializarClienteNuevo();
+            }
+            catch (Exception ex)
+            {
+                MensajeError.Mostrar("Error", $"Error al guardar cliente: {ex.Message}");
             }
         }
 
@@ -148,7 +201,7 @@ namespace ProyectoRuben.MVVM
         {
             if (cliente == null)
             {
-                MensajeAdvertencia.Mostrar("Por favor, selecciona un cliente para editar.", "Advertencia");
+                MensajeAdvertencia.Mostrar("Advertencia", "Por favor, selecciona un cliente para editar.");
                 return;
             }
 
@@ -169,7 +222,7 @@ namespace ProyectoRuben.MVVM
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar($"Error al editar cliente: {ex.Message}", "Error");
+                MensajeError.Mostrar("Error", $"Error al editar cliente: {ex.Message}");
             }
         }
 
@@ -183,7 +236,7 @@ namespace ProyectoRuben.MVVM
                 var cliente = await GetByIdAsync(_clienteRepository, clienteId);
                 if (cliente == null)
                 {
-                    MensajeError.Mostrar("Cliente no encontrado.", "Error");
+                    MensajeError.Mostrar("Error", "Cliente no encontrado.");
                     return;
                 }
 
@@ -205,7 +258,7 @@ namespace ProyectoRuben.MVVM
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar($"Error al desactivar cliente: {ex.Message}", "Error");
+                MensajeError.Mostrar("Error", $"Error al desactivar cliente: {ex.Message}");
             }
         }
 
@@ -216,7 +269,7 @@ namespace ProyectoRuben.MVVM
         {
             if (cliente == null)
             {
-                MensajeAdvertencia.Mostrar("Por favor, selecciona un cliente.", "Advertencia");
+                MensajeAdvertencia.Mostrar("Advertencia", "Por favor, selecciona un cliente.");
                 return;
             }
 
@@ -225,19 +278,19 @@ namespace ProyectoRuben.MVVM
                 if (string.IsNullOrWhiteSpace(cliente.HistorialCitas))
                 {
                     MensajeInformacion.Mostrar(
-                        $"El cliente {cliente.Nombre} no tiene historial de citas registrado.",
-                        "Historial Vacío");
+                        "Historial Vacio",
+                        $"El cliente {cliente.Nombre} no tiene historial de citas registrado.");
                 }
                 else
                 {
                     MensajeInformacion.Mostrar(
-                        $"Historial de {cliente.Nombre}:\n\n{cliente.HistorialCitas}",
-                        "Historial de Citas");
+                        "Historial de Citas",
+                        $"Historial de {cliente.Nombre}:\n\n{cliente.HistorialCitas}");
                 }
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar($"Error al mostrar historial: {ex.Message}", "Error");
+                MensajeError.Mostrar("Error", $"Error al mostrar historial: {ex.Message}");
             }
         }
     }

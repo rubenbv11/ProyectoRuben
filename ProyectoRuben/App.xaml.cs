@@ -53,13 +53,20 @@ namespace ProyectoRuben
             services.AddTransient<MVUsuario>();
             services.AddTransient<MVReservas>();
             services.AddTransient<MVClientes>();
+            services.AddTransient<MVServicios>();
+            services.AddTransient<MVProductos>();
+            services.AddTransient<MVCaja>();
 
             // --- E. Ventanas (Vistas) ---
             services.AddTransient<MainWindow>();
             services.AddTransient<Login>();
             services.AddTransient<UCReservas>();
             services.AddTransient<UCClientes>();
+            services.AddTransient<UCServicios>();
+            services.AddTransient<UCProductos>();
+            services.AddTransient<UCCaja>();
             services.AddTransient<AgregarReserva>();
+            services.AddTransient<AgregarCliente>();
         }
 
         protected override void OnStartup(StartupEventArgs e)

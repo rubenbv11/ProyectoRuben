@@ -11,7 +11,7 @@
 
                 <!-- Material Design principal - Neutro Moderno -->
                 <mat:BundledTheme BaseTheme="Light"
-                                  PrimaryColor="Grey" />
+                                  PrimaryColor="Grey"/>
 
                 <!-- Recursos obligatorios de Material Design -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
@@ -27,6 +27,7 @@
             <!-- Converters personalizados -->
             <converters:StringToFirstCharConverter x:Key="StringToFirstCharConverter"/>
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:StockBajoConverter x:Key="StockBajoConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
