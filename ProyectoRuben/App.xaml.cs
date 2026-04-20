@@ -56,6 +56,8 @@ namespace ProyectoRuben
             services.AddTransient<MVServicios>();
             services.AddTransient<MVProductos>();
             services.AddTransient<MVCaja>();
+            services.AddTransient<MVInventario>();
+            services.AddTransient<MVReportes>();
 
             // --- E. Ventanas (Vistas) ---
             services.AddTransient<MainWindow>();
@@ -65,6 +67,8 @@ namespace ProyectoRuben
             services.AddTransient<UCServicios>();
             services.AddTransient<UCProductos>();
             services.AddTransient<UCCaja>();
+            services.AddTransient<UCInventario>();
+            services.AddTransient<UCReportes>();
             services.AddTransient<AgregarReserva>();
             services.AddTransient<AgregarCliente>();
         }

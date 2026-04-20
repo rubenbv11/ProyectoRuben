@@ -22,8 +22,10 @@ namespace ProyectoRuben
         private readonly UCServicios _uCServicios;
         private readonly UCProductos _uCProductos;
         private readonly UCCaja _uCCaja;
+        private readonly UCInventario _ucInventario;
+        private readonly UCReportes _ucReportes;
 
-        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider, UCReservas uCReservas, UCClientes uCClientes, UCServicios uCServicios, UCProductos uCProductos, UCCaja uCCaja)
+        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider, UCReservas uCReservas, UCClientes uCClientes, UCServicios uCServicios, UCProductos uCProductos, UCCaja uCCaja, UCInventario uCInventario, UCReportes uCReportes)
         {
             InitializeComponent();
             _mvDashboard = mVDashboard;
@@ -34,6 +36,8 @@ namespace ProyectoRuben
             _uCServicios = uCServicios;
             _uCProductos = uCProductos;
             _uCCaja = uCCaja;
+            _ucInventario = uCInventario;
+            _ucReportes = uCReportes;
             InicializarVentana();
 
             this.Loaded += MainWindow_Loaded;
@@ -126,14 +130,20 @@ namespace ProyectoRuben
 
         private void btnReportes_Click(object sender, RoutedEventArgs e)
         {
-            txtTituloPagina.Text = "Reportes y Estadísticas";
-            MessageBox.Show("Navegando a Reportes...", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+            txtTituloPagina.Text = "Gestión de Reportes";
+            var vmReportes = _serviceProvider.GetRequiredService<MVReportes>();
+            _ucReportes.DataContext = vmReportes;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(_ucReportes);
         }
 
         private void btnInventario_Click(object sender, RoutedEventArgs e)
         {
-            txtTituloPagina.Text = "Control de Inventario";
-            MessageBox.Show("Navegando a Inventario...", "Información", MessageBoxButton.OK, MessageBoxImage.Information);
+            txtTituloPagina.Text = "Gestión de Stock";
+            var vmInventario = _serviceProvider.GetRequiredService<MVInventario>();
+            _ucReportes.DataContext = vmInventario;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(_ucInventario);
         }
 
         private void btnEmpleados_Click(object sender, RoutedEventArgs e)

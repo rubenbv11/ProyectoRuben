@@ -1,0 +1,63 @@
+﻿<UserControl x:Class="ProyectoRuben.Frontend.UCReportes"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             Background="{StaticResource LightGrayBrush}">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Reportes y Balance Financiero" FontSize="28" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,24"/>
+
+        <UniformGrid Grid.Row="1" Columns="3" Margin="0,0,0,24">
+
+            <Border Background="{StaticResource AccentBrush}" CornerRadius="12" Padding="24" Margin="0,0,16,0">
+                <StackPanel>
+                    <materialDesign:PackIcon Kind="TrendingUp" Width="32" Height="32" Foreground="White" Margin="0,0,0,8"/>
+                    <TextBlock Text="Ingresos del Mes" Foreground="White" Opacity="0.8" FontSize="14"/>
+                    <TextBlock Text="{Binding IngresosEsteMes, StringFormat='{}{0:F2} €'}" Foreground="White" FontWeight="Bold" FontSize="32"/>
+                </StackPanel>
+            </Border>
+
+            <Border Background="{StaticResource PrimaryBrush}" CornerRadius="12" Padding="24" Margin="8,0,8,0">
+                <StackPanel>
+                    <materialDesign:PackIcon Kind="Receipt" Width="32" Height="32" Foreground="White" Margin="0,0,0,8"/>
+                    <TextBlock Text="Facturas Emitidas" Foreground="White" Opacity="0.8" FontSize="14"/>
+                    <TextBlock Text="{Binding TotalFacturasMes}" Foreground="White" FontWeight="Bold" FontSize="32"/>
+                </StackPanel>
+            </Border>
+
+            <Border Background="{StaticResource SecondaryBrush}" CornerRadius="12" Padding="24" Margin="16,0,0,0">
+                <StackPanel>
+                    <materialDesign:PackIcon Kind="AccountCash" Width="32" Height="32" Foreground="White" Margin="0,0,0,8"/>
+                    <TextBlock Text="Gasto Promedio/Cliente" Foreground="White" Opacity="0.8" FontSize="14"/>
+                    <TextBlock Text="{Binding PromedioPorCliente, StringFormat='{}{0:F2} €'}" Foreground="White" FontWeight="Bold" FontSize="32"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <Border Grid.Row="2" Background="White" CornerRadius="12" Padding="20">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="15" ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.08"/>
+            </Border.Effect>
+            <StackPanel>
+                <TextBlock Text="Últimas 10 Facturas" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,16"/>
+
+                <DataGrid ItemsSource="{Binding UltimasFacturas}" AutoGenerateColumns="False" IsReadOnly="True" 
+                          Background="Transparent" BorderThickness="0" RowHeight="45" HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="{StaticResource MediumGrayBrush}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nº Factura" Binding="{Binding Id}" Width="*"/>
+                        <DataGridTextColumn Header="Fecha" Binding="{Binding FechaEmision, StringFormat=dd/MM/yyyy}" Width="*"/>
+                        <DataGridTextColumn Header="Método Pago" Binding="{Binding MetodoPago}" Width="*"/>
+                        <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat='{}{0:F2} €'}" FontWeight="Bold" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
