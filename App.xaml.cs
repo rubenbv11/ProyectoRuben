@@ -75,7 +75,7 @@ namespace ProyectoRuben
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            var loginWindow = _serviceProvider.GetRequiredService<MainWindow>();
+            var loginWindow = _serviceProvider.GetRequiredService<Login>();
             loginWindow.Show();
             base.OnStartup(e);
         }
