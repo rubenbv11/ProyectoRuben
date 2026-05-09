@@ -17,7 +17,6 @@ namespace ProyectoRuben.MVVM
         private readonly IClienteRepository _clienteRepository;
         private readonly IServicioRepository _servicioRepository;
 
-        // ── Lista de reservas del día ──────────────────────────────────────────
         private DateTime _fechaSeleccionada;
         public DateTime FechaSeleccionada
         {
@@ -25,7 +24,9 @@ namespace ProyectoRuben.MVVM
             set
             {
                 if (SetProperty(ref _fechaSeleccionada, value))
+                {
                     _ = Inicializa();
+                }
             }
         }
 
@@ -84,15 +85,8 @@ namespace ProyectoRuben.MVVM
         public ICommand CambiarEstadoCommand { get; }
         public ICommand EliminarCommand { get; }
 
-        public MVReservas(IReservaRepository reservaRepository,
-                          IClienteRepository clienteRepository,
-                          IServicioRepository servicioRepository)
         {
-            _reservaRepository  = reservaRepository;
-            _clienteRepository  = clienteRepository;
-            _servicioRepository = servicioRepository;
 
-            EditarCommand       = new RelayCommand(EditarReserva);
             CambiarEstadoCommand = new RelayCommand(CambiarEstadoReserva);
             EliminarCommand     = new RelayCommand(async (param) =>
             {
@@ -100,7 +94,6 @@ namespace ProyectoRuben.MVVM
                 else if (param is Reserva r) await EliminarReserva(r.Id);
             });
 
-            FechaSeleccionada = DateTime.Today; // dispara Inicializa()
         }
 
         /// <summary>
@@ -111,22 +104,9 @@ namespace ProyectoRuben.MVVM
         {
             try
             {
-                var reservas  = await _reservaRepository.GetReservasByFechaAsync(FechaSeleccionada);
-                var clientes  = await _clienteRepository.FindAsync(c => c.Activo == true);
-                var servicios = await _servicioRepository.FindAsync(s => s.Activo == true);
-
-                var listaRes = reservas.ToList();
-
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    listaReservas   = new ListCollectionView(listaRes);
-                    ListaClientes   = new ObservableCollection<Cliente>(clientes);
-                    ListaServicios  = new ObservableCollection<Servicio>(servicios);
-                });
             }
             catch (Exception ex)
             {
-                SnackbarMessageQueue.Enqueue($"Error cargando datos: {ex.Message}");
             }
         }
 
@@ -160,56 +140,13 @@ namespace ProyectoRuben.MVVM
             }
         }
 
-        /// <summary>
-        /// Construye y guarda una nueva reserva a partir de los campos del formulario.
-        /// </summary>
-        public async Task<bool> GuardarReserva()
         {
-            // Validaciones básicas
-            if (ClienteSeleccionado == null)
-            {
-                SnackbarMessageQueue.Enqueue("Selecciona un cliente.");
-                return false;
-            }
-            if (ServicioSeleccionado == null)
-            {
-                SnackbarMessageQueue.Enqueue("Selecciona un servicio.");
-                return false;
-            }
-            if (!FechaReserva.HasValue)
-            {
-                SnackbarMessageQueue.Enqueue("Selecciona una fecha.");
-                return false;
-            }
-            if (!HoraReserva.HasValue)
-            {
                 SnackbarMessageQueue.Enqueue("Selecciona una hora.");
                 return false;
             }
 
             try
             {
-                var reserva = new Reserva
-                {
-                    ClienteId     = ClienteSeleccionado.Id,
-                    ServicioId    = ServicioSeleccionado.Id,
-                    EmpleadoId    = 1,  // TODO: obtener del usuario logueado
-                    Fecha         = FechaReserva.Value.Date,
-                    Hora          = HoraReserva.Value.TimeOfDay,
-                    Estado        = "Pendiente",
-                    FechaCreacion = DateTime.Now
-                };
-
-                await _reservaRepository.AddAsync(reserva);
-                SnackbarMessageQueue.Enqueue($"Reserva guardada para {ClienteSeleccionado.Nombre}.");
-
-                // Limpiar selección del formulario para la próxima reserva
-                ClienteSeleccionado  = null;
-                ServicioSeleccionado = null;
-                FechaReserva         = DateTime.Today;
-                HoraReserva          = null;
-
-                return true;
             }
             catch (Exception ex)
             {

@@ -37,6 +37,7 @@ namespace ProyectoRuben.MVVM
             try
             {
                 var todasLasFacturas = await _facturaRepository.GetAllAsync();
+                // ... (el resto de tu código original del try se queda igual)
                 var mesActual = DateTime.Now.Month;
                 var añoActual = DateTime.Now.Year;
 
@@ -62,19 +63,21 @@ namespace ProyectoRuben.MVVM
                                            and not StackOverflowException)
             {
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    IngresosEsteMes = 2450.75m;
-                    TotalFacturasMes = 84;
-                    PromedioPorCliente = 29.17m;
-                    UltimasFacturas = new ObservableCollection<Factura>
-                    {
+            {
+                // DATOS FALSOS PARA VER EL DASHBOARD DE REPORTES
+                IngresosEsteMes = 2450.75m;
+                TotalFacturasMes = 84;
+                PromedioPorCliente = 29.17m;
+
+                UltimasFacturas = new ObservableCollection<Factura>
+        {
                         new() { Id = 1001, Fecha = DateTime.Now, MetodoPago = "Tarjeta",      Total = 45.00m  },
                         new() { Id = 1002, Fecha = DateTime.Now.AddHours(-2), MetodoPago = "Efectivo", Total = 15.50m },
                         new() { Id = 1003, Fecha = DateTime.Now.AddDays(-1),  MetodoPago = "Transferencia", Total = 120.00m }
-                    };
+        };
                 });
                 SnackbarMessageQueue.Enqueue($"Modo sin conexión: {ex.Message}");
             }
-        }   
-    }   
+        }
+    }
 }

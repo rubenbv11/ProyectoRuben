@@ -11,7 +11,7 @@
         Background="Transparent">
 
 	<Border CornerRadius="12" ClipToBounds="True">
-		<Grid>
+    <Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="1.3*"/>
@@ -22,10 +22,10 @@
 			<!-- ══════════════════════════════════ -->
 			<Border Grid.Column="0" CornerRadius="12,0,0,12">
 				<Border.Background>
-					<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-						<GradientStop Color="{StaticResource PrimaryColor}" Offset="0"/>
-						<GradientStop Color="{StaticResource SecondaryColor}" Offset="1"/>
-					</LinearGradientBrush>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="{StaticResource PrimaryColor}" Offset="0"/>
+                        <GradientStop Color="{StaticResource SecondaryColor}" Offset="1"/>
+                    </LinearGradientBrush>
 				</Border.Background>
 				<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
 					<Image Source="/Recursos/Imagenes/logo.jpg"
@@ -39,26 +39,26 @@
                                FontSize="13" Foreground="#DDDDDD"
                                HorizontalAlignment="Center" Margin="0,6,0,0"/>
 				</StackPanel>
-			</Border>
+        </Border>
 
 			<!-- ══════════════════════════════════ -->
 			<!-- Panel derecho: formulario          -->
 			<!-- ══════════════════════════════════ -->
 			<Border Grid.Column="1" Background="White" CornerRadius="0,12,12,0">
-				<Grid>
+            <Grid>
 					<!-- Botón cerrar anclado arriba-derecha -->
 					<Button x:Name="btnCerrar"
                             Content="✕"
                             Width="32" Height="32"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Top"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top"
                             Margin="0,10,10,0"
-                            Background="Transparent"
+                        Background="Transparent"
                             Foreground="#999999"
-                            BorderThickness="0"
-                            Cursor="Hand"
+                        BorderThickness="0"
+                        Cursor="Hand"
                             FontSize="14"
-                            Click="btnCerrar_Click"/>
+                        Click="btnCerrar_Click"/>
 
 					<!-- Formulario centrado -->
 					<StackPanel VerticalAlignment="Center"
@@ -82,22 +82,23 @@
                                      Style="{StaticResource MaterialDesignFilledRevealPasswordBox}"
                                      Margin="0,0,0,24"/>
 
-						<Button x:Name="btnLogin"
+                    <!-- Botón usando tu estilo del tema -->
+                    <Button x:Name="btnLogin"
                                 Content="ENTRAR"
-                                Style="{StaticResource PrimaryButton}"
+                            Style="{StaticResource PrimaryButton}"
                                 Height="42"
                                 IsDefault="True"
                                 Click="btnLogin_Click"/>
 
-						<TextBlock x:Name="txtMensaje"
-                                   Foreground="{StaticResource ErrorBrush}"
-                                   TextAlignment="Center"
+                    <TextBlock x:Name="txtMensaje"
+                               Foreground="{StaticResource ErrorBrush}"
+                               TextAlignment="Center"
                                    TextWrapping="Wrap"
                                    Margin="0,12,0,0"
                                    FontSize="12"/>
-					</StackPanel>
-				</Grid>
-			</Border>
-		</Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
 	</Border>
 </Window>
