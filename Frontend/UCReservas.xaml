@@ -6,7 +6,8 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900"
-             Background="{StaticResource LightGrayBrush}">
+             Background="{StaticResource LightGrayBrush}"
+			 Language="es-ES">
 
     <Grid Margin="24">
         <Grid.ColumnDefinitions>
@@ -69,7 +70,7 @@
                                        FontSize="12" 
                                        Foreground="{StaticResource TextLightBrush}"/>
                             <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}">
-                                <Run Text="{Binding FechaSeleccionada, StringFormat='{}{0:dddd, dd MMMM yyyy}'}"/>
+								<TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource TextBrush}" Text="{Binding FechaSeleccionadaTexto}"/>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>

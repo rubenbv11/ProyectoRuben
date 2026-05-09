@@ -3,11 +3,13 @@ using ProyectoRuben.Backend.Servicios;
 using pruebaNavegacion.MVVM;
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace ProyectoRuben.MVVM
 {
@@ -17,6 +19,7 @@ namespace ProyectoRuben.MVVM
         private readonly IClienteRepository _clienteRepository;
         private readonly IServicioRepository _servicioRepository;
 
+        // ── FechaSeleccionada ─────────────────────────────────────────────────
         private DateTime _fechaSeleccionada;
         public DateTime FechaSeleccionada
         {
@@ -25,11 +28,24 @@ namespace ProyectoRuben.MVVM
             {
                 if (SetProperty(ref _fechaSeleccionada, value))
                 {
+                    OnPropertyChanged(nameof(FechaSeleccionadaTexto));
                     _ = Inicializa();
                 }
             }
         }
 
+        /// <summary>
+        /// Texto formateado en español para mostrar en la cabecera de reservas.
+        /// Ejemplo: "martes, 13 de enero de 2026"
+        /// </summary>
+        public string FechaSeleccionadaTexto =>
+            _fechaSeleccionada == default
+                ? string.Empty
+                : _fechaSeleccionada.ToString(
+                    "dddd, dd 'de' MMMM 'de' yyyy",
+                    new CultureInfo("es-ES"));
+
+        // ── Lista de reservas ─────────────────────────────────────────────────
         private ListCollectionView _listaReservas;
         public ListCollectionView listaReservas
         {
@@ -37,7 +53,7 @@ namespace ProyectoRuben.MVVM
             set => SetProperty(ref _listaReservas, value);
         }
 
-        // ── Datos para el formulario AgregarReserva ───────────────────────────
+        // ── Catálogos para AgregarReserva ─────────────────────────────────────
         private ObservableCollection<Cliente> _listaClientes = new();
         public ObservableCollection<Cliente> ListaClientes
         {
@@ -79,14 +95,28 @@ namespace ProyectoRuben.MVVM
             get => _horaReserva;
             set => SetProperty(ref _horaReserva, value);
         }
+        private string _horaHH = "09";
+        public string HoraHH
+        {
+            get => _horaHH;
+            set => SetProperty(ref _horaHH, value);
+        }
+
+        private string _horaMM = "00";
+        public string HoraMM
+        {
+            get => _horaMM;
+            set => SetProperty(ref _horaMM, value);
+        }
 
         // ── Comandos ──────────────────────────────────────────────────────────
-        public ICommand EditarCommand { get; }
         public ICommand CambiarEstadoCommand { get; }
         public ICommand EliminarCommand { get; }
 
-        // FIX: Added constructor to house the command initializations
-        public MVReservas(IReservaRepository reservaRepository, IClienteRepository clienteRepository, IServicioRepository servicioRepository)
+        // ── Constructor ───────────────────────────────────────────────────────
+        public MVReservas(IReservaRepository reservaRepository,
+                          IClienteRepository clienteRepository,
+                          IServicioRepository servicioRepository)
         {
             _reservaRepository = reservaRepository;
             _clienteRepository = clienteRepository;
@@ -98,38 +128,60 @@ namespace ProyectoRuben.MVVM
                 if (param is int id) await EliminarReserva(id);
                 else if (param is Reserva r) await EliminarReserva(r.Id);
             });
+
+            // Asignar directamente el campo (no el setter) para no
+            // disparar Inicializa() antes de que los repositorios estén listos
+            _fechaSeleccionada = DateTime.Today;
+
+            // Primera carga
+            _ = Inicializa();
         }
 
-        /// <summary>
-        /// Carga las reservas del día seleccionado y los catálogos de clientes/servicios
-        /// necesarios para el formulario de nueva reserva.
-        /// </summary>
+        // ── Carga principal ───────────────────────────────────────────────────
         public async Task Inicializa()
         {
             try
             {
-                // Lógica de inicialización aquí
+                var clientes = await _clienteRepository.GetAllAsync();
+                var servicios = await _servicioRepository.GetAllAsync();
+
+                // Traer todo a memoria — el proveedor MySQL de EF Core
+                // no traduce bien comparaciones de DATE en todos los casos
+                var todas = await _reservaRepository
+                    .Query(asNoTracking: true,
+                           r => r.Cliente,
+                           r => r.Servicio,
+                           r => r.Empleado)
+                    .ToListAsync();
+
+                var reservasDelDia = todas
+                    .Where(r => r.Fecha.Date == _fechaSeleccionada.Date)
+                    .OrderBy(r => r.Hora)
+                    .ToList();
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    ListaClientes = new ObservableCollection<Cliente>(
+                                         clientes.Where(c => c.Activo == true));
+                    ListaServicios = new ObservableCollection<Servicio>(
+                                         servicios.Where(s => s.Activo == true));
+                    listaReservas = new ListCollectionView(
+                                         new ObservableCollection<Reserva>(reservasDelDia));
+                });
             }
             catch (Exception ex)
             {
-                // Manejo de errores
+                System.Diagnostics.Debug.WriteLine($"EXCEPCIÓN en Inicializa: {ex}");
+                SnackbarMessageQueue.Enqueue($"Error: {ex.Message}");
             }
         }
 
-        private void EditarReserva(object parametro)
-        {
-            if (parametro is Reserva reserva)
-            {
-                MessageBox.Show($"Editando reserva de: {reserva.Cliente?.Nombre}", "Editar", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
+        // ── Acciones ──────────────────────────────────────────────────────────
         private void CambiarEstadoReserva(object parametro)
         {
             if (parametro is Reserva reserva)
-            {
-                MessageBox.Show($"Cambiando estado de reserva ID: {reserva.Id}", "Estado", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+                MessageBox.Show($"Cambiando estado de reserva ID: {reserva.Id}",
+                    "Estado", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public async Task EliminarReserva(int id)
@@ -137,33 +189,50 @@ namespace ProyectoRuben.MVVM
             try
             {
                 await _reservaRepository.RemoveByIdAsync(id);
+                SnackbarMessageQueue.Enqueue("Reserva eliminada correctamente.");
                 await Inicializa();
-                // Asegúrate de que SnackbarMessageQueue esté definido en MVBase o inyectado
-                // SnackbarMessageQueue.Enqueue("Reserva eliminada correctamente.");
             }
             catch (Exception ex)
             {
-                // SnackbarMessageQueue.Enqueue($"Error al eliminar: {ex.Message}");
+                SnackbarMessageQueue.Enqueue($"Error al eliminar: {ex.Message}");
             }
         }
 
-        // FIX: Added missing method signature for the floating logic at the bottom
         public async Task<bool> GuardarReserva()
         {
-            if (HoraReserva == null) // Check ajustado para que compile con tu mensaje
-            {
-                // SnackbarMessageQueue.Enqueue("Selecciona una hora.");
-                return false;
-            }
+            if (ClienteSeleccionado == null)
+            { SnackbarMessageQueue.Enqueue("Selecciona un cliente."); return false; }
+            if (ServicioSeleccionado == null)
+            { SnackbarMessageQueue.Enqueue("Selecciona un servicio."); return false; }
+            if (FechaReserva == null)
+            { SnackbarMessageQueue.Enqueue("Selecciona una fecha."); return false; }
+            if (HoraReserva == null)
+            { SnackbarMessageQueue.Enqueue("Selecciona una hora."); return false; }
 
             try
             {
-                // Lógica para guardar la reserva aquí
+                var fechaFinal = FechaReserva.Value.Date + HoraReserva.Value.TimeOfDay;
+
+                var nueva = new Reserva
+                {
+                    ClienteId = ClienteSeleccionado.Id,
+                    ServicioId = ServicioSeleccionado.Id,
+                    EmpleadoId = 1, // TODO: usuario logueado
+                    Fecha = fechaFinal.Date,
+                    Hora = fechaFinal.TimeOfDay,
+                    Estado = "Pendiente",
+                    FechaCreacion = DateTime.Now,
+                    FechaModificacion = DateTime.Now
+                };
+
+                await _reservaRepository.AddAsync(nueva);
+                SnackbarMessageQueue.Enqueue("Reserva guardada correctamente.");
+                await Inicializa();
                 return true;
             }
             catch (Exception ex)
             {
-                // SnackbarMessageQueue.Enqueue($"Error al guardar: {ex.Message}");
+                SnackbarMessageQueue.Enqueue($"Error al guardar: {ex.Message}");
                 return false;
             }
         }

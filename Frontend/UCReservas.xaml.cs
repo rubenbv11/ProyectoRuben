@@ -39,7 +39,7 @@ namespace ProyectoRuben.Frontend
         {
             if (sender is MenuItem item && item.DataContext is Reserva reserva)
             {
-                var dialogo = new ProyectoRuben.Frontend.Dialogos.DialogoEliminar
+                var dialogo = new DialogoEliminar
                 {
                     Owner = Window.GetWindow(this)
                 };

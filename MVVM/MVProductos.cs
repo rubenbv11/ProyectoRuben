@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using ProyectoRuben.Frontend;
 using System.Windows.Input;
 
 namespace ProyectoRuben.MVVM

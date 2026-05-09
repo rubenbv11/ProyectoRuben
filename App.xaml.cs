@@ -7,6 +7,9 @@ using ProyectoRuben.MVVM;
 using pruebaNavegacion.Backend.Servicios;
 using System;
 using System.Windows;
+using System.Globalization;
+using System.Threading;
+using System.Windows.Markup;
 
 namespace ProyectoRuben
 {
@@ -73,6 +76,21 @@ namespace ProyectoRuben
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            var culture = new System.Globalization.CultureInfo("es-ES");
+
+            // 1. Esto fuerza el español en TODOS los hilos de .NET 8 (es el truco clave)
+            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
+            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+            // 2. Fuerzas el hilo actual
+            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
+            System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
+
+            // 3. Fuerzas la interfaz gráfica de WPF
+            FrameworkElement.LanguageProperty.OverrideMetadata(
+                typeof(FrameworkElement),
+                new FrameworkPropertyMetadata(System.Windows.Markup.XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+
             var loginWindow = _serviceProvider.GetRequiredService<Login>();
             loginWindow.Show();
             base.OnStartup(e);

@@ -1,41 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
-namespace di.proyecto.clase._2025.Frontend.Mensajes
+namespace ProyectoRuben.Frontend
 {
-    /// <summary>
-    /// Interaction logic for VentanaMensaje.xaml
-    /// </summary>
     public partial class VentanaMensaje : Window
     {
-        MensajeVentana _mensajeVentana;
+        private MensajeVentana _mensajeVentana;
+
+        // Constructor vacío requerido por XAML
+        public VentanaMensaje()
+        {
+            InitializeComponent();
+        }
+
         public VentanaMensaje(MensajeVentana mensajeVentana)
         {
             InitializeComponent();
             _mensajeVentana = mensajeVentana;
+            Loaded += VentanaDialogoMensaje_Loaded;
         }
 
-        private void ventanaDialogoMensaje_Loaded(object sender, RoutedEventArgs e)
+        private void VentanaDialogoMensaje_Loaded(object sender, RoutedEventArgs e)
         {
-            imgMensaje.Source = _mensajeVentana.Imagen;
-            tbMensaje.Text = _mensajeVentana.Cuerpo;
-            tbTitulo.Text = _mensajeVentana.Titulo;
-            Aceptar.Background = _mensajeVentana.ColorDistintivo;
+            // Ocultamos el icono por defecto si tienes tu propia lógica de imágenes
+            // o puedes enlazar la imagen de _mensajeVentana.Imagen a un control Image en tu XAML
+
+            if (txtMensaje != null) txtMensaje.Text = _mensajeVentana.Cuerpo;
+            if (txtTitulo != null) txtTitulo.Text = _mensajeVentana.Titulo;
+
+            // Si el botón Aceptar existe en tu nuevo XAML y quieres cambiarle el color dinámicamente:
+            // btnAceptar.Background = _mensajeVentana.ColorDistintivo;
         }
 
-        private void Aceptar_Click(object sender, RoutedEventArgs e)
+        private void BtnAceptar_Click(object sender, RoutedEventArgs e)
         {
+            this.DialogResult = true;
             this.Close();
         }
     }

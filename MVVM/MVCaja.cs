@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using ProyectoRuben.Frontend;
 using System.Windows.Input;
 
 namespace ProyectoRuben.MVVM
