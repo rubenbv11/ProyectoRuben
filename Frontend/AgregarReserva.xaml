@@ -4,7 +4,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Loaded="AgregarReserva_Loaded"
         Title="Nueva Reserva"
-        Height="560" Width="460"
+        Height="660" Width="460"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         Background="#F5F6F7"
@@ -42,11 +42,8 @@
 					</StackPanel>
 					<Button HorizontalAlignment="Right"
                             Width="32" Height="32"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            Cursor="Hand"
-                            IsCancel="True"
-                            Click="Cancelar_Click">
+                            Background="Transparent" BorderThickness="0"
+                            Cursor="Hand" IsCancel="True" Click="Cancelar_Click">
 						<materialDesign:PackIcon Kind="Close" Width="16" Height="16"
                                                  Foreground="#AAAAAA"/>
 					</Button>
@@ -57,35 +54,27 @@
 			<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
 				<StackPanel Margin="24,20,24,24">
 
-					<!-- ── CLIENTE con búsqueda ── -->
+					<!-- ════ CLIENTE ════ -->
 					<TextBlock Text="CLIENTE" FontSize="11" FontWeight="SemiBold"
-                               Foreground="#636E72" LetterSpacing="1"
-                               Margin="0,0,0,6"/>
+                               Foreground="#636E72" Margin="0,0,0,6"/>
 
-					<!-- Caja de búsqueda -->
+					<!-- Búsqueda cliente -->
 					<Border Background="White" CornerRadius="8"
-                            BorderBrush="#DFE6E9" BorderThickness="1"
-                            Margin="0,0,0,4">
+                            BorderBrush="#DFE6E9" BorderThickness="1" Margin="0,0,0,4">
 						<Grid>
-							<materialDesign:PackIcon Kind="Magnify"
-                                                     Width="16" Height="16"
-                                                     Foreground="#B2BEC3"
-                                                     Margin="12,0,0,0"
-                                                     VerticalAlignment="Center"
+							<materialDesign:PackIcon Kind="AccountSearch"
+                                                     Width="16" Height="16" Foreground="#B2BEC3"
+                                                     Margin="12,0,0,0" VerticalAlignment="Center"
                                                      HorizontalAlignment="Left"/>
 							<TextBox x:Name="TxtBuscarCliente"
-                                     Margin="36,0,8,0"
-                                     Height="40"
-                                     BorderThickness="0"
-                                     Background="Transparent"
-                                     Foreground="#2D3436"
-                                     FontSize="14"
+                                     Margin="36,0,8,0" Height="40"
+                                     BorderThickness="0" Background="Transparent"
+                                     Foreground="#2D3436" FontSize="14"
                                      VerticalContentAlignment="Center"
                                      TextChanged="TxtBuscarCliente_TextChanged"/>
-							<TextBlock Text="Buscar cliente..."
-                                       Foreground="#B2BEC3" FontSize="14"
-                                       Margin="38,0,0,0"
-                                       VerticalAlignment="Center"
+							<TextBlock Text="Buscar cliente por nombre..."
+                                       Foreground="#B2BEC3" FontSize="13"
+                                       Margin="38,0,0,0" VerticalAlignment="Center"
                                        IsHitTestVisible="False">
 								<TextBlock.Style>
 									<Style TargetType="TextBlock">
@@ -101,21 +90,19 @@
 						</Grid>
 					</Border>
 
-					<!-- Lista filtrada de clientes -->
-					<Border Background="White" CornerRadius="8"
+					<!-- Lista clientes -->
+					<Border x:Name="BorderListaClientes"
+                            Background="White" CornerRadius="8"
                             BorderBrush="#DFE6E9" BorderThickness="1"
-                            MaxHeight="160" Margin="0,0,0,16">
+                            MaxHeight="150" Margin="0,0,0,6">
 						<ListBox x:Name="ListaClientesFiltrada"
-                                 ItemsSource="{Binding ClientesFiltrados}"
-                                 SelectedItem="{Binding ClienteSeleccionado, Mode=TwoWay}"
-                                 DisplayMemberPath="Nombre"
-                                 BorderThickness="0"
-                                 Background="Transparent"
+                                 BorderThickness="0" Background="Transparent"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 DisplayMemberPath="Nombre"
                                  SelectionChanged="ListaClientes_SelectionChanged">
 							<ListBox.ItemContainerStyle>
 								<Style TargetType="ListBoxItem">
-									<Setter Property="Padding" Value="12,10"/>
+									<Setter Property="Padding" Value="12,9"/>
 									<Setter Property="FontSize" Value="13"/>
 									<Setter Property="Foreground" Value="#2D3436"/>
 									<Setter Property="Background" Value="Transparent"/>
@@ -136,71 +123,145 @@
 						</ListBox>
 					</Border>
 
-					<!-- Cliente seleccionado (chip) -->
+					<!-- Chip cliente seleccionado -->
 					<Border x:Name="ChipCliente"
                             Background="#FFF4EC" CornerRadius="8"
-                            Padding="12,8" Margin="0,0,0,16"
-                            Visibility="Collapsed">
+                            Padding="12,8" Margin="0,0,0,16" Visibility="Collapsed">
 						<Grid>
 							<Grid.ColumnDefinitions>
 								<ColumnDefinition Width="Auto"/>
 								<ColumnDefinition Width="*"/>
 								<ColumnDefinition Width="Auto"/>
 							</Grid.ColumnDefinitions>
-							<Border Grid.Column="0" Width="28" Height="28"
-                                    CornerRadius="14" Background="#D4A574"
-                                    Margin="0,0,10,0">
+							<Border Grid.Column="0" Width="28" Height="28" CornerRadius="14"
+                                    Background="#D4A574" Margin="0,0,10,0">
 								<TextBlock x:Name="TxtInicialCliente"
-                                           Foreground="White" FontSize="13"
-                                           FontWeight="Bold"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
+                                           Foreground="White" FontSize="13" FontWeight="Bold"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
 							</Border>
 							<TextBlock x:Name="TxtNombreClienteSeleccionado"
-                                       Grid.Column="1"
-                                       FontSize="13" FontWeight="SemiBold"
-                                       Foreground="#2D3436"
-                                       VerticalAlignment="Center"/>
-							<Button Grid.Column="2"
-                                    Width="24" Height="24"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Cursor="Hand"
-                                    Click="LimpiarCliente_Click">
-								<materialDesign:PackIcon Kind="Close"
-                                                         Width="14" Height="14"
+                                       Grid.Column="1" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="#2D3436" VerticalAlignment="Center"/>
+							<Button Grid.Column="2" Width="24" Height="24"
+                                    Background="Transparent" BorderThickness="0"
+                                    Cursor="Hand" Click="LimpiarCliente_Click">
+								<materialDesign:PackIcon Kind="Close" Width="14" Height="14"
                                                          Foreground="#636E72"/>
 							</Button>
 						</Grid>
 					</Border>
 
-					<!-- ── SERVICIO ── -->
+					<!-- ════ SERVICIO (mismo patrón que cliente) ════ -->
 					<TextBlock Text="SERVICIO" FontSize="11" FontWeight="SemiBold"
                                Foreground="#636E72" Margin="0,0,0,6"/>
+
+					<!-- Búsqueda servicio -->
 					<Border Background="White" CornerRadius="8"
-                            BorderBrush="#DFE6E9" BorderThickness="1"
-                            Margin="0,0,0,16">
-						<ComboBox ItemsSource="{Binding ListaServicios}"
-                                  SelectedItem="{Binding ServicioSeleccionado, Mode=TwoWay}"
-                                  DisplayMemberPath="Nombre"
-                                  Height="42"
-                                  BorderThickness="0"
-                                  Background="Transparent"
-                                  Foreground="#2D3436"
-                                  FontSize="13"
-                                  Padding="12,0"
-                                  VerticalContentAlignment="Center">
-							<ComboBox.ItemContainerStyle>
-								<Style TargetType="ComboBoxItem">
-									<Setter Property="Padding" Value="12,10"/>
-									<Setter Property="FontSize" Value="13"/>
-									<Setter Property="Foreground" Value="#2D3436"/>
-								</Style>
-							</ComboBox.ItemContainerStyle>
-						</ComboBox>
+                            BorderBrush="#DFE6E9" BorderThickness="1" Margin="0,0,0,4">
+						<Grid>
+							<materialDesign:PackIcon Kind="Magnify"
+                                                     Width="16" Height="16" Foreground="#B2BEC3"
+                                                     Margin="12,0,0,0" VerticalAlignment="Center"
+                                                     HorizontalAlignment="Left"/>
+							<TextBox x:Name="TxtBuscarServicio"
+                                     Margin="36,0,8,0" Height="40"
+                                     BorderThickness="0" Background="Transparent"
+                                     Foreground="#2D3436" FontSize="14"
+                                     VerticalContentAlignment="Center"
+                                     TextChanged="TxtBuscarServicio_TextChanged"/>
+							<TextBlock Text="Buscar servicio..."
+                                       Foreground="#B2BEC3" FontSize="13"
+                                       Margin="38,0,0,0" VerticalAlignment="Center"
+                                       IsHitTestVisible="False">
+								<TextBlock.Style>
+									<Style TargetType="TextBlock">
+										<Setter Property="Visibility" Value="Collapsed"/>
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding Text, ElementName=TxtBuscarServicio}" Value="">
+												<Setter Property="Visibility" Value="Visible"/>
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</TextBlock.Style>
+							</TextBlock>
+						</Grid>
 					</Border>
 
-					<!-- ── FECHA Y HORA en dos columnas ── -->
+					<!-- Lista servicios -->
+					<Border x:Name="BorderListaServicios"
+                            Background="White" CornerRadius="8"
+                            BorderBrush="#DFE6E9" BorderThickness="1"
+                            MaxHeight="150" Margin="0,0,0,6">
+						<ListBox x:Name="ListaServiciosFiltrada"
+                                 BorderThickness="0" Background="Transparent"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 SelectionChanged="ListaServicios_SelectionChanged">
+							<ListBox.ItemTemplate>
+								<DataTemplate>
+									<StackPanel>
+										<TextBlock Text="{Binding Nombre}"
+                                                   FontSize="13" Foreground="#2D3436"/>
+										<TextBlock FontSize="11" Foreground="#B2BEC3">
+											<Run Text="{Binding Duracion, StringFormat='{}{0} min'}"/>
+											<Run Text=" · "/>
+											<Run Text="{Binding Costo, StringFormat='{}{0:F2} €'}"/>
+										</TextBlock>
+									</StackPanel>
+								</DataTemplate>
+							</ListBox.ItemTemplate>
+							<ListBox.ItemContainerStyle>
+								<Style TargetType="ListBoxItem">
+									<Setter Property="Padding" Value="12,8"/>
+									<Setter Property="Background" Value="Transparent"/>
+									<Setter Property="BorderThickness" Value="0"/>
+									<Setter Property="Cursor" Value="Hand"/>
+									<Style.Triggers>
+										<Trigger Property="IsMouseOver" Value="True">
+											<Setter Property="Background" Value="#F5F6F7"/>
+										</Trigger>
+										<Trigger Property="IsSelected" Value="True">
+											<Setter Property="Background" Value="#FFF4EC"/>
+										</Trigger>
+									</Style.Triggers>
+								</Style>
+							</ListBox.ItemContainerStyle>
+						</ListBox>
+					</Border>
+
+					<!-- Chip servicio seleccionado -->
+					<Border x:Name="ChipServicio"
+                            Background="#F0F9F4" CornerRadius="8"
+                            Padding="12,8" Margin="0,0,0,16" Visibility="Collapsed">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto"/>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="Auto"/>
+							</Grid.ColumnDefinitions>
+							<Border Grid.Column="0" Width="28" Height="28" CornerRadius="8"
+                                    Background="#2D3436" Margin="0,0,10,0">
+								<materialDesign:PackIcon Kind="Scissors"
+                                                         Width="16" Height="16"
+                                                         Foreground="White"
+                                                         HorizontalAlignment="Center"
+                                                         VerticalAlignment="Center"/>
+							</Border>
+							<StackPanel Grid.Column="1" VerticalAlignment="Center">
+								<TextBlock x:Name="TxtNombreServicioSeleccionado"
+                                           FontSize="13" FontWeight="SemiBold" Foreground="#2D3436"/>
+								<TextBlock x:Name="TxtDetalleServicioSeleccionado"
+                                           FontSize="11" Foreground="#636E72"/>
+							</StackPanel>
+							<Button Grid.Column="2" Width="24" Height="24"
+                                    Background="Transparent" BorderThickness="0"
+                                    Cursor="Hand" Click="LimpiarServicio_Click">
+								<materialDesign:PackIcon Kind="Close" Width="14" Height="14"
+                                                         Foreground="#636E72"/>
+							</Button>
+						</Grid>
+					</Border>
+
+					<!-- ════ FECHA Y HORA ════ -->
 					<Grid Margin="0,0,0,24">
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*"/>
@@ -208,7 +269,6 @@
 							<ColumnDefinition Width="*"/>
 						</Grid.ColumnDefinitions>
 
-						<!-- Fecha -->
 						<StackPanel Grid.Column="0">
 							<TextBlock Text="FECHA" FontSize="11" FontWeight="SemiBold"
                                        Foreground="#636E72" Margin="0,0,0,6"/>
@@ -216,70 +276,50 @@
                                     BorderBrush="#DFE6E9" BorderThickness="1">
 								<DatePicker x:Name="DatePickerReserva"
                                             SelectedDate="{Binding FechaReserva, Mode=TwoWay}"
-                                            Height="42"
-                                            BorderThickness="0"
-                                            Background="Transparent"
-                                            Foreground="#2D3436"
-                                            FontSize="13"
-                                            Padding="8,0"
+                                            Height="42" BorderThickness="0"
+                                            Background="Transparent" Foreground="#2D3436"
+                                            FontSize="13" Padding="8,0"
                                             VerticalContentAlignment="Center"
                                             CalendarStyle="{StaticResource NeutroCalendarStyle}"/>
 							</Border>
 						</StackPanel>
 
-						<!-- Hora: HH y MM con spinners nativos -->
 						<StackPanel Grid.Column="2">
 							<TextBlock Text="HORA" FontSize="11" FontWeight="SemiBold"
                                        Foreground="#636E72" Margin="0,0,0,6"/>
 							<Border Background="White" CornerRadius="8"
-                                    BorderBrush="#DFE6E9" BorderThickness="1"
-                                    Height="42">
+                                    BorderBrush="#DFE6E9" BorderThickness="1" Height="42">
 								<Grid VerticalAlignment="Center" Margin="8,0">
 									<Grid.ColumnDefinitions>
 										<ColumnDefinition Width="*"/>
 										<ColumnDefinition Width="Auto"/>
 										<ColumnDefinition Width="*"/>
 									</Grid.ColumnDefinitions>
-
-									<!-- Horas -->
-									<TextBox x:Name="TxtHora"
-                                             Grid.Column="0"
+									<TextBox x:Name="TxtHora" Grid.Column="0"
                                              Text="{Binding HoraHH, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             MaxLength="2"
-                                             TextAlignment="Center"
+                                             MaxLength="2" TextAlignment="Center"
                                              FontSize="15" FontWeight="SemiBold"
-                                             Foreground="#2D3436"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             VerticalContentAlignment="Center"
+                                             Foreground="#2D3436" BorderThickness="0"
+                                             Background="Transparent" VerticalContentAlignment="Center"
                                              PreviewTextInput="SoloNumeros_PreviewTextInput"/>
-
 									<TextBlock Grid.Column="1" Text=":"
                                                FontSize="16" FontWeight="Bold"
-                                               Foreground="#636E72"
-                                               VerticalAlignment="Center"/>
-
-									<!-- Minutos -->
-									<TextBox x:Name="TxtMinutos"
-                                             Grid.Column="2"
+                                               Foreground="#636E72" VerticalAlignment="Center"/>
+									<TextBox x:Name="TxtMinutos" Grid.Column="2"
                                              Text="{Binding HoraMM, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                             MaxLength="2"
-                                             TextAlignment="Center"
+                                             MaxLength="2" TextAlignment="Center"
                                              FontSize="15" FontWeight="SemiBold"
-                                             Foreground="#2D3436"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             VerticalContentAlignment="Center"
+                                             Foreground="#2D3436" BorderThickness="0"
+                                             Background="Transparent" VerticalContentAlignment="Center"
                                              PreviewTextInput="SoloNumeros_PreviewTextInput"/>
 								</Grid>
 							</Border>
 							<TextBlock Text="Formato 24h  ej: 09 : 30"
-                                       FontSize="10" Foreground="#B2BEC3"
-                                       Margin="2,4,0,0"/>
+                                       FontSize="10" Foreground="#B2BEC3" Margin="2,4,0,0"/>
 						</StackPanel>
 					</Grid>
 
-					<!-- ── BOTONES ── -->
+					<!-- ════ BOTONES ════ -->
 					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="*"/>
@@ -287,16 +327,11 @@
 							<ColumnDefinition Width="*"/>
 						</Grid.ColumnDefinitions>
 
-						<Button Grid.Column="0"
-                                Content="Cancelar"
-                                Height="44"
-                                Background="#F5F6F7"
-                                Foreground="#636E72"
+						<Button Grid.Column="0" Content="Cancelar" Height="44"
+                                Background="#F5F6F7" Foreground="#636E72"
                                 FontSize="14" FontWeight="SemiBold"
                                 BorderThickness="1" BorderBrush="#DFE6E9"
-                                Cursor="Hand"
-                                IsCancel="True"
-                                Click="Cancelar_Click">
+                                Cursor="Hand" IsCancel="True" Click="Cancelar_Click">
 							<Button.Template>
 								<ControlTemplate TargetType="Button">
 									<Border CornerRadius="8"
@@ -310,20 +345,14 @@
 							</Button.Template>
 						</Button>
 
-						<Button Grid.Column="2"
-                                Content="Guardar Reserva"
-                                Height="44"
-                                Background="#D4A574"
-                                Foreground="White"
+						<Button Grid.Column="2" Content="Guardar Reserva" Height="44"
+                                Background="#D4A574" Foreground="White"
                                 FontSize="14" FontWeight="SemiBold"
-                                BorderThickness="0"
-                                Cursor="Hand"
-                                IsDefault="True"
-                                Click="Guardar_Click">
+                                BorderThickness="0" Cursor="Hand"
+                                IsDefault="True" Click="Guardar_Click">
 							<Button.Template>
 								<ControlTemplate TargetType="Button">
-									<Border CornerRadius="8"
-                                            Background="{TemplateBinding Background}">
+									<Border CornerRadius="8" Background="{TemplateBinding Background}">
 										<ContentPresenter HorizontalAlignment="Center"
                                                           VerticalAlignment="Center"/>
 									</Border>

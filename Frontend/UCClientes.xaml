@@ -4,272 +4,340 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              Background="{StaticResource LightGrayBrush}">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
 
-        <!-- ENCABEZADO -->
-        <Border Grid.Row="0" Background="White" Padding="32,24" BorderThickness="0,0,0,1" BorderBrush="{StaticResource MediumGrayBrush}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+		<!-- ══ ENCABEZADO ══ -->
+		<Border Grid.Row="0" Background="White" Padding="32,24"
+                BorderThickness="0,0,0,1" BorderBrush="{StaticResource MediumGrayBrush}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
 
-                <!-- Título y descripción -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="Gestión de Clientes" 
-                               FontSize="28" 
-                               FontWeight="SemiBold" 
-                               Foreground="{StaticResource TextBrush}"
-                               FontFamily="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"/>
+				<StackPanel Grid.Column="0" VerticalAlignment="Center">
+					<TextBlock Text="Gestión de Clientes"
+                               FontSize="26" FontWeight="SemiBold"
+                               Foreground="{StaticResource TextBrush}"/>
+					<TextBlock Text="Administra y visualiza el registro de clientes de la peluquería"
+                               FontSize="13" Foreground="{StaticResource TextLightBrush}"
+                               Margin="0,4,0,0"/>
+				</StackPanel>
 
-                    <TextBlock Text="Administra y visualiza el registro de clientes de la peluquería"
-                               FontSize="13"
-                               Foreground="{StaticResource TextLightBrush}"
-                               Margin="0,4,0,0"
-                               FontFamily="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"/>
-                </StackPanel>
+				<Button Grid.Column="1"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="{StaticResource AccentBrush}"
+                        BorderBrush="{StaticResource AccentBrush}"
+                        Foreground="White" Height="40"
+                        Padding="16,0" Cursor="Hand"
+                        Command="{Binding AgregarClienteCommand}">
+					<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+						<materialDesign:PackIcon Kind="Plus" Width="18" Height="18"
+                                                 Margin="0,0,8,0" VerticalAlignment="Center"/>
+						<TextBlock Text="Nuevo Cliente" FontSize="13" FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+					</StackPanel>
+				</Button>
+			</Grid>
+		</Border>
 
-                <!-- Botón Nueva Cliente -->
-                <Button Grid.Column="1" 
-        Style="{StaticResource MaterialDesignRaisedButton}"
-        Background="{StaticResource AccentBrush}"
-        BorderBrush="{StaticResource AccentBrush}"
-        Foreground="White"
-        Height="42"
-        Cursor="Hand"
-        Command="{Binding AgregarClienteCommand}">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <materialDesign:PackIcon Kind="Plus" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Nuevo Cliente" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-            </Grid>
-        </Border>
+		<!-- ══ BARRA BÚSQUEDA + CONTADOR ══ -->
+		<Border Grid.Row="1" Background="White" Padding="32,14"
+                BorderThickness="0,0,0,1" BorderBrush="{StaticResource MediumGrayBrush}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="360"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
 
-        <!-- CONTENIDO PRINCIPAL -->
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <!-- BARRA DE BÚSQUEDA -->
-            <Border Grid.Row="0" Background="White" Padding="32,16" BorderThickness="0,0,0,1" BorderBrush="{StaticResource MediumGrayBrush}">
-                <TextBox Text="{Binding FiltroNombre, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Height="40"
-                         Padding="12,8"
-                         Foreground="{StaticResource TextBrush}"
-                         Background="White"
-                         BorderBrush="{StaticResource MediumGrayBrush}"
-                         BorderThickness="1"
-                         FontSize="13"
-                         FontFamily="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"
-                         MaxWidth="400"
-                         HorizontalAlignment="Left">
-                    <TextBox.Template>
-                        <ControlTemplate TargetType="TextBox">
-                            <Border BorderBrush="{TemplateBinding BorderBrush}" 
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="6"
-                                    Background="{TemplateBinding Background}">
-                                <Grid>
-                                    <materialDesign:PackIcon Kind="Magnify" 
-                                                             Foreground="{StaticResource TextLightBrush}"
-                                                             Width="20" Height="20"
-                                                             Margin="10,0,0,0"
-                                                             VerticalAlignment="Center"/>
-                                    <ScrollViewer Margin="36,0,10,0" x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                        </ControlTemplate>
-                    </TextBox.Template>
-                </TextBox>
-            </Border>
-
-            <!-- LISTA DE CLIENTES O ESTADO VACÍO -->
-            <Grid Grid.Row="1">
-                <!-- Estado Vacío -->
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding EstaVacio, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Border Width="80" Height="80" Background="{StaticResource MediumGrayBrush}" CornerRadius="40" HorizontalAlignment="Center" Margin="0,0,0,16">
-                        <materialDesign:PackIcon Kind="PeopleOutline" 
-                                                 Foreground="White"
-                                                 Width="40" Height="40"
+				<!-- Buscador -->
+				<Border Grid.Column="0" Background="{StaticResource LightGrayBrush}"
+                        CornerRadius="8" BorderBrush="{StaticResource MediumGrayBrush}"
+                        BorderThickness="1">
+					<Grid>
+						<materialDesign:PackIcon Kind="Magnify"
+                                                 Foreground="{StaticResource TextLightBrush}"
+                                                 Width="18" Height="18"
+                                                 Margin="12,0,0,0"
                                                  VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"/>
-                    </Border>
+                                                 HorizontalAlignment="Left"/>
+						<TextBox Text="{Binding FiltroNombre, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="36,0,10,0" Height="36"
+                                 BorderThickness="0" Background="Transparent"
+                                 Foreground="{StaticResource TextBrush}"
+                                 FontSize="13" VerticalContentAlignment="Center">
+							<TextBox.Template>
+								<ControlTemplate TargetType="TextBox">
+									<ScrollViewer x:Name="PART_ContentHost"
+                                                  VerticalAlignment="Center"/>
+								</ControlTemplate>
+							</TextBox.Template>
+						</TextBox>
+						<TextBlock Text="Buscar por nombre..."
+                                   Foreground="{StaticResource TextLightBrush}"
+                                   FontSize="13" Margin="38,0,0,0"
+                                   VerticalAlignment="Center"
+                                   IsHitTestVisible="False">
+							<TextBlock.Style>
+								<Style TargetType="TextBlock">
+									<Setter Property="Visibility" Value="Collapsed"/>
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding FiltroNombre}" Value="">
+											<Setter Property="Visibility" Value="Visible"/>
+										</DataTrigger>
+										<DataTrigger Binding="{Binding FiltroNombre}" Value="{x:Null}">
+											<Setter Property="Visibility" Value="Visible"/>
+										</DataTrigger>
+									</Style.Triggers>
+								</Style>
+							</TextBlock.Style>
+						</TextBlock>
+					</Grid>
+				</Border>
 
-                    <TextBlock Text="Sin clientes registrados" 
-                               FontSize="18" 
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextBrush}"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,8"
-                               FontFamily="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"/>
+				<!-- Contador -->
+				<StackPanel Grid.Column="2" Orientation="Horizontal"
+                            VerticalAlignment="Center">
+					<TextBlock FontSize="13" Foreground="{StaticResource TextLightBrush}">
+						<Run Text="{Binding TotalClientes}"/>
+						<Run Text="clientes activos"/>
+					</TextBlock>
+				</StackPanel>
+			</Grid>
+		</Border>
 
-                    <TextBlock Text="Comienza agregando tu primer cliente"
-                               FontSize="13"
-                               Foreground="{StaticResource TextLightBrush}"
-                               HorizontalAlignment="Center"
-                               FontFamily="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"/>
-                </StackPanel>
+		<!-- ══ LISTA / ESTADO VACÍO ══ -->
+		<Grid Grid.Row="2">
 
-                <!-- Lista de Clientes -->
-                <ScrollViewer Visibility="{Binding EstaVacio, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding ListaClientesView}" Padding="24">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="3"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
+			<!-- Estado vacío -->
+			<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Visibility="{Binding EstaVacio, Converter={StaticResource BooleanToVisibilityConverter}}">
+				<Border Width="72" Height="72" CornerRadius="36"
+                        Background="{StaticResource MediumGrayBrush}"
+                        HorizontalAlignment="Center" Margin="0,0,0,16">
+					<materialDesign:PackIcon Kind="AccountOff" Foreground="White"
+                                             Width="36" Height="36"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+				</Border>
+				<TextBlock Text="Sin clientes registrados"
+                           FontSize="17" FontWeight="SemiBold"
+                           Foreground="{StaticResource TextBrush}"
+                           HorizontalAlignment="Center" Margin="0,0,0,6"/>
+				<TextBlock Text="Comienza agregando tu primer cliente"
+                           FontSize="13" Foreground="{StaticResource TextLightBrush}"
+                           HorizontalAlignment="Center"/>
+			</StackPanel>
 
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <!-- TARJETA DE CLIENTE -->
-                                <Border Margin="8"
-                                        Background="White"
-                                        CornerRadius="12"
-                                        Padding="20">
-                                    <Border.Effect>
-                                        <DropShadowEffect BlurRadius="15" ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.08"/>
-                                    </Border.Effect>
+			<!-- Lista de cards horizontales -->
+			<ScrollViewer Visibility="{Binding EstaVacio, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+				<ItemsControl ItemsSource="{Binding ListaClientesView}"
+                              Padding="28,20,28,28">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
 
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<!-- ── CARD HORIZONTAL ── -->
+							<Border Margin="0,0,0,10"
+                                    Background="White"
+                                    CornerRadius="12"
+                                    Padding="20,16">
+								<Border.Effect>
+									<DropShadowEffect BlurRadius="12" ShadowDepth="1"
+                                                      Direction="270" Color="#000000" Opacity="0.05"/>
+								</Border.Effect>
 
-                                        <!-- AVATAR Y VIP BADGE -->
-                                        <Grid Grid.Row="0" Margin="0,0,0,16">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="60"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<!-- Avatar -->
+										<ColumnDefinition Width="Auto"/>
+										<!-- Info -->
+										<ColumnDefinition Width="*"/>
+										<!-- Badge activo -->
+										<ColumnDefinition Width="Auto"/>
+										<!-- Botones -->
+										<ColumnDefinition Width="Auto"/>
+									</Grid.ColumnDefinitions>
 
-                                            <!-- Avatar circular -->
-                                            <Ellipse Grid.Column="0" 
-                                                     Width="60" Height="60"
-                                                     Fill="{StaticResource AccentBrush}"/>
+									<!-- ── Avatar circular ── -->
+									<Grid Grid.Column="0" Margin="0,0,16,0">
+										<Ellipse Width="48" Height="48"
+                                                 Fill="{StaticResource AccentBrush}"/>
+										<TextBlock Text="{Binding Nombre, Converter={StaticResource StringToFirstCharConverter}}"
+                                                   Foreground="White"
+                                                   FontSize="18" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"/>
+									</Grid>
 
-                                            <TextBlock Grid.Column="0"
-                                                       Text="{Binding Nombre, Converter={StaticResource StringToFirstCharConverter}}"
-                                                       Foreground="White"
-                                                       FontSize="20"
-                                                       FontWeight="SemiBold"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"
-                                                       FontFamily="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"/>
+									<!-- ── Nombre, VIP, contacto ── -->
+									<StackPanel Grid.Column="1" VerticalAlignment="Center">
 
-                                            <!-- VIP Star Badge -->
-                                            <Border Grid.Column="2" 
-                                                    Width="32" Height="32"
-                                                    Background="#FFD700"
-                                                    CornerRadius="16"
-                                                    VerticalAlignment="Top">
-                                                <materialDesign:PackIcon Kind="Star" 
-                                                                         Foreground="White"
-                                                                         Width="18" Height="18"
-                                                                         VerticalAlignment="Center"
-                                                                         HorizontalAlignment="Center"/>
-                                            </Border>
-                                        </Grid>
-
-                                        <!-- INFORMACIÓN CLIENTE -->
-                                        <StackPanel Grid.Row="1" Margin="0,0,0,12">
-                                            <TextBlock Text="{Binding Nombre}"
-                                                       FontSize="15"
-                                                       FontWeight="SemiBold"
+										<!-- Nombre + badge VIP -->
+										<StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+											<TextBlock Text="{Binding Nombre}"
+                                                       FontSize="15" FontWeight="SemiBold"
                                                        Foreground="{StaticResource TextBrush}"
+                                                       VerticalAlignment="Center"/>
+
+											<!-- Badge VIP: solo visible si EsVip = true -->
+											<Border Margin="10,0,0,0"
+                                                    Background="#FFF4E0"
+                                                    CornerRadius="99"
+                                                    Padding="8,2"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding EsVip, Converter={StaticResource BooleanToVisibilityConverter}}">
+												<TextBlock Text="VIP"
+                                                           FontSize="10" FontWeight="SemiBold"
+                                                           Foreground="#A0622A"/>
+											</Border>
+										</StackPanel>
+
+										<!-- Teléfono y email en línea -->
+										<StackPanel Orientation="Horizontal">
+											<materialDesign:PackIcon Kind="Phone"
+                                                                     Width="13" Height="13"
+                                                                     Foreground="{StaticResource TextLightBrush}"
+                                                                     VerticalAlignment="Center"
+                                                                     Margin="0,0,5,0"/>
+											<TextBlock Text="{Binding Telefono}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextLightBrush}"
+                                                       VerticalAlignment="Center"/>
+
+											<Rectangle Width="1" Height="12"
+                                                       Fill="{StaticResource MediumGrayBrush}"
+                                                       Margin="12,0" VerticalAlignment="Center"/>
+
+											<materialDesign:PackIcon Kind="Email"
+                                                                     Width="13" Height="13"
+                                                                     Foreground="{StaticResource TextLightBrush}"
+                                                                     VerticalAlignment="Center"
+                                                                     Margin="0,0,5,0"/>
+											<TextBlock Text="{Binding Email}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextLightBrush}"
+                                                       VerticalAlignment="Center"
                                                        TextTrimming="CharacterEllipsis"
-                                                       FontFamily="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"/>
+                                                       MaxWidth="220"/>
+										</StackPanel>
+									</StackPanel>
 
-                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                                <materialDesign:PackIcon Kind="Phone" 
-                                                                         Foreground="{StaticResource TextLightBrush}"
-                                                                         Width="14" Height="14"
-                                                                         Margin="0,0,6,0"/>
-                                                <TextBlock Text="{Binding Telefono}" 
-                                                           FontSize="12"
-                                                           Foreground="{StaticResource TextLightBrush}"
-                                                           FontFamily="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"/>
-                                            </StackPanel>
+									<!-- ── Badge estado Activo ── -->
+									<Border Grid.Column="2"
+                                            Margin="16,0"
+                                            Background="#E8F5E9"
+                                            CornerRadius="99"
+                                            Padding="12,4"
+                                            VerticalAlignment="Center">
+										<TextBlock Text="Activo"
+                                                   FontSize="11" FontWeight="SemiBold"
+                                                   Foreground="#2E7D32"/>
+									</Border>
 
-                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
-                                                <materialDesign:PackIcon Kind="Email" 
-                                                                         Foreground="{StaticResource TextLightBrush}"
-                                                                         Width="14" Height="14"
-                                                                         Margin="0,0,6,0"/>
-                                                <TextBlock Text="{Binding Email}" 
-                                                           FontSize="12"
-                                                           Foreground="{StaticResource TextLightBrush}"
-                                                           TextTrimming="CharacterEllipsis"
-                                                           FontFamily="pack://application:,,,/ProyectoRuben;component/Fonts/#Montserrat"/>
-                                            </StackPanel>
-                                        </StackPanel>
+									<!-- ── Botones de acción ── -->
+									<StackPanel Grid.Column="3"
+                                                Orientation="Horizontal"
+                                                VerticalAlignment="Center">
 
-                                        <!-- SEPARADOR -->
-                                        <Rectangle Grid.Row="2" Height="1" Fill="{StaticResource MediumGrayBrush}" Margin="0,0,0,16" VerticalAlignment="Top"/>
+										<!-- Editar -->
+										<Button Width="34" Height="34"
+                                                Background="Transparent"
+                                                BorderThickness="1"
+                                                BorderBrush="{StaticResource MediumGrayBrush}"
+                                                Cursor="Hand"
+                                                Margin="0,0,6,0"
+                                                ToolTip="Editar cliente"
+                                                Command="{Binding DataContext.EditarClienteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}">
+											<Button.Template>
+												<ControlTemplate TargetType="Button">
+													<Border CornerRadius="8"
+                                                            Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}">
+														<ContentPresenter HorizontalAlignment="Center"
+                                                                          VerticalAlignment="Center"/>
+													</Border>
+												</ControlTemplate>
+											</Button.Template>
+											<materialDesign:PackIcon Kind="Pencil"
+                                                                     Width="16" Height="16"
+                                                                     Foreground="{StaticResource TextLightBrush}"/>
+										</Button>
 
-                                        <!-- BOTONES DE ACCIÓN -->
-                                        <StackPanel Grid.Row="3" Orientation="Horizontal">
-                                            <!-- Editar -->
-                                            <Button Width="40" Height="40"
-                                                    Background="{StaticResource LightGrayBrush}"
-                                                    Foreground="{StaticResource TextBrush}"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    ToolTip="Editar cliente"
-                                                    Margin="0,0,8,0"
-                                                    Command="{Binding DataContext.EditarClienteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                    CommandParameter="{Binding}">
-                                                <materialDesign:PackIcon Kind="Pencil" Width="18" Height="18"/>
-                                            </Button>
+										<!-- Historial -->
+										<Button Width="34" Height="34"
+                                                Background="Transparent"
+                                                BorderThickness="1"
+                                                BorderBrush="{StaticResource MediumGrayBrush}"
+                                                Cursor="Hand"
+                                                Margin="0,0,6,0"
+                                                ToolTip="Ver historial de citas"
+                                                Command="{Binding DataContext.VerHistorialCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}">
+											<Button.Template>
+												<ControlTemplate TargetType="Button">
+													<Border CornerRadius="8"
+                                                            Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}">
+														<ContentPresenter HorizontalAlignment="Center"
+                                                                          VerticalAlignment="Center"/>
+													</Border>
+												</ControlTemplate>
+											</Button.Template>
+											<materialDesign:PackIcon Kind="History"
+                                                                     Width="16" Height="16"
+                                                                     Foreground="{StaticResource TextLightBrush}"/>
+										</Button>
 
-                                            <!-- Ver Historial -->
-                                            <Button Width="40" Height="40"
-                                                    Background="{StaticResource LightGrayBrush}"
-                                                    Foreground="{StaticResource TextBrush}"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    ToolTip="Ver historial"
-                                                    Margin="0,0,8,0"
-                                                    Command="{Binding DataContext.VerHistorialCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                    CommandParameter="{Binding}">
-                                                <materialDesign:PackIcon Kind="History" Width="18" Height="18"/>
-                                            </Button>
-
-                                            <!-- Desactivar -->
-                                            <Button Width="40" Height="40"
-                                                    Background="#FFE0E0"
-                                                    Foreground="#D63031"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
-                                                    ToolTip="Desactivar cliente"
-                                                    Margin="0"
-                                                    Command="{Binding DataContext.DesactivarClienteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                    CommandParameter="{Binding Id}">
-                                                <materialDesign:PackIcon Kind="Delete" Width="18" Height="18"/>
-                                            </Button>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Grid>
-        </Grid>
-    </Grid>
+										<!-- Desactivar -->
+										<Button Width="34" Height="34"
+                                                Background="#FFF0F0"
+                                                BorderThickness="1"
+                                                BorderBrush="#FFCDD2"
+                                                Cursor="Hand"
+                                                ToolTip="Desactivar cliente"
+                                                Command="{Binding DataContext.DesactivarClienteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding Id}">
+											<Button.Template>
+												<ControlTemplate TargetType="Button">
+													<Border CornerRadius="8"
+                                                            Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}">
+														<ContentPresenter HorizontalAlignment="Center"
+                                                                          VerticalAlignment="Center"/>
+													</Border>
+												</ControlTemplate>
+											</Button.Template>
+											<materialDesign:PackIcon Kind="TrashCanOutline"
+                                                                     Width="16" Height="16"
+                                                                     Foreground="#D63031"/>
+										</Button>
+									</StackPanel>
+								</Grid>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+		</Grid>
+	</Grid>
 </UserControl>

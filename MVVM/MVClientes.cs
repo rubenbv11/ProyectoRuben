@@ -1,4 +1,5 @@
 ﻿using di.proyecto.clase._2025.Frontend.Mensajes;
+using Microsoft.EntityFrameworkCore;
 using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
 using ProyectoRuben.Frontend;
@@ -13,21 +14,41 @@ using System.Windows.Input;
 
 namespace ProyectoRuben.MVVM
 {
-    /// <summary>
-    /// ViewModel para la gestión de clientes.
-    /// Maneja la carga, filtrado y operaciones CRUD de clientes activos.
-    /// </summary>
+    // ══════════════════════════════════════════════════════════════════════════
+    // Wrapper que expone EsVip sin modificar la entidad de EF Core
+    // ══════════════════════════════════════════════════════════════════════════
+    public class ClienteViewModel
+    {
+        private readonly Cliente _cliente;
+
+        public ClienteViewModel(Cliente cliente, bool esVip = false)
+        {
+            _cliente = cliente;
+            EsVip = esVip;
+        }
+
+        public int Id => _cliente.Id;
+        public string Nombre => _cliente.Nombre;
+        public string? Telefono => _cliente.Telefono;
+        public string? Email => _cliente.Email;
+        public string? HistorialCitas => _cliente.HistorialCitas;
+        public bool? Activo => _cliente.Activo;
+        public bool EsVip { get; }
+        public Cliente Modelo => _cliente;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // ViewModel principal
+    // ══════════════════════════════════════════════════════════════════════════
     public class MVClientes : MVBase
     {
         private readonly IClienteRepository _clienteRepository;
+        private readonly IReservaRepository _reservaRepository;
 
-        private ObservableCollection<Cliente> _clientes;
-        public ObservableCollection<Cliente> Clientes
-        {
-            get => _clientes;
-            set => SetProperty(ref _clientes, value);
-        }
+        // Fuente completa (nunca se filtra, solo se lee)
+        private ObservableCollection<ClienteViewModel> _todoLosClientes = new();
 
+        // ── Vista filtrada (bound al ItemsControl) ────────────────────────────
         private ListCollectionView _listaClientesView;
         public ListCollectionView ListaClientesView
         {
@@ -42,87 +63,124 @@ namespace ProyectoRuben.MVVM
             set => SetProperty(ref _estaVacio, value);
         }
 
-        private string _filtroNombre;
+        private int _totalClientes;
+        public int TotalClientes
+        {
+            get => _totalClientes;
+            set => SetProperty(ref _totalClientes, value);
+        }
+
+        // ── Filtro: usa un timer para no filtrar en cada tecla ────────────────
+        private string _filtroNombre = string.Empty;
         public string FiltroNombre
         {
             get => _filtroNombre;
             set
             {
                 if (SetProperty(ref _filtroNombre, value))
-                {
                     AplicarFiltro();
-                }
             }
         }
 
-        private Cliente _clienteNuevo;
+        // ── Formulario ────────────────────────────────────────────────────────
+        private Cliente _clienteNuevo = new();
         public Cliente ClienteNuevo
         {
             get => _clienteNuevo;
             set => SetProperty(ref _clienteNuevo, value);
         }
 
+        // ── Comandos ──────────────────────────────────────────────────────────
         public ICommand AgregarClienteCommand { get; }
         public ICommand EditarClienteCommand { get; }
         public ICommand DesactivarClienteCommand { get; }
         public ICommand VerHistorialCommand { get; }
 
-        public MVClientes(IClienteRepository clienteRepository)
+        // ══════════════════════════════════════════════════════════════════════
+        // Constructor
+        // ══════════════════════════════════════════════════════════════════════
+        public MVClientes(IClienteRepository clienteRepository,
+                          IReservaRepository reservaRepository)
         {
-            _clienteRepository = clienteRepository ?? throw new ArgumentNullException(nameof(clienteRepository));
-            Clientes = new ObservableCollection<Cliente>();
+            _clienteRepository = clienteRepository
+                ?? throw new ArgumentNullException(nameof(clienteRepository));
+            _reservaRepository = reservaRepository
+                ?? throw new ArgumentNullException(nameof(reservaRepository));
+
             InicializarClienteNuevo();
 
-            AgregarClienteCommand = new RelayCommand(_ => AgregarCliente());
-            EditarClienteCommand = new RelayCommand(async (param) => await EditarCliente(param as Cliente));
-            DesactivarClienteCommand = new RelayCommand(async (param) =>
+            AgregarClienteCommand = new RelayCommand(_ => AbrirFormularioNuevoCliente());
+            EditarClienteCommand = new RelayCommand(p => AbrirFormularioEdicion(p as ClienteViewModel));
+            DesactivarClienteCommand = new RelayCommand(async p =>
             {
-                if (param is int clienteId)
-                    await DesactivarCliente(clienteId);
+                if (p is int id) await DesactivarCliente(id);
             });
-            VerHistorialCommand = new RelayCommand(param => VerHistorial(param as Cliente));
+            VerHistorialCommand = new RelayCommand(async p =>
+                await MostrarHistorial(p as ClienteViewModel));
 
             _ = CargarClientes();
         }
 
-        /// <summary>
-        /// Carga todos los clientes activos de la base de datos.
-        /// Las actualizaciones de colección se ejecutan en el hilo de la UI para evitar fallos de dispatcher.
-        /// </summary>
+        // ══════════════════════════════════════════════════════════════════════
+        // Carga de datos
+        // ══════════════════════════════════════════════════════════════════════
         public async Task CargarClientes()
         {
             try
             {
-                var todosLosClientes = await GetAllAsync(_clienteRepository);
-                var clientesActivos = todosLosClientes.Where(c => c.Activo == true).ToList();
+                var todos = await GetAllAsync(_clienteRepository);
+                var activos = todos.Where(c => c.Activo == true).ToList();
 
-                // Actualizar la colección en el hilo de la UI (ListCollectionView tiene afinidad de dispatcher)
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                var wrappers = activos
+                    .Select(c => new ClienteViewModel(c))
+                    .ToList();
+
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    Clientes = new ObservableCollection<Cliente>(clientesActivos);
+                    _todoLosClientes = new ObservableCollection<ClienteViewModel>(wrappers);
 
-                    ListaClientesView = new ListCollectionView(Clientes);
-                    ListaClientesView.Filter = obj =>
-                    {
-                        if (string.IsNullOrEmpty(FiltroNombre))
-                            return true;
-                        var c = obj as Cliente;
-                        return c != null && c.Nombre.IndexOf(FiltroNombre, StringComparison.OrdinalIgnoreCase) >= 0;
-                    };
-
-                    EstaVacio = Clientes.Count == 0;
+                    // Crear la vista con el filtro ya aplicado
+                    CrearVista();
                 });
             }
             catch (Exception ex)
             {
                 SnackbarMessageQueue.Enqueue($"Error cargando clientes: {ex.Message}");
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => EstaVacio = true);
+                await Application.Current.Dispatcher.InvokeAsync(() => EstaVacio = true);
             }
         }
 
-        /// <summary>
-        /// Inicializa un nuevo cliente con valores por defecto.
-        /// </summary>
+        // ══════════════════════════════════════════════════════════════════════
+        // Filtro rápido: sustituye la colección visible, no hace Refresh()
+        // Esto evita el freeze de 2 segundos con muchos clientes
+        // ══════════════════════════════════════════════════════════════════════
+        private void AplicarFiltro()
+        {
+            // Usar Dispatcher para no bloquear el hilo de UI desde el setter
+            Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                CrearVista();
+            });
+        }
+
+        private void CrearVista()
+        {
+            // Filtrar en memoria sobre la colección ligera
+            var filtrado = string.IsNullOrEmpty(_filtroNombre)
+                ? _todoLosClientes
+                : new ObservableCollection<ClienteViewModel>(
+                    _todoLosClientes.Where(c =>
+                        c.Nombre.IndexOf(_filtroNombre, StringComparison.OrdinalIgnoreCase) >= 0));
+
+            // Asignar una nueva vista — más rápido que Refresh() en colecciones grandes
+            ListaClientesView = new ListCollectionView(filtrado);
+            TotalClientes = filtrado.Count;
+            EstaVacio = filtrado.Count == 0;
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Formulario nuevo cliente
+        // ══════════════════════════════════════════════════════════════════════
         private void InicializarClienteNuevo()
         {
             ClienteNuevo = new Cliente
@@ -136,35 +194,23 @@ namespace ProyectoRuben.MVVM
             };
         }
 
-        /// <summary>
-        /// Aplica el filtro de búsqueda por nombre.
-        /// </summary>
-        private void AplicarFiltro()
-        {
-            ListaClientesView?.Refresh();
-            EstaVacio = ListaClientesView?.Count == 0;
-        }
-
-        /// <summary>
-        /// Abre un diálogo para agregar un nuevo cliente.
-        /// </summary>
-        private void AgregarCliente()
+        private void AbrirFormularioNuevoCliente()
         {
             try
             {
+                InicializarClienteNuevo();
                 var dialogo = new AgregarCliente(this);
                 dialogo.ShowDialog();
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al abrir formulario de cliente: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al abrir formulario: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Guarda un nuevo cliente en la base de datos.
-        /// </summary>
-        // MVClientes.cs — GuardarCliente debe retornar bool:
+        // ══════════════════════════════════════════════════════════════════════
+        // Guardar NUEVO cliente
+        // ══════════════════════════════════════════════════════════════════════
         public async Task<bool> GuardarCliente()
         {
             try
@@ -172,8 +218,9 @@ namespace ProyectoRuben.MVVM
                 if (string.IsNullOrWhiteSpace(ClienteNuevo.Nombre))
                 {
                     MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio.");
-                    return false; // ← indica fallo sin excepción
+                    return false;
                 }
+
                 if (string.IsNullOrWhiteSpace(ClienteNuevo.Contacto))
                     ClienteNuevo.Contacto = ClienteNuevo.Nombre;
 
@@ -185,46 +232,76 @@ namespace ProyectoRuben.MVVM
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al guardar cliente: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al guardar: {ex.Message}");
                 return false;
             }
         }
 
-        /// <summary>
-        /// Edita un cliente existente.
-        /// </summary>
-        private async Task EditarCliente(Cliente cliente)
+        // ══════════════════════════════════════════════════════════════════════
+        // Editar cliente existente
+        // ══════════════════════════════════════════════════════════════════════
+        private void AbrirFormularioEdicion(ClienteViewModel? vm)
         {
-            if (cliente == null)
-            {
-                MensajeAdvertencia.Mostrar("Advertencia", "Por favor, selecciona un cliente para editar.");
-                return;
-            }
+            if (vm == null) return;
 
             try
             {
-                // Aquí se abrirá un diálogo para editar cliente
-                // Por ahora, mostramos una notificación
-                SnackbarMessageQueue.Enqueue($"Editando cliente: {cliente.Nombre}");
-
-                // En el futuro:
-                // var dialogo = new AgregarClienteDialog(cliente);
-                // if (dialogo.ShowDialog() == true)
-                // {
-                //     await CargarClientes();
-                // }
-
-                await Task.CompletedTask;
+                InicializarClienteNuevo();
+                var dialogo = new AgregarCliente(this)
+                {
+                    ClienteAEditar = vm
+                };
+                dialogo.ShowDialog();
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al editar cliente: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al abrir edición: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Desactiva un cliente (baja lógica, no borra de la BD).
-        /// </summary>
+        // ══════════════════════════════════════════════════════════════════════
+        // Actualizar cliente existente
+        // ══════════════════════════════════════════════════════════════════════
+        public async Task<bool> ActualizarCliente()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ClienteNuevo.Nombre))
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio.");
+                    return false;
+                }
+
+                var clienteTracked = await _clienteRepository.GetByIdAsync(ClienteNuevo.Id);
+                if (clienteTracked == null)
+                {
+                    MensajeError.Mostrar("Error", "Cliente no encontrado.");
+                    return false;
+                }
+
+                clienteTracked.Nombre = ClienteNuevo.Nombre;
+                clienteTracked.Telefono = ClienteNuevo.Telefono;
+                clienteTracked.Email = ClienteNuevo.Email;
+                clienteTracked.Contacto = string.IsNullOrWhiteSpace(ClienteNuevo.Contacto)
+                                              ? ClienteNuevo.Nombre
+                                              : ClienteNuevo.Contacto;
+
+                await UpdateAsync(_clienteRepository, clienteTracked);
+                SnackbarMessageQueue.Enqueue($"Cliente {clienteTracked.Nombre} actualizado.");
+                await CargarClientes();
+                InicializarClienteNuevo();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MensajeError.Mostrar("Error", $"Error al actualizar: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Desactivar
+        // ══════════════════════════════════════════════════════════════════════
         private async Task DesactivarCliente(int clienteId)
         {
             try
@@ -236,57 +313,60 @@ namespace ProyectoRuben.MVVM
                     return;
                 }
 
-                var resultado = MessageBox.Show(
-                    $"¿Estás seguro de que deseas desactivar a {cliente.Nombre}? Esta acción no se puede deshacer fácilmente.",
-                    "Confirmar desactivación",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
+                var dialogo = new DialogoEliminar(
+                    $"¿Desactivar a {cliente.Nombre}? Dejará de aparecer en la lista.")
+                {
+                    Owner = Application.Current.MainWindow
+                };
 
-                if (resultado == System.Windows.MessageBoxResult.Yes)
+                if (dialogo.ShowDialog() == true)
                 {
                     cliente.Activo = false;
                     if (await UpdateAsync(_clienteRepository, cliente))
                     {
-                        SnackbarMessageQueue.Enqueue($"Cliente {cliente.Nombre} desactivado correctamente.");
+                        SnackbarMessageQueue.Enqueue($"{cliente.Nombre} desactivado.");
                         await CargarClientes();
                     }
                 }
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al desactivar cliente: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al desactivar: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Muestra el historial de citas de un cliente.
-        /// </summary>
-        private void VerHistorial(Cliente cliente)
+        // ══════════════════════════════════════════════════════════════════════
+        // Historial real con ventana dedicada
+        // ══════════════════════════════════════════════════════════════════════
+        private async Task MostrarHistorial(ClienteViewModel? vm)
         {
-            if (cliente == null)
+            if (vm == null)
             {
-                MensajeAdvertencia.Mostrar("Advertencia", "Por favor, selecciona un cliente.");
+                MensajeAdvertencia.Mostrar("Advertencia", "Selecciona un cliente.");
                 return;
             }
 
             try
             {
-                if (string.IsNullOrWhiteSpace(cliente.HistorialCitas))
+                // Cargar reservas con navegación a Servicio y Empleado
+                var reservas = await _reservaRepository
+                    .Query(asNoTracking: true,
+                           r => r.Servicio,
+                           r => r.Empleado)
+                    .Where(r => r.ClienteId == vm.Id)
+                    .OrderByDescending(r => r.Fecha)
+                    .ToListAsync();
+
+                // Abrir ventana dedicada grande
+                var ventana = new HistorialCliente(vm.Nombre, reservas)
                 {
-                    MensajeInformacion.Mostrar(
-                        "Historial Vacio",
-                        $"El cliente {cliente.Nombre} no tiene historial de citas registrado.");
-                }
-                else
-                {
-                    MensajeInformacion.Mostrar(
-                        "Historial de Citas",
-                        $"Historial de {cliente.Nombre}:\n\n{cliente.HistorialCitas}");
-                }
+                    Owner = Application.Current.MainWindow
+                };
+                ventana.ShowDialog();
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al mostrar historial: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al cargar historial: {ex.Message}");
             }
         }
     }

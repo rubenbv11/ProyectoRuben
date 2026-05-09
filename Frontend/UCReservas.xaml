@@ -156,22 +156,28 @@
                             </Style>
                         </DataGrid.CellStyle>
 
-                        <DataGrid.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Editar Reserva" >
-                                    <MenuItem.Icon>
-                                        <materialDesign:PackIcon Kind="Pencil"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                                <MenuItem Header="Eliminar Reserva" 
-                                          Command="{Binding EliminarCommand}" 
-                                          CommandParameter="{Binding Id}">
-                                    <MenuItem.Icon>
-                                        <materialDesign:PackIcon Kind="Delete"/>
-                                    </MenuItem.Icon>
-                                </MenuItem>
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
+						<DataGrid.ContextMenu>
+							<ContextMenu>
+								<MenuItem Header="Editar Reserva"
+										  Click="MenuEditar_Click"
+										  DataContext="{Binding PlacementTarget.SelectedItem,
+                               RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+									<MenuItem.Icon>
+										<materialDesign:PackIcon Kind="Pencil" Foreground="#2D3436"/>
+									</MenuItem.Icon>
+								</MenuItem>
+								<Separator/>
+								<MenuItem Header="Eliminar Reserva"
+										  Click="MenuEliminar_Click"
+										  Foreground="#D63031"
+										  DataContext="{Binding PlacementTarget.SelectedItem,
+                               RelativeSource={RelativeSource AncestorType=ContextMenu}}">
+									<MenuItem.Icon>
+										<materialDesign:PackIcon Kind="Delete" Foreground="#D63031"/>
+									</MenuItem.Icon>
+								</MenuItem>
+							</ContextMenu>
+						</DataGrid.ContextMenu>
 
                         <DataGrid.Columns>
                             <!-- Columna Hora -->

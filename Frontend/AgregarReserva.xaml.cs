@@ -1,4 +1,7 @@
-﻿using ProyectoRuben.MVVM;
+﻿using ProyectoRuben.Backen.Modelo;
+using ProyectoRuben.MVVM;
+using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -8,6 +11,11 @@ namespace ProyectoRuben.Frontend
     public partial class AgregarReserva : Window
     {
         private MVReservas _mVReservas;
+
+        /// <summary>
+        /// Si se asigna antes de ShowDialog(), el diálogo pre-carga sus datos (modo edición).
+        /// </summary>
+        public Reserva? ReservaAEditar { get; set; }
 
         public AgregarReserva(MVReservas mVReservas)
         {
@@ -21,101 +29,177 @@ namespace ProyectoRuben.Frontend
                 new RoutedEventHandler(_mVReservas.OnErrorEvent));
             DataContext = _mVReservas;
 
-            // Mostrar todos los clientes al abrir
+            // Fuente inicial: todos los clientes y servicios
             ListaClientesFiltrada.ItemsSource = _mVReservas.ListaClientes;
+            ListaServiciosFiltrada.ItemsSource = _mVReservas.ListaServicios;
+
+            // ── Pre-cargar si estamos en modo edición ──────────────────────
+            if (ReservaAEditar != null)
+            {
+                // Título de la ventana
+                this.Title = "Editar Reserva";
+
+                // Pre-seleccionar cliente
+                var cliente = _mVReservas.ListaClientes
+                    .FirstOrDefault(c => c.Id == ReservaAEditar.ClienteId);
+                if (cliente != null)
+                {
+                    _mVReservas.ClienteSeleccionado = cliente;
+                    MostrarChipCliente(cliente.Nombre);
+                }
+
+                // Pre-seleccionar servicio
+                var servicio = _mVReservas.ListaServicios
+                    .FirstOrDefault(s => s.Id == ReservaAEditar.ServicioId);
+                if (servicio != null)
+                {
+                    _mVReservas.ServicioSeleccionado = servicio;
+                    MostrarChipServicio(servicio);
+                }
+            }
         }
 
-        // ── Arrastrar ventana sin borde ───────────────────────────────────────
+        // ── Arrastrar ventana ─────────────────────────────────────────────────
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ButtonState == MouseButtonState.Pressed)
                 DragMove();
         }
 
-        // ── Búsqueda de cliente en tiempo real ────────────────────────────────
+        // ══════════════════════════════════════════════════════════════════════
+        // CLIENTE
+        // ══════════════════════════════════════════════════════════════════════
+
         private void TxtBuscarCliente_TextChanged(object sender, TextChangedEventArgs e)
         {
             var filtro = TxtBuscarCliente.Text.Trim();
 
-            if (string.IsNullOrEmpty(filtro))
-            {
-                ListaClientesFiltrada.ItemsSource = _mVReservas.ListaClientes;
-            }
-            else
-            {
-                var filtrados = _mVReservas.ListaClientes
-                    .Where(c => c.Nombre.Contains(filtro,
-                                StringComparison.OrdinalIgnoreCase))
+            ListaClientesFiltrada.ItemsSource = string.IsNullOrEmpty(filtro)
+                ? _mVReservas.ListaClientes
+                : _mVReservas.ListaClientes
+                    .Where(c => c.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase))
                     .ToList();
-                ListaClientesFiltrada.ItemsSource = filtrados;
-            }
 
-            // Si hay cliente seleccionado y el texto cambió, limpiar selección
             if (_mVReservas.ClienteSeleccionado != null &&
-                !_mVReservas.ClienteSeleccionado.Nombre.Contains(filtro,
-                    StringComparison.OrdinalIgnoreCase))
+                !_mVReservas.ClienteSeleccionado.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase))
             {
                 _mVReservas.ClienteSeleccionado = null;
-                OcultarChip();
+                OcultarChipCliente();
             }
         }
 
-        // ── Al seleccionar cliente de la lista ────────────────────────────────
         private void ListaClientes_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ListaClientesFiltrada.SelectedItem is ProyectoRuben.Backen.Modelo.Cliente c)
+            if (ListaClientesFiltrada.SelectedItem is Cliente c)
             {
                 _mVReservas.ClienteSeleccionado = c;
-                MostrarChip(c.Nombre);
+                MostrarChipCliente(c.Nombre);
                 TxtBuscarCliente.Text = string.Empty;
-                ListaClientesFiltrada.ItemsSource = null; // ocultar lista
+                ListaClientesFiltrada.ItemsSource = null;
+                BorderListaClientes.Visibility = Visibility.Collapsed;
             }
         }
 
-        // ── Chip: mostrar cliente seleccionado ────────────────────────────────
-        private void MostrarChip(string nombre)
+        private void MostrarChipCliente(string nombre)
         {
             ChipCliente.Visibility = Visibility.Visible;
-            ListaClientesFiltrada.Visibility = Visibility.Collapsed;
+            BorderListaClientes.Visibility = Visibility.Collapsed;
             TxtNombreClienteSeleccionado.Text = nombre;
-            TxtInicialCliente.Text = nombre.Length > 0
-                ? nombre[0].ToString().ToUpper()
-                : "?";
+            TxtInicialCliente.Text = nombre.Length > 0 ? nombre[0].ToString().ToUpper() : "?";
         }
 
-        private void OcultarChip()
+        private void OcultarChipCliente()
         {
             ChipCliente.Visibility = Visibility.Collapsed;
-            ListaClientesFiltrada.Visibility = Visibility.Visible;
+            BorderListaClientes.Visibility = Visibility.Visible;
             ListaClientesFiltrada.ItemsSource = _mVReservas.ListaClientes;
             ListaClientesFiltrada.SelectedItem = null;
         }
 
-        // ── Botón × del chip: limpiar cliente ────────────────────────────────
         private void LimpiarCliente_Click(object sender, RoutedEventArgs e)
         {
             _mVReservas.ClienteSeleccionado = null;
             TxtBuscarCliente.Text = string.Empty;
-            OcultarChip();
+            OcultarChipCliente();
             TxtBuscarCliente.Focus();
         }
 
-        // ── Validar que solo entren números en HH y MM ────────────────────────
+        // ══════════════════════════════════════════════════════════════════════
+        // SERVICIO
+        // ══════════════════════════════════════════════════════════════════════
+
+        private void TxtBuscarServicio_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var filtro = TxtBuscarServicio.Text.Trim();
+
+            ListaServiciosFiltrada.ItemsSource = string.IsNullOrEmpty(filtro)
+                ? _mVReservas.ListaServicios
+                : _mVReservas.ListaServicios
+                    .Where(s => s.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+            if (_mVReservas.ServicioSeleccionado != null &&
+                !_mVReservas.ServicioSeleccionado.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase))
+            {
+                _mVReservas.ServicioSeleccionado = null;
+                OcultarChipServicio();
+            }
+        }
+
+        private void ListaServicios_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ListaServiciosFiltrada.SelectedItem is Servicio s)
+            {
+                _mVReservas.ServicioSeleccionado = s;
+                MostrarChipServicio(s);
+                TxtBuscarServicio.Text = string.Empty;
+                ListaServiciosFiltrada.ItemsSource = null;
+                BorderListaServicios.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void MostrarChipServicio(Servicio s)
+        {
+            ChipServicio.Visibility = Visibility.Visible;
+            BorderListaServicios.Visibility = Visibility.Collapsed;
+            TxtNombreServicioSeleccionado.Text = s.Nombre;
+            TxtDetalleServicioSeleccionado.Text = $"{s.Duracion} min · {s.Costo:F2} €";
+        }
+
+        private void OcultarChipServicio()
+        {
+            ChipServicio.Visibility = Visibility.Collapsed;
+            BorderListaServicios.Visibility = Visibility.Visible;
+            ListaServiciosFiltrada.ItemsSource = _mVReservas.ListaServicios;
+            ListaServiciosFiltrada.SelectedItem = null;
+        }
+
+        private void LimpiarServicio_Click(object sender, RoutedEventArgs e)
+        {
+            _mVReservas.ServicioSeleccionado = null;
+            TxtBuscarServicio.Text = string.Empty;
+            OcultarChipServicio();
+            TxtBuscarServicio.Focus();
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // VALIDACIÓN Y GUARDADO
+        // ══════════════════════════════════════════════════════════════════════
+
         private void SoloNumeros_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             e.Handled = !int.TryParse(e.Text, out _);
         }
 
-        // ── Botones principales ───────────────────────────────────────────────
         private void Cancelar_Click(object sender, RoutedEventArgs e)
         {
+            _mVReservas.ReservaEnEdicion = null; // limpiar si se cancela edición
             DialogResult = false;
             Close();
         }
 
         private async void Guardar_Click(object sender, RoutedEventArgs e)
         {
-            // Validar HH y MM antes de pasar al ViewModel
             if (!int.TryParse(TxtHora.Text, out int hh) || hh < 0 || hh > 23)
             {
                 MessageBox.Show("Introduce una hora válida (0–23).",
@@ -131,7 +215,6 @@ namespace ProyectoRuben.Frontend
                 return;
             }
 
-            // Construir el DateTime de hora y asignarlo al ViewModel
             _mVReservas.HoraReserva = DateTime.Today.AddHours(hh).AddMinutes(mm);
 
             bool exito = await _mVReservas.GuardarReserva();

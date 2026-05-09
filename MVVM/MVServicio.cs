@@ -1,32 +1,26 @@
 ﻿using di.proyecto.clase._2025.Frontend.Mensajes;
 using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
+using ProyectoRuben.Frontend;
 using pruebaNavegacion.MVVM;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using ProyectoRuben.Frontend;
 
 namespace ProyectoRuben.MVVM
 {
-    /// <summary>
-    /// ViewModel para la gestión de servicios.
-    /// Maneja la carga, filtrado y operaciones CRUD de servicios activos.
-    /// </summary>
     public class MVServicios : MVBase
     {
         private readonly IServicioRepository _servicioRepository;
 
-        private ObservableCollection<Servicio> _servicios;
-        public ObservableCollection<Servicio> Servicios
-        {
-            get => _servicios;
-            set => SetProperty(ref _servicios, value);
-        }
+        // Fuente completa
+        private ObservableCollection<Servicio> _todosLosServicios = new();
 
+        // ── Vista filtrada ────────────────────────────────────────────────────
         private ListCollectionView _listaServiciosView;
         public ListCollectionView ListaServiciosView
         {
@@ -41,83 +35,104 @@ namespace ProyectoRuben.MVVM
             set => SetProperty(ref _estaVacio, value);
         }
 
-        private string _filtroNombre;
+        private int _totalServicios;
+        public int TotalServicios
+        {
+            get => _totalServicios;
+            set => SetProperty(ref _totalServicios, value);
+        }
+
+        private string _filtroNombre = string.Empty;
         public string FiltroNombre
         {
             get => _filtroNombre;
             set
             {
                 if (SetProperty(ref _filtroNombre, value))
-                {
                     AplicarFiltro();
-                }
             }
         }
 
-        private Servicio _servicioNuevo;
+        // ── Formulario ────────────────────────────────────────────────────────
+        private Servicio _servicioNuevo = new();
         public Servicio ServicioNuevo
         {
             get => _servicioNuevo;
             set => SetProperty(ref _servicioNuevo, value);
         }
 
+        // ── Comandos ──────────────────────────────────────────────────────────
         public ICommand AgregarServicioCommand { get; }
         public ICommand EditarServicioCommand { get; }
         public ICommand DesactivarServicioCommand { get; }
 
+        // ══════════════════════════════════════════════════════════════════════
+        // Constructor
+        // ══════════════════════════════════════════════════════════════════════
         public MVServicios(IServicioRepository servicioRepository)
         {
-            _servicioRepository = servicioRepository ?? throw new ArgumentNullException(nameof(servicioRepository));
-            Servicios = new ObservableCollection<Servicio>();
+            _servicioRepository = servicioRepository
+                ?? throw new ArgumentNullException(nameof(servicioRepository));
+
             InicializarServicioNuevo();
 
-            AgregarServicioCommand = new RelayCommand(_ => AgregarServicio());
-            EditarServicioCommand = new RelayCommand(async (param) => await EditarServicio(param as Servicio));
-            DesactivarServicioCommand = new RelayCommand(async (param) =>
+            AgregarServicioCommand = new RelayCommand(_ => AbrirFormularioNuevo());
+            EditarServicioCommand = new RelayCommand(p => AbrirFormularioEdicion(p as Servicio));
+            DesactivarServicioCommand = new RelayCommand(async p =>
             {
-                if (param is int id) await DesactivarServicio(id);
+                if (p is int id) await DesactivarServicio(id);
             });
 
             _ = CargarServicios();
         }
 
-        /// <summary>
-        /// Carga todos los servicios activos de la base de datos.
-        /// Las actualizaciones de colección se ejecutan en el hilo de la UI para evitar fallos de dispatcher.
-        /// </summary>
+        // ══════════════════════════════════════════════════════════════════════
+        // Carga
+        // ══════════════════════════════════════════════════════════════════════
         public async Task CargarServicios()
         {
             try
             {
-                var todosLosServicios = await GetAllAsync(_servicioRepository);
-                var serviciosActivos = todosLosServicios.Where(s => s.Activo == true).ToList();
+                var todos = await GetAllAsync(_servicioRepository);
+                var activos = todos.Where(s => s.Activo == true).ToList();
 
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    Servicios = new ObservableCollection<Servicio>(serviciosActivos);
-
-                    ListaServiciosView = new ListCollectionView(Servicios);
-                    ListaServiciosView.Filter = obj =>
-                    {
-                        if (string.IsNullOrEmpty(FiltroNombre))
-                            return true;
-                        var s = obj as Servicio;
-                        return s != null && s.Nombre.IndexOf(FiltroNombre, StringComparison.OrdinalIgnoreCase) >= 0;
-                    };
-
-                    EstaVacio = Servicios.Count == 0;
+                    _todosLosServicios = new ObservableCollection<Servicio>(activos);
+                    CrearVista();
                 });
             }
             catch (Exception ex)
             {
                 SnackbarMessageQueue.Enqueue($"Error cargando servicios: {ex.Message}");
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => EstaVacio = true);
+                await Application.Current.Dispatcher.InvokeAsync(() => EstaVacio = true);
             }
         }
 
-        /// <summary>
-        /// Inicializa un nuevo servicio con valores por defecto.
-        /// </summary>
+        // ══════════════════════════════════════════════════════════════════════
+        // Filtro rápido (sin Refresh — evita freeze)
+        // ══════════════════════════════════════════════════════════════════════
+        private void AplicarFiltro()
+        {
+            Application.Current.Dispatcher.InvokeAsync(CrearVista);
+        }
+
+        private void CrearVista()
+        {
+            var filtrado = string.IsNullOrEmpty(_filtroNombre)
+                ? _todosLosServicios
+                : new ObservableCollection<Servicio>(
+                    _todosLosServicios.Where(s =>
+                        s.Nombre.IndexOf(_filtroNombre, StringComparison.OrdinalIgnoreCase) >= 0));
+
+            ListaServiciosView = new ListCollectionView(filtrado);
+            TotalServicios = filtrado.Count;
+            EstaVacio = filtrado.Count == 0;
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Formulario nuevo
+        // ══════════════════════════════════════════════════════════════════════
         private void InicializarServicioNuevo()
         {
             ServicioNuevo = new Servicio
@@ -131,48 +146,124 @@ namespace ProyectoRuben.MVVM
             };
         }
 
-        /// <summary>
-        /// Abre un diálogo para agregar un nuevo servicio.
-        /// </summary>
-        private void AgregarServicio()
+        private void AbrirFormularioNuevo()
         {
             try
             {
-                // Aquí se abrirá un diálogo para agregar servicio
-                // Por ahora, mostramos una notificación
-                SnackbarMessageQueue.Enqueue("Función 'Agregar Servicio' disponible próximamente.");
+                InicializarServicioNuevo();
+                var dialogo = new AgregarServicio(this);
+                dialogo.ShowDialog();
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al agregar servicio: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al abrir formulario: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Edita un servicio existente.
-        /// </summary>
-        private async Task EditarServicio(Servicio servicio)
+        // ══════════════════════════════════════════════════════════════════════
+        // Guardar NUEVO servicio
+        // ══════════════════════════════════════════════════════════════════════
+        public async Task<bool> GuardarServicio()
         {
-            if (servicio == null)
+            try
             {
-                MensajeAdvertencia.Mostrar("Advertencia", "Por favor, selecciona un servicio para editar.");
-                return;
+                if (string.IsNullOrWhiteSpace(ServicioNuevo.Nombre))
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio.");
+                    return false;
+                }
+                if (ServicioNuevo.Duracion <= 0)
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "La duración debe ser mayor que 0.");
+                    return false;
+                }
+                if (ServicioNuevo.Costo < 0)
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "El precio no puede ser negativo.");
+                    return false;
+                }
+
+                await AddAsync(_servicioRepository, ServicioNuevo);
+                SnackbarMessageQueue.Enqueue($"Servicio '{ServicioNuevo.Nombre}' guardado.");
+                await CargarServicios();
+                InicializarServicioNuevo();
+                return true;
             }
+            catch (Exception ex)
+            {
+                MensajeError.Mostrar("Error", $"Error al guardar: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Editar servicio existente
+        // ══════════════════════════════════════════════════════════════════════
+        private void AbrirFormularioEdicion(Servicio? servicio)
+        {
+            if (servicio == null) return;
 
             try
             {
-                // Lógica de edición (diálogo, etc.)
-                SnackbarMessageQueue.Enqueue($"Editando servicio: {servicio.Nombre}");
+                InicializarServicioNuevo();
+                var dialogo = new AgregarServicio(this)
+                {
+                    ServicioAEditar = servicio
+                };
+                dialogo.ShowDialog();
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al editar servicio: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al abrir edición: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Desactiva un servicio (baja lógica, no borra de la BD).
-        /// </summary>
+        // ══════════════════════════════════════════════════════════════════════
+        // Actualizar servicio existente
+        // ══════════════════════════════════════════════════════════════════════
+        public async Task<bool> ActualizarServicio()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ServicioNuevo.Nombre))
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio.");
+                    return false;
+                }
+                if (ServicioNuevo.Duracion <= 0)
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "La duración debe ser mayor que 0.");
+                    return false;
+                }
+
+                var tracked = await _servicioRepository.GetByIdAsync(ServicioNuevo.Id);
+                if (tracked == null)
+                {
+                    MensajeError.Mostrar("Error", "Servicio no encontrado.");
+                    return false;
+                }
+
+                tracked.Nombre = ServicioNuevo.Nombre;
+                tracked.Descripcion = ServicioNuevo.Descripcion;
+                tracked.Duracion = ServicioNuevo.Duracion;
+                tracked.Costo = ServicioNuevo.Costo;
+
+                await UpdateAsync(_servicioRepository, tracked);
+                SnackbarMessageQueue.Enqueue($"Servicio '{tracked.Nombre}' actualizado.");
+                await CargarServicios();
+                InicializarServicioNuevo();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MensajeError.Mostrar("Error", $"Error al actualizar: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Desactivar
+        // ══════════════════════════════════════════════════════════════════════
         private async Task DesactivarServicio(int servicioId)
         {
             try
@@ -184,24 +275,26 @@ namespace ProyectoRuben.MVVM
                     return;
                 }
 
-                servicio.Activo = false;
-                await UpdateAsync(_servicioRepository, servicio);
+                var dialogo = new DialogoEliminar(
+                    $"¿Desactivar '{servicio.Nombre}'? Dejará de aparecer en el catálogo.")
+                {
+                    Owner = Application.Current.MainWindow
+                };
 
-                SnackbarMessageQueue.Enqueue($"Servicio {servicio.Nombre} desactivado.");
-                await CargarServicios();
+                if (dialogo.ShowDialog() == true)
+                {
+                    servicio.Activo = false;
+                    if (await UpdateAsync(_servicioRepository, servicio))
+                    {
+                        SnackbarMessageQueue.Enqueue($"'{servicio.Nombre}' desactivado.");
+                        await CargarServicios();
+                    }
+                }
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al desactivar servicio: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al desactivar: {ex.Message}");
             }
-        }
-
-        /// <summary>
-        /// Aplica filtro por nombre en tiempo real.
-        /// </summary>
-        private void AplicarFiltro()
-        {
-            ListaServiciosView?.Refresh();
         }
     }
 }

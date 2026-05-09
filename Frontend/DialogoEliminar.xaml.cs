@@ -4,22 +4,22 @@ namespace ProyectoRuben.Frontend
 {
     public partial class DialogoEliminar : Window
     {
-        public DialogoEliminar(string mensaje = "¿Estás seguro que deseas eliminar la reserva?")
+        public DialogoEliminar(string mensaje = "Esta acción no se puede deshacer.")
         {
             InitializeComponent();
-            txtMensaje.Text = mensaje;
+            TxtMensaje.Text = mensaje;
         }
 
         private void BtnCancelar_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = false;
-            this.Close();
+            DialogResult = false;
+            Close();
         }
 
         private void BtnEliminar_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
-            this.Close();
+            DialogResult = true;
+            Close();
         }
     }
 }

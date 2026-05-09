@@ -1,33 +1,26 @@
 ﻿using di.proyecto.clase._2025.Frontend.Mensajes;
 using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
+using ProyectoRuben.Frontend;
 using pruebaNavegacion.MVVM;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
-using ProyectoRuben.Frontend;
 using System.Windows.Input;
 
 namespace ProyectoRuben.MVVM
 {
-    /// <summary>
-    /// ViewModel para la gestión de productos.
-    /// Maneja la carga, filtrado y operaciones CRUD de productos activos.
-    /// Incluye lógica visual para detectar stock bajo.
-    /// </summary>
     public class MVProductos : MVBase
     {
         private readonly IProductoRepository _productoRepository;
 
-        private ObservableCollection<Producto> _productos;
-        public ObservableCollection<Producto> Productos
-        {
-            get => _productos;
-            set => SetProperty(ref _productos, value);
-        }
+        // Fuente completa
+        private ObservableCollection<Producto> _todosLosProductos = new();
 
+        // ── Vista filtrada ────────────────────────────────────────────────────
         private ListCollectionView _listaProductosView;
         public ListCollectionView ListaProductosView
         {
@@ -42,141 +35,253 @@ namespace ProyectoRuben.MVVM
             set => SetProperty(ref _estaVacio, value);
         }
 
-        private string _filtroNombre;
+        private int _totalProductos;
+        public int TotalProductos
+        {
+            get => _totalProductos;
+            set => SetProperty(ref _totalProductos, value);
+        }
+
+        private int _totalStockBajo;
+        public int TotalStockBajo
+        {
+            get => _totalStockBajo;
+            set => SetProperty(ref _totalStockBajo, value);
+        }
+
+        private bool _hayStockBajo;
+        public bool HayStockBajo
+        {
+            get => _hayStockBajo;
+            set => SetProperty(ref _hayStockBajo, value);
+        }
+
+        private string _filtroNombre = string.Empty;
         public string FiltroNombre
         {
             get => _filtroNombre;
             set
             {
                 if (SetProperty(ref _filtroNombre, value))
-                {
                     AplicarFiltro();
-                }
             }
         }
 
-        private Producto _productoNuevo;
+        // ── Formulario ────────────────────────────────────────────────────────
+        private Producto _productoNuevo = new();
         public Producto ProductoNuevo
         {
             get => _productoNuevo;
             set => SetProperty(ref _productoNuevo, value);
         }
 
+        // ── Comandos ──────────────────────────────────────────────────────────
         public ICommand AgregarProductoCommand { get; }
         public ICommand EditarProductoCommand { get; }
         public ICommand DesactivarProductoCommand { get; }
 
+        // ══════════════════════════════════════════════════════════════════════
+        // Constructor
+        // ══════════════════════════════════════════════════════════════════════
         public MVProductos(IProductoRepository productoRepository)
         {
-            _productoRepository = productoRepository ?? throw new ArgumentNullException(nameof(productoRepository));
-            Productos = new ObservableCollection<Producto>();
+            _productoRepository = productoRepository
+                ?? throw new ArgumentNullException(nameof(productoRepository));
+
             InicializarProductoNuevo();
 
-            AgregarProductoCommand = new RelayCommand(_ => AgregarProducto());
-            EditarProductoCommand = new RelayCommand(async (param) => await EditarProducto(param as Producto));
-            DesactivarProductoCommand = new RelayCommand(async (param) =>
+            AgregarProductoCommand = new RelayCommand(_ => AbrirFormularioNuevo());
+            EditarProductoCommand = new RelayCommand(p => AbrirFormularioEdicion(p as Producto));
+            DesactivarProductoCommand = new RelayCommand(async p =>
             {
-                if (param is int id) await DesactivarProducto(id);
+                if (p is int id) await DesactivarProducto(id);
             });
 
             _ = CargarProductos();
         }
 
-        /// <summary>
-        /// Carga todos los productos activos de la base de datos.
-        /// Las actualizaciones de colección se ejecutan en el hilo de la UI para evitar fallos de dispatcher.
-        /// </summary>
+        // ══════════════════════════════════════════════════════════════════════
+        // Carga
+        // ══════════════════════════════════════════════════════════════════════
         public async Task CargarProductos()
         {
             try
             {
-                var todosLosProductos = await GetAllAsync(_productoRepository);
-                var productosActivos = todosLosProductos.Where(p => p.Activo == true).ToList();
+                var todos = await GetAllAsync(_productoRepository);
+                var activos = todos.Where(p => p.Activo == true).ToList();
 
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    Productos = new ObservableCollection<Producto>(productosActivos);
-
-                    ListaProductosView = new ListCollectionView(Productos);
-                    ListaProductosView.Filter = obj =>
-                    {
-                        if (string.IsNullOrEmpty(FiltroNombre))
-                            return true;
-                        var p = obj as Producto;
-                        return p != null && p.Nombre.IndexOf(FiltroNombre, StringComparison.OrdinalIgnoreCase) >= 0;
-                    };
-
-                    EstaVacio = Productos.Count == 0;
+                    _todosLosProductos = new ObservableCollection<Producto>(activos);
+                    CrearVista();
                 });
             }
             catch (Exception ex)
             {
                 SnackbarMessageQueue.Enqueue($"Error cargando productos: {ex.Message}");
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() => EstaVacio = true);
+                await Application.Current.Dispatcher.InvokeAsync(() => EstaVacio = true);
             }
         }
 
-        /// <summary>
-        /// Inicializa un nuevo producto con valores por defecto.
-        /// </summary>
+        // ══════════════════════════════════════════════════════════════════════
+        // Filtro rápido sin freeze
+        // ══════════════════════════════════════════════════════════════════════
+        private void AplicarFiltro()
+        {
+            Application.Current.Dispatcher.InvokeAsync(CrearVista);
+        }
+
+        private void CrearVista()
+        {
+            var filtrado = string.IsNullOrEmpty(_filtroNombre)
+                ? _todosLosProductos
+                : new ObservableCollection<Producto>(
+                    _todosLosProductos.Where(p =>
+                        p.Nombre.IndexOf(_filtroNombre, StringComparison.OrdinalIgnoreCase) >= 0));
+
+            ListaProductosView = new ListCollectionView(filtrado);
+            TotalProductos = filtrado.Count;
+            EstaVacio = filtrado.Count == 0;
+
+            // Stats de stock bajo
+            TotalStockBajo = filtrado.Count(p => p.AlertaStock);
+            HayStockBajo = TotalStockBajo > 0;
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Formulario nuevo
+        // ══════════════════════════════════════════════════════════════════════
         private void InicializarProductoNuevo()
         {
             ProductoNuevo = new Producto
             {
                 Nombre = string.Empty,
+                Proveedor = string.Empty,
                 Descripcion = string.Empty,
+                Precio = 0,
                 Cantidad = 0,
                 StockMinimo = 5,
                 StockMaximo = 100,
-                Precio = 0,
-                Proveedor = string.Empty,
                 Activo = true,
                 FechaCreacion = DateTime.Now
             };
         }
 
-        /// <summary>
-        /// Abre un diálogo para agregar un nuevo producto.
-        /// </summary>
-        private void AgregarProducto()
+        private void AbrirFormularioNuevo()
         {
             try
             {
-                // Aquí se abrirá un diálogo para agregar producto
-                // Por ahora, mostramos una notificación
-                SnackbarMessageQueue.Enqueue("Función 'Agregar Producto' disponible próximamente.");
+                InicializarProductoNuevo();
+                var dialogo = new AgregarProducto(this);
+                dialogo.ShowDialog();
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al agregar producto: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al abrir formulario: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Edita un producto existente.
-        /// </summary>
-        private async Task EditarProducto(Producto producto)
+        // ══════════════════════════════════════════════════════════════════════
+        // Guardar NUEVO producto
+        // ══════════════════════════════════════════════════════════════════════
+        public async Task<bool> GuardarProducto()
         {
-            if (producto == null)
+            try
             {
-                MensajeAdvertencia.Mostrar("Advertencia", "Por favor, selecciona un producto para editar.");
-                return;
+                if (string.IsNullOrWhiteSpace(ProductoNuevo.Nombre))
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio.");
+                    return false;
+                }
+                if (ProductoNuevo.Precio < 0)
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "El precio no puede ser negativo.");
+                    return false;
+                }
+                if (ProductoNuevo.Cantidad < 0)
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "La cantidad no puede ser negativa.");
+                    return false;
+                }
+
+                await AddAsync(_productoRepository, ProductoNuevo);
+                SnackbarMessageQueue.Enqueue($"Producto '{ProductoNuevo.Nombre}' guardado.");
+                await CargarProductos();
+                InicializarProductoNuevo();
+                return true;
             }
+            catch (Exception ex)
+            {
+                MensajeError.Mostrar("Error", $"Error al guardar: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Editar producto existente
+        // ══════════════════════════════════════════════════════════════════════
+        private void AbrirFormularioEdicion(Producto? producto)
+        {
+            if (producto == null) return;
 
             try
             {
-                // Lógica de edición (diálogo, etc.)
-                SnackbarMessageQueue.Enqueue($"Editando producto: {producto.Nombre}");
+                InicializarProductoNuevo();
+                var dialogo = new AgregarProducto(this)
+                {
+                    ProductoAEditar = producto
+                };
+                dialogo.ShowDialog();
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al editar producto: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al abrir edición: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Desactiva un producto (baja lógica, no borra de la BD).
-        /// </summary>
+        // ══════════════════════════════════════════════════════════════════════
+        // Actualizar producto existente
+        // ══════════════════════════════════════════════════════════════════════
+        public async Task<bool> ActualizarProducto()
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ProductoNuevo.Nombre))
+                {
+                    MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio.");
+                    return false;
+                }
+
+                var tracked = await _productoRepository.GetByIdAsync(ProductoNuevo.Id);
+                if (tracked == null)
+                {
+                    MensajeError.Mostrar("Error", "Producto no encontrado.");
+                    return false;
+                }
+
+                tracked.Nombre = ProductoNuevo.Nombre;
+                tracked.Proveedor = ProductoNuevo.Proveedor;
+                tracked.Precio = ProductoNuevo.Precio;
+                tracked.Cantidad = ProductoNuevo.Cantidad;
+                tracked.StockMinimo = ProductoNuevo.StockMinimo;
+                tracked.StockMaximo = ProductoNuevo.StockMaximo;
+
+                await UpdateAsync(_productoRepository, tracked);
+                SnackbarMessageQueue.Enqueue($"Producto '{tracked.Nombre}' actualizado.");
+                await CargarProductos();
+                InicializarProductoNuevo();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MensajeError.Mostrar("Error", $"Error al actualizar: {ex.Message}");
+                return false;
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // Desactivar
+        // ══════════════════════════════════════════════════════════════════════
         private async Task DesactivarProducto(int productoId)
         {
             try
@@ -188,33 +293,30 @@ namespace ProyectoRuben.MVVM
                     return;
                 }
 
-                producto.Activo = false;
-                await UpdateAsync(_productoRepository, producto);
+                var dialogo = new DialogoEliminar(
+                    $"¿Desactivar '{producto.Nombre}'? Dejará de aparecer en el catálogo.")
+                {
+                    Owner = Application.Current.MainWindow
+                };
 
-                SnackbarMessageQueue.Enqueue($"Producto {producto.Nombre} desactivado.");
-                await CargarProductos();
+                if (dialogo.ShowDialog() == true)
+                {
+                    producto.Activo = false;
+                    if (await UpdateAsync(_productoRepository, producto))
+                    {
+                        SnackbarMessageQueue.Enqueue($"'{producto.Nombre}' desactivado.");
+                        await CargarProductos();
+                    }
+                }
             }
             catch (Exception ex)
             {
-                MensajeError.Mostrar("Error", $"Error al desactivar producto: {ex.Message}");
+                MensajeError.Mostrar("Error", $"Error al desactivar: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// Aplica filtro por nombre en tiempo real.
-        /// </summary>
-        private void AplicarFiltro()
-        {
-            ListaProductosView?.Refresh();
-        }
-
-        /// <summary>
-        /// Determina si un producto tiene stock bajo.
-        /// </summary>
+        // Método legacy para compatibilidad con UCInventario
         public static bool TieneStockBajo(Producto producto)
-        {
-            if (producto == null) return false;
-            return producto.Cantidad <= (producto.StockMinimo ?? 0);
-        }
+            => producto?.AlertaStock ?? false;
     }
 }

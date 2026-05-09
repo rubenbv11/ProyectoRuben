@@ -4,253 +4,295 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              Background="{StaticResource LightGrayBrush}">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
 
-        <!-- ENCABEZADO -->
-        <Border Grid.Row="0" Background="White" Padding="32,24" BorderThickness="0,0,0,1" BorderBrush="{StaticResource MediumGrayBrush}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+		<!-- ══ ENCABEZADO ══ -->
+		<Border Grid.Row="0" Background="White" Padding="32,24"
+                BorderThickness="0,0,0,1" BorderBrush="{StaticResource MediumGrayBrush}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
 
-                <!-- Título y descripción -->
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="Catálogo de Servicios" 
-                               FontSize="28" 
-                               FontWeight="SemiBold" 
+				<StackPanel Grid.Column="0" VerticalAlignment="Center">
+					<TextBlock Text="Catálogo de Servicios"
+                               FontSize="26" FontWeight="SemiBold"
                                Foreground="{StaticResource TextBrush}"/>
-
-                    <TextBlock Text="Visualiza y administra todos los servicios ofrecidos"
-                               FontSize="13"
-                               Foreground="{StaticResource TextLightBrush}"
+					<TextBlock Text="Visualiza y administra todos los servicios ofrecidos"
+                               FontSize="13" Foreground="{StaticResource TextLightBrush}"
                                Margin="0,4,0,0"/>
-                </StackPanel>
+				</StackPanel>
 
-                <!-- Botón Nuevo Servicio -->
-                <Button Grid.Column="1" 
-        Style="{StaticResource MaterialDesignRaisedButton}"
-        VerticalAlignment="Center"
-        Background="{StaticResource AccentBrush}"
-        BorderBrush="{StaticResource AccentBrush}"
-        Foreground="White"
-        Height="40"
-        Padding="16,0"
-        Cursor="Hand"
-        FontSize="13"
-        FontWeight="SemiBold"
-        Command="{Binding AgregarServicioCommand}">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Nuevo Servicio" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-            </Grid>
-        </Border>
+				<Button Grid.Column="1"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="{StaticResource AccentBrush}"
+                        BorderBrush="{StaticResource AccentBrush}"
+                        Foreground="White" Height="40"
+                        Padding="16,0" Cursor="Hand"
+                        Command="{Binding AgregarServicioCommand}">
+					<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+						<materialDesign:PackIcon Kind="Plus" Width="18" Height="18"
+                                                 Margin="0,0,8,0" VerticalAlignment="Center"/>
+						<TextBlock Text="Nuevo Servicio" FontSize="13" FontWeight="SemiBold"
+                                   VerticalAlignment="Center"/>
+					</StackPanel>
+				</Button>
+			</Grid>
+		</Border>
 
-        <!-- CONTENIDO PRINCIPAL -->
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+		<!-- ══ BARRA BÚSQUEDA + CONTADOR ══ -->
+		<Border Grid.Row="1" Background="White" Padding="32,14"
+                BorderThickness="0,0,0,1" BorderBrush="{StaticResource MediumGrayBrush}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="360"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="Auto"/>
+				</Grid.ColumnDefinitions>
 
-            <!-- BARRA DE BÚSQUEDA -->
-            <Border Grid.Row="0" Background="White" Padding="32,16" BorderThickness="0,0,0,1" BorderBrush="{StaticResource MediumGrayBrush}">
-                <TextBox Text="{Binding FiltroNombre, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Height="40"
-                         Padding="12,8"
-                         Foreground="{StaticResource TextBrush}"
-                         Background="White"
-                         BorderBrush="{StaticResource MediumGrayBrush}"
-                         BorderThickness="1"
-                         FontSize="13"
-                         MaxWidth="400"
-                         HorizontalAlignment="Left">
-                    <TextBox.Template>
-                        <ControlTemplate TargetType="TextBox">
-                            <Border BorderBrush="{TemplateBinding BorderBrush}" 
-                                    BorderThickness="{TemplateBinding BorderThickness}"
-                                    CornerRadius="6"
-                                    Background="{TemplateBinding Background}">
-                                <Grid>
-                                    <materialDesign:PackIcon Kind="Magnify" 
-                                                             Foreground="{StaticResource TextLightBrush}"
-                                                             Width="20" Height="20"
-                                                             Margin="10,0,0,0"
-                                                             VerticalAlignment="Center"/>
-                                    <ScrollViewer Margin="36,0,10,0" x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                </Grid>
-                            </Border>
-                        </ControlTemplate>
-                    </TextBox.Template>
-                </TextBox>
-            </Border>
-
-            <!-- LISTA DE SERVICIOS O ESTADO VACÍO -->
-            <Grid Grid.Row="1">
-                <!-- Estado Vacío -->
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding EstaVacio, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Border Width="80" Height="80" Background="{StaticResource MediumGrayBrush}" CornerRadius="40" HorizontalAlignment="Center" Margin="0,0,0,16">
-                        <materialDesign:PackIcon Kind="Tools" 
-                                                 Foreground="White"
-                                                 Width="40" Height="40"
+				<Border Grid.Column="0" Background="{StaticResource LightGrayBrush}"
+                        CornerRadius="8" BorderBrush="{StaticResource MediumGrayBrush}"
+                        BorderThickness="1">
+					<Grid>
+						<materialDesign:PackIcon Kind="Magnify"
+                                                 Foreground="{StaticResource TextLightBrush}"
+                                                 Width="18" Height="18"
+                                                 Margin="12,0,0,0"
                                                  VerticalAlignment="Center"
-                                                 HorizontalAlignment="Center"/>
-                    </Border>
+                                                 HorizontalAlignment="Left"/>
+						<TextBox Text="{Binding FiltroNombre, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="36,0,10,0" Height="36"
+                                 BorderThickness="0" Background="Transparent"
+                                 Foreground="{StaticResource TextBrush}"
+                                 FontSize="13" VerticalContentAlignment="Center">
+							<TextBox.Template>
+								<ControlTemplate TargetType="TextBox">
+									<ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+								</ControlTemplate>
+							</TextBox.Template>
+						</TextBox>
+						<TextBlock Text="Buscar por nombre..."
+                                   Foreground="{StaticResource TextLightBrush}"
+                                   FontSize="13" Margin="38,0,0,0"
+                                   VerticalAlignment="Center"
+                                   IsHitTestVisible="False">
+							<TextBlock.Style>
+								<Style TargetType="TextBlock">
+									<Setter Property="Visibility" Value="Collapsed"/>
+									<Style.Triggers>
+										<DataTrigger Binding="{Binding FiltroNombre}" Value="">
+											<Setter Property="Visibility" Value="Visible"/>
+										</DataTrigger>
+										<DataTrigger Binding="{Binding FiltroNombre}" Value="{x:Null}">
+											<Setter Property="Visibility" Value="Visible"/>
+										</DataTrigger>
+									</Style.Triggers>
+								</Style>
+							</TextBlock.Style>
+						</TextBlock>
+					</Grid>
+				</Border>
 
-                    <TextBlock Text="Sin servicios registrados" 
-                               FontSize="18" 
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource TextBrush}"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,8"/>
+				<StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+					<TextBlock FontSize="13" Foreground="{StaticResource TextLightBrush}">
+						<Run Text="{Binding TotalServicios}"/>
+						<Run Text="servicios activos"/>
+					</TextBlock>
+				</StackPanel>
+			</Grid>
+		</Border>
 
-                    <TextBlock Text="Comienza agregando tu primer servicio"
-                               FontSize="13"
-                               Foreground="{StaticResource TextLightBrush}"
-                               HorizontalAlignment="Center"/>
-                </StackPanel>
+		<!-- ══ CONTENIDO ══ -->
+		<Grid Grid.Row="2">
 
-                <!-- Lista de Servicios -->
-                <ScrollViewer Visibility="{Binding EstaVacio, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding ListaServiciosView}" Padding="24">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="3"/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
+			<!-- Estado vacío -->
+			<StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Visibility="{Binding EstaVacio, Converter={StaticResource BooleanToVisibilityConverter}}">
+				<Border Width="72" Height="72" CornerRadius="36"
+                        Background="{StaticResource MediumGrayBrush}"
+                        HorizontalAlignment="Center" Margin="0,0,0,16">
+					<materialDesign:PackIcon Kind="Scissors" Foreground="White"
+                                             Width="36" Height="36"
+                                             HorizontalAlignment="Center"
+                                             VerticalAlignment="Center"/>
+				</Border>
+				<TextBlock Text="Sin servicios registrados"
+                           FontSize="17" FontWeight="SemiBold"
+                           Foreground="{StaticResource TextBrush}"
+                           HorizontalAlignment="Center" Margin="0,0,0,6"/>
+				<TextBlock Text="Comienza agregando tu primer servicio"
+                           FontSize="13" Foreground="{StaticResource TextLightBrush}"
+                           HorizontalAlignment="Center"/>
+			</StackPanel>
 
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <!-- TARJETA DE SERVICIO -->
-                                <Border Margin="8"
-                                        Background="White"
-                                        CornerRadius="12"
-                                        Padding="20">
-                                    <Border.Effect>
-                                        <DropShadowEffect BlurRadius="15" ShadowDepth="2" Direction="270" Color="#000000" Opacity="0.08"/>
-                                    </Border.Effect>
+			<!-- Grid de cards 2 columnas -->
+			<ScrollViewer Visibility="{Binding EstaVacio, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+				<ItemsControl ItemsSource="{Binding ListaServiciosView}"
+                              Padding="28,20,28,28">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<!-- 2 columnas uniformes -->
+							<UniformGrid Columns="2"/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
 
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<!-- ── CARD ── -->
+							<Border Margin="0,0,10,10"
+                                    Background="White"
+                                    CornerRadius="12"
+                                    Padding="18,16">
+								<Border.Effect>
+									<DropShadowEffect BlurRadius="10" ShadowDepth="1"
+                                                      Direction="270" Color="#000000" Opacity="0.05"/>
+								</Border.Effect>
 
-                                        <!-- ICONO Y NOMBRE -->
-                                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
-                                            <Border Width="50" Height="50" Background="{StaticResource AccentBrush}" CornerRadius="8" Margin="0,0,12,0">
-                                                <materialDesign:PackIcon Kind="Scissors" 
-                                                                         Foreground="White"
-                                                                         Width="28" Height="28"
-                                                                         VerticalAlignment="Center"
-                                                                         HorizontalAlignment="Center"/>
-                                            </Border>
-                                            <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Nombre}"
-                                                           FontSize="16"
-                                                           FontWeight="SemiBold"
-                                                           Foreground="{StaticResource TextBrush}"
-                                                           TextTrimming="CharacterEllipsis"/>
-                                                <TextBlock Text="{Binding Categoria}" 
-                                                           FontSize="11"
-                                                           Foreground="{StaticResource TextLightBrush}"
-                                                           Margin="0,2,0,0"/>
-                                            </StackPanel>
-                                        </StackPanel>
+								<Grid>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="Auto"/>
+										<RowDefinition Height="*"/>
+										<RowDefinition Height="Auto"/>
+									</Grid.RowDefinitions>
 
-                                        <!-- DESCRIPCIÓN -->
-                                        <TextBlock Grid.Row="1"
-                                                   Text="{Binding Descripcion}"
-                                                   FontSize="12"
-                                                   Foreground="{StaticResource TextLightBrush}"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   TextWrapping="Wrap"
-                                                   MaxHeight="48"
-                                                   Margin="0,0,0,12"/>
+									<!-- Icono + nombre + descripción -->
+									<StackPanel Grid.Row="0" Orientation="Horizontal"
+                                                Margin="0,0,0,10">
+										<Border Width="42" Height="42" CornerRadius="10"
+                                                Background="{StaticResource AccentBrush}"
+                                                Margin="0,0,12,0">
+											<materialDesign:PackIcon Kind="Scissors"
+                                                                     Width="20" Height="20"
+                                                                     Foreground="White"
+                                                                     HorizontalAlignment="Center"
+                                                                     VerticalAlignment="Center"/>
+										</Border>
+										<StackPanel VerticalAlignment="Center" MaxWidth="260">
+											<TextBlock Text="{Binding Nombre}"
+                                                       FontSize="14" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextBrush}"
+                                                       TextTrimming="CharacterEllipsis"/>
+											<TextBlock Text="{Binding Descripcion}"
+                                                       FontSize="12"
+                                                       Foreground="{StaticResource TextLightBrush}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Margin="0,2,0,0"/>
+										</StackPanel>
+									</StackPanel>
 
-                                        <!-- SEPARADOR -->
-                                        <Rectangle Grid.Row="2" Height="1" Fill="{StaticResource MediumGrayBrush}" Margin="0,0,0,12" VerticalAlignment="Top"/>
+									<!-- Separador -->
+									<Rectangle Grid.Row="1" Height="1"
+                                               Fill="{StaticResource MediumGrayBrush}"
+                                               VerticalAlignment="Top"
+                                               Margin="0,0,0,10"/>
 
-                                        <!-- CHIPS: COSTO Y DURACIÓN -->
-                                        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,12">
-                                            <!-- Costo -->
-                                            <Border Padding="12,6" Background="{StaticResource LightGrayBrush}" CornerRadius="4" Margin="0,0,8,0">
-                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <materialDesign:PackIcon Kind="CurrencyUsd" 
-                                                                             Foreground="{StaticResource AccentBrush}"
-                                                                             Width="14" Height="14"
-                                                                             Margin="0,0,6,0"/>
-                                                    <TextBlock Text="{Binding Costo, StringFormat='C'}" 
-                                                               FontSize="11"
-                                                               FontWeight="SemiBold"
-                                                               Foreground="{StaticResource TextBrush}"/>
-                                                </StackPanel>
-                                            </Border>
+									<!-- Pills precio + duración + botones -->
+									<Grid Grid.Row="2">
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="*"/>
+											<ColumnDefinition Width="Auto"/>
+										</Grid.ColumnDefinitions>
 
-                                            <!-- Duración -->
-                                            <Border Padding="12,6" Background="{StaticResource LightGrayBrush}" CornerRadius="4">
-                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                                    <materialDesign:PackIcon Kind="ClockOutline" 
+										<!-- Pills -->
+										<StackPanel Grid.Column="0" Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+											<!-- Precio -->
+											<Border Background="#FFF4EC" CornerRadius="99"
+                                                    Padding="10,4" Margin="0,0,8,0">
+												<TextBlock FontSize="12" FontWeight="SemiBold"
+                                                           Foreground="#A0622A">
+													<Run Text="{Binding Costo, StringFormat='{}{0:F2}'}"/>
+													<Run Text=" €"/>
+												</TextBlock>
+											</Border>
+
+											<!-- Duración -->
+											<Border Background="{StaticResource LightGrayBrush}"
+                                                    CornerRadius="99" Padding="10,4">
+												<StackPanel Orientation="Horizontal">
+													<materialDesign:PackIcon Kind="ClockOutline"
+                                                                             Width="13" Height="13"
                                                                              Foreground="{StaticResource TextLightBrush}"
-                                                                             Width="14" Height="14"
-                                                                             Margin="0,0,6,0"/>
-                                                    <TextBlock Text="{Binding Duracion, StringFormat='{}{0} min'}" 
-                                                          
-                                                               FontSize="11"
-                                                                               Foreground="{StaticResource TextLightBrush}"/>
-                                                </StackPanel>
-                                            </Border>
-                                        </StackPanel>
+                                                                             VerticalAlignment="Center"
+                                                                             Margin="0,0,4,0"/>
+													<TextBlock FontSize="12"
+                                                               Foreground="{StaticResource TextLightBrush}">
+														<Run Text="{Binding Duracion}"/>
+														<Run Text=" min"/>
+													</TextBlock>
+												</StackPanel>
+											</Border>
+										</StackPanel>
 
-                                        <!-- BOTONES DE ACCIÓN -->
-                                        <StackPanel Grid.Row="4" Orientation="Horizontal">
-                                            <!-- Editar -->
-                                            <Button Width="40" Height="40"
-                                                    Background="{StaticResource LightGrayBrush}"
-                                                    Foreground="{StaticResource TextBrush}"
-                                                    BorderThickness="0"
-                                                    Cursor="Hand"
+										<!-- Botones -->
+										<StackPanel Grid.Column="1" Orientation="Horizontal"
+                                                    VerticalAlignment="Center">
+											<!-- Editar -->
+											<Button Width="32" Height="32"
+                                                    Background="Transparent"
+                                                    BorderThickness="1"
+                                                    BorderBrush="{StaticResource MediumGrayBrush}"
+                                                    Cursor="Hand" Margin="0,0,6,0"
                                                     ToolTip="Editar servicio"
-                                                    Margin="0,0,8,0"
                                                     Command="{Binding DataContext.EditarServicioCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                     CommandParameter="{Binding}">
-                                                <materialDesign:PackIcon Kind="Pencil" Width="18" Height="18"/>
-                                            </Button>
+												<Button.Template>
+													<ControlTemplate TargetType="Button">
+														<Border CornerRadius="8"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="{TemplateBinding BorderThickness}">
+															<ContentPresenter HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+														</Border>
+													</ControlTemplate>
+												</Button.Template>
+												<materialDesign:PackIcon Kind="Pencil" Width="15" Height="15"
+                                                                         Foreground="{StaticResource TextLightBrush}"/>
+											</Button>
 
-                                            <!-- Desactivar -->
-                                            <Button Width="40" Height="40"
-                                                    Background="#FFE0E0"
-                                                    Foreground="#D63031"
-                                                    BorderThickness="0"
+											<!-- Desactivar -->
+											<Button Width="32" Height="32"
+                                                    Background="#FFF0F0"
+                                                    BorderThickness="1"
+                                                    BorderBrush="#FFCDD2"
                                                     Cursor="Hand"
                                                     ToolTip="Desactivar servicio"
-                                                    Margin="0"
                                                     Command="{Binding DataContext.DesactivarServicioCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                     CommandParameter="{Binding Id}">
-                                                <materialDesign:PackIcon Kind="Delete" Width="18" Height="18"/>
-                                            </Button>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </ScrollViewer>
-            </Grid>
-        </Grid>
-    </Grid>
+												<Button.Template>
+													<ControlTemplate TargetType="Button">
+														<Border CornerRadius="8"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="{TemplateBinding BorderThickness}">
+															<ContentPresenter HorizontalAlignment="Center"
+                                                                              VerticalAlignment="Center"/>
+														</Border>
+													</ControlTemplate>
+												</Button.Template>
+												<materialDesign:PackIcon Kind="TrashCanOutline" Width="15" Height="15"
+                                                                         Foreground="#D63031"/>
+											</Button>
+										</StackPanel>
+									</Grid>
+								</Grid>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+		</Grid>
+	</Grid>
 </UserControl>
