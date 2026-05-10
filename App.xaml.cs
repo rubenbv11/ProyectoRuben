@@ -13,9 +13,6 @@ using System.Windows.Markup;
 
 namespace ProyectoRuben
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         private IServiceProvider _serviceProvider;
@@ -29,70 +26,70 @@ namespace ProyectoRuben
 
         private void ConfigureServices(ServiceCollection services)
         {
-            // --- A. Contexto de Base de Datos y Logging ---
+            // ── BD y Logging ──────────────────────────────────────────────────
             services.AddDbContextFactory<GestioninventarioyserviciosContext>();
             services.AddLogging(configure => configure.AddConsole());
 
-            // --- B+C. Repositorios: Transient para que cada ViewModel tenga su propio contexto ---
-            services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddTransient<IUsuarioRepository, UsuarioRepository>();
-            services.AddTransient<IClienteRepository, ClienteRepository>();
-            services.AddTransient<IReservaRepository, ReservaRepository>();
-            services.AddTransient<IFacturaRepository, FacturaRepository>();
-            services.AddTransient<IProductoRepository, ProductoRepository>();
-            services.AddTransient<IServicioRepository, ServicioRepository>();
-            services.AddTransient<IRoleRepository, RoleRepository>();
-            services.AddTransient<IPermisoRepository, PermisoRepository>();
-            services.AddTransient<IRolesPermisosRepository, RolesPermisosRepository>();
-            services.AddTransient<IOfertaRepository, OfertaRepository>();
-            services.AddTransient<IConfiguracionRepository, ConfiguracionRepository>();
-            services.AddTransient<IHorarioRepository, HorarioRepository>();
-            services.AddTransient<IServicioProductoRepository, ServicioProductoRepository>();
+            // ── Repositorios → Singleton ──────────────────────────────────────
+            services.AddSingleton(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddSingleton<IUsuarioRepository, UsuarioRepository>();
+            services.AddSingleton<IClienteRepository, ClienteRepository>();
+            services.AddSingleton<IReservaRepository, ReservaRepository>();
+            services.AddSingleton<IFacturaRepository, FacturaRepository>();
+            services.AddSingleton<IProductoRepository, ProductoRepository>();
+            services.AddSingleton<IServicioRepository, ServicioRepository>();
+            services.AddSingleton<IRoleRepository, RoleRepository>();
+            services.AddSingleton<IPermisoRepository, PermisoRepository>();
+            services.AddSingleton<IRolesPermisosRepository, RolesPermisosRepository>();
+            services.AddSingleton<IOfertaRepository, OfertaRepository>();
+            services.AddSingleton<IConfiguracionRepository, ConfiguracionRepository>();
+            services.AddSingleton<IHorarioRepository, HorarioRepository>();
+            services.AddSingleton<IServicioProductoRepository, ServicioProductoRepository>();
 
-            // --- D. ViewModels ---
-            services.AddTransient<MVDashboard>();
-            services.AddTransient<MVUsuario>();
-            services.AddTransient<MVReservas>();
-            services.AddTransient<MVClientes>();
-            services.AddTransient<MVServicios>();
-            services.AddTransient<MVProductos>();
-            services.AddTransient<MVCaja>();
-            services.AddTransient<MVInventario>();
-            services.AddTransient<MVReportes>();
+            // ── ViewModels → Singleton ────────────────────────────────────────
+            services.AddSingleton<MVDashboard>();
+            services.AddSingleton<MVUsuario>();
+            services.AddSingleton<MVReservas>();
+            services.AddSingleton<MVClientes>();
+            services.AddSingleton<MVServicios>();
+            services.AddSingleton<MVProductos>();
+            services.AddSingleton<MVCaja>();
+            services.AddSingleton<MVInventario>();
+            services.AddSingleton<MVReportes>();
+            services.AddSingleton<MVInformes>();  // ← nuevo
 
-            // --- E. Ventanas (Vistas) ---
-            services.AddTransient<MainWindow>();
+            // ── Vistas → Singleton ────────────────────────────────────────────
+            services.AddSingleton<MainWindow>();
+            services.AddSingleton<UCReservas>();
+            services.AddSingleton<UCClientes>();
+            services.AddSingleton<UCServicios>();
+            services.AddSingleton<UCProductos>();
+            services.AddSingleton<UCCaja>();
+            services.AddSingleton<UCInventario>();
+            services.AddSingleton<UCReportes>();
+            services.AddSingleton<UCInformes>();   // ← nuevo
+
+            // ── Ventanas modales → Transient ──────────────────────────────────
             services.AddTransient<Login>();
-            services.AddTransient<UCReservas>();
-            services.AddTransient<UCClientes>();
-            services.AddTransient<UCServicios>();
-            services.AddTransient<UCProductos>();
-            services.AddTransient<UCCaja>();
-            services.AddTransient<UCInventario>();
-            services.AddTransient<UCReportes>();
             services.AddTransient<AgregarReserva>();
             services.AddTransient<AgregarCliente>();
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            var culture = new System.Globalization.CultureInfo("es-ES");
+            var culture = new CultureInfo("es-ES");
 
-            // 1. Esto fuerza el español en TODOS los hilos de .NET 8 (es el truco clave)
-            System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
-            System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = culture;
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+            Thread.CurrentThread.CurrentCulture = culture;
+            Thread.CurrentThread.CurrentUICulture = culture;
 
-            // 2. Fuerzas el hilo actual
-            System.Threading.Thread.CurrentThread.CurrentCulture = culture;
-            System.Threading.Thread.CurrentThread.CurrentUICulture = culture;
-
-            // 3. Fuerzas la interfaz gráfica de WPF
             FrameworkElement.LanguageProperty.OverrideMetadata(
                 typeof(FrameworkElement),
-                new FrameworkPropertyMetadata(System.Windows.Markup.XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+                new FrameworkPropertyMetadata(
+                    XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
 
-            var loginWindow = _serviceProvider.GetRequiredService<Login>();
-            loginWindow.Show();
+            _serviceProvider.GetRequiredService<Login>().Show();
             base.OnStartup(e);
         }
     }

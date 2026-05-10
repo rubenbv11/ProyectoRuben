@@ -17,10 +17,10 @@ namespace ProyectoRuben.MVVM
     {
         private readonly IServicioRepository _servicioRepository;
 
-        // Fuente completa
-        private ObservableCollection<Servicio> _todosLosServicios = new();
+        private ObservableCollection<Servicio> _todosActivos = new();
+        private ObservableCollection<Servicio> _todosArchivados = new();
 
-        // ── Vista filtrada ────────────────────────────────────────────────────
+        // ── Vista ─────────────────────────────────────────────────────────────
         private ListCollectionView _listaServiciosView;
         public ListCollectionView ListaServiciosView
         {
@@ -28,77 +28,67 @@ namespace ProyectoRuben.MVVM
             set => SetProperty(ref _listaServiciosView, value);
         }
 
-        private bool _estaVacio;
-        public bool EstaVacio
+        // ── Toggle ────────────────────────────────────────────────────────────
+        private bool _mostrandoArchivados;
+        public bool MostrandoArchivados
         {
-            get => _estaVacio;
-            set => SetProperty(ref _estaVacio, value);
+            get => _mostrandoArchivados;
+            set { if (SetProperty(ref _mostrandoArchivados, value)) { OnPropertyChanged(nameof(MostrandoActivos)); CrearVista(); } }
         }
+        public bool MostrandoActivos => !_mostrandoArchivados;
+
+        // ── Stats ─────────────────────────────────────────────────────────────
+        private bool _estaVacio;
+        public bool EstaVacio { get => _estaVacio; set => SetProperty(ref _estaVacio, value); }
 
         private int _totalServicios;
-        public int TotalServicios
-        {
-            get => _totalServicios;
-            set => SetProperty(ref _totalServicios, value);
-        }
+        public int TotalServicios { get => _totalServicios; set => SetProperty(ref _totalServicios, value); }
 
+        // ── Filtro ────────────────────────────────────────────────────────────
         private string _filtroNombre = string.Empty;
         public string FiltroNombre
         {
             get => _filtroNombre;
-            set
-            {
-                if (SetProperty(ref _filtroNombre, value))
-                    AplicarFiltro();
-            }
+            set { if (SetProperty(ref _filtroNombre, value)) AplicarFiltro(); }
         }
 
         // ── Formulario ────────────────────────────────────────────────────────
         private Servicio _servicioNuevo = new();
-        public Servicio ServicioNuevo
-        {
-            get => _servicioNuevo;
-            set => SetProperty(ref _servicioNuevo, value);
-        }
+        public Servicio ServicioNuevo { get => _servicioNuevo; set => SetProperty(ref _servicioNuevo, value); }
 
         // ── Comandos ──────────────────────────────────────────────────────────
+        public ICommand MostrarActivosCommand { get; }
+        public ICommand MostrarArchivadosCommand { get; }
         public ICommand AgregarServicioCommand { get; }
         public ICommand EditarServicioCommand { get; }
         public ICommand DesactivarServicioCommand { get; }
+        public ICommand ReactivarServicioCommand { get; }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Constructor
-        // ══════════════════════════════════════════════════════════════════════
         public MVServicios(IServicioRepository servicioRepository)
         {
-            _servicioRepository = servicioRepository
-                ?? throw new ArgumentNullException(nameof(servicioRepository));
-
+            _servicioRepository = servicioRepository ?? throw new ArgumentNullException(nameof(servicioRepository));
             InicializarServicioNuevo();
 
+            MostrarActivosCommand = new RelayCommand(_ => MostrandoArchivados = false);
+            MostrarArchivadosCommand = new RelayCommand(_ => MostrandoArchivados = true);
             AgregarServicioCommand = new RelayCommand(_ => AbrirFormularioNuevo());
             EditarServicioCommand = new RelayCommand(p => AbrirFormularioEdicion(p as Servicio));
-            DesactivarServicioCommand = new RelayCommand(async p =>
-            {
-                if (p is int id) await DesactivarServicio(id);
-            });
+            DesactivarServicioCommand = new RelayCommand(async p => { if (p is int id) await DesactivarServicio(id); });
+            ReactivarServicioCommand = new RelayCommand(async p => { if (p is int id) await ReactivarServicio(id); });
 
             _ = CargarServicios();
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Carga
-        // ══════════════════════════════════════════════════════════════════════
+        // ── Carga ─────────────────────────────────────────────────────────────
         public async Task CargarServicios()
         {
             try
             {
                 var todos = await GetAllAsync(_servicioRepository);
-                var activos = todos.Where(s => s.Activo == true).ToList();
-
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    _todosLosServicios = new ObservableCollection<Servicio>(activos);
+                    _todosActivos = new ObservableCollection<Servicio>(todos.Where(s => s.Activo == true));
+                    _todosArchivados = new ObservableCollection<Servicio>(todos.Where(s => s.Activo != true));
                     CrearVista();
                 });
             }
@@ -109,30 +99,22 @@ namespace ProyectoRuben.MVVM
             }
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Filtro rápido (sin Refresh — evita freeze)
-        // ══════════════════════════════════════════════════════════════════════
-        private void AplicarFiltro()
-        {
-            Application.Current.Dispatcher.InvokeAsync(CrearVista);
-        }
+        private void AplicarFiltro() => Application.Current.Dispatcher.InvokeAsync(CrearVista);
 
         private void CrearVista()
         {
+            var fuente = _mostrandoArchivados ? _todosArchivados : _todosActivos;
             var filtrado = string.IsNullOrEmpty(_filtroNombre)
-                ? _todosLosServicios
-                : new ObservableCollection<Servicio>(
-                    _todosLosServicios.Where(s =>
-                        s.Nombre.IndexOf(_filtroNombre, StringComparison.OrdinalIgnoreCase) >= 0));
+                ? fuente
+                : new ObservableCollection<Servicio>(fuente.Where(s =>
+                    s.Nombre.IndexOf(_filtroNombre, StringComparison.OrdinalIgnoreCase) >= 0));
 
             ListaServiciosView = new ListCollectionView(filtrado);
             TotalServicios = filtrado.Count;
             EstaVacio = filtrado.Count == 0;
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Formulario nuevo
-        // ══════════════════════════════════════════════════════════════════════
+        // ── Formulario ────────────────────────────────────────────────────────
         private void InicializarServicioNuevo()
         {
             ServicioNuevo = new Servicio
@@ -148,153 +130,79 @@ namespace ProyectoRuben.MVVM
 
         private void AbrirFormularioNuevo()
         {
-            try
-            {
-                InicializarServicioNuevo();
-                var dialogo = new AgregarServicio(this);
-                dialogo.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MensajeError.Mostrar("Error", $"Error al abrir formulario: {ex.Message}");
-            }
+            InicializarServicioNuevo();
+            new AgregarServicio(this).ShowDialog();
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Guardar NUEVO servicio
-        // ══════════════════════════════════════════════════════════════════════
+        private void AbrirFormularioEdicion(Servicio? s)
+        {
+            if (s == null) return;
+            InicializarServicioNuevo();
+            new AgregarServicio(this) { ServicioAEditar = s }.ShowDialog();
+        }
+
+        // ── CRUD ──────────────────────────────────────────────────────────────
         public async Task<bool> GuardarServicio()
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(ServicioNuevo.Nombre))
-                {
-                    MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio.");
-                    return false;
-                }
+                { MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio."); return false; }
                 if (ServicioNuevo.Duracion <= 0)
-                {
-                    MensajeAdvertencia.Mostrar("Validación", "La duración debe ser mayor que 0.");
-                    return false;
-                }
-                if (ServicioNuevo.Costo < 0)
-                {
-                    MensajeAdvertencia.Mostrar("Validación", "El precio no puede ser negativo.");
-                    return false;
-                }
-
+                { MensajeAdvertencia.Mostrar("Validación", "La duración debe ser mayor que 0."); return false; }
                 await AddAsync(_servicioRepository, ServicioNuevo);
-                SnackbarMessageQueue.Enqueue($"Servicio '{ServicioNuevo.Nombre}' guardado.");
-                await CargarServicios();
-                InicializarServicioNuevo();
-                return true;
+                SnackbarMessageQueue.Enqueue($"'{ServicioNuevo.Nombre}' guardado.");
+                await CargarServicios(); InicializarServicioNuevo(); return true;
             }
-            catch (Exception ex)
-            {
-                MensajeError.Mostrar("Error", $"Error al guardar: {ex.Message}");
-                return false;
-            }
+            catch (Exception ex) { MensajeError.Mostrar("Error", ex.Message); return false; }
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Editar servicio existente
-        // ══════════════════════════════════════════════════════════════════════
-        private void AbrirFormularioEdicion(Servicio? servicio)
-        {
-            if (servicio == null) return;
-
-            try
-            {
-                InicializarServicioNuevo();
-                var dialogo = new AgregarServicio(this)
-                {
-                    ServicioAEditar = servicio
-                };
-                dialogo.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                MensajeError.Mostrar("Error", $"Error al abrir edición: {ex.Message}");
-            }
-        }
-
-        // ══════════════════════════════════════════════════════════════════════
-        // Actualizar servicio existente
-        // ══════════════════════════════════════════════════════════════════════
         public async Task<bool> ActualizarServicio()
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(ServicioNuevo.Nombre))
-                {
-                    MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio.");
-                    return false;
-                }
-                if (ServicioNuevo.Duracion <= 0)
-                {
-                    MensajeAdvertencia.Mostrar("Validación", "La duración debe ser mayor que 0.");
-                    return false;
-                }
-
-                var tracked = await _servicioRepository.GetByIdAsync(ServicioNuevo.Id);
-                if (tracked == null)
-                {
-                    MensajeError.Mostrar("Error", "Servicio no encontrado.");
-                    return false;
-                }
-
-                tracked.Nombre = ServicioNuevo.Nombre;
-                tracked.Descripcion = ServicioNuevo.Descripcion;
-                tracked.Duracion = ServicioNuevo.Duracion;
-                tracked.Costo = ServicioNuevo.Costo;
-
-                await UpdateAsync(_servicioRepository, tracked);
-                SnackbarMessageQueue.Enqueue($"Servicio '{tracked.Nombre}' actualizado.");
-                await CargarServicios();
-                InicializarServicioNuevo();
-                return true;
+                { MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio."); return false; }
+                var t = await _servicioRepository.GetByIdAsync(ServicioNuevo.Id);
+                if (t == null) { MensajeError.Mostrar("Error", "Servicio no encontrado."); return false; }
+                t.Nombre = ServicioNuevo.Nombre; t.Descripcion = ServicioNuevo.Descripcion;
+                t.Duracion = ServicioNuevo.Duracion; t.Costo = ServicioNuevo.Costo;
+                await UpdateAsync(_servicioRepository, t);
+                SnackbarMessageQueue.Enqueue($"'{t.Nombre}' actualizado.");
+                await CargarServicios(); InicializarServicioNuevo(); return true;
             }
-            catch (Exception ex)
-            {
-                MensajeError.Mostrar("Error", $"Error al actualizar: {ex.Message}");
-                return false;
-            }
+            catch (Exception ex) { MensajeError.Mostrar("Error", ex.Message); return false; }
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // Desactivar
-        // ══════════════════════════════════════════════════════════════════════
-        private async Task DesactivarServicio(int servicioId)
+        private async Task DesactivarServicio(int id)
         {
             try
             {
-                var servicio = await GetByIdAsync(_servicioRepository, servicioId);
-                if (servicio == null)
+                var s = await GetByIdAsync(_servicioRepository, id);
+                if (s == null) return;
+                var d = new DialogoEliminar($"¿Archivar '{s.Nombre}'? Podrás reactivarlo desde Archivados.")
+                { Owner = Application.Current.MainWindow };
+                if (d.ShowDialog() == true)
                 {
-                    MensajeError.Mostrar("Error", "Servicio no encontrado.");
-                    return;
-                }
-
-                var dialogo = new DialogoEliminar(
-                    $"¿Desactivar '{servicio.Nombre}'? Dejará de aparecer en el catálogo.")
-                {
-                    Owner = Application.Current.MainWindow
-                };
-
-                if (dialogo.ShowDialog() == true)
-                {
-                    servicio.Activo = false;
-                    if (await UpdateAsync(_servicioRepository, servicio))
-                    {
-                        SnackbarMessageQueue.Enqueue($"'{servicio.Nombre}' desactivado.");
-                        await CargarServicios();
-                    }
+                    s.Activo = false;
+                    if (await UpdateAsync(_servicioRepository, s))
+                    { SnackbarMessageQueue.Enqueue($"'{s.Nombre}' archivado."); await CargarServicios(); }
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) { MensajeError.Mostrar("Error", ex.Message); }
+        }
+
+        private async Task ReactivarServicio(int id)
+        {
+            try
             {
-                MensajeError.Mostrar("Error", $"Error al desactivar: {ex.Message}");
+                var s = await GetByIdAsync(_servicioRepository, id);
+                if (s == null) return;
+                s.Activo = true;
+                if (await UpdateAsync(_servicioRepository, s))
+                { SnackbarMessageQueue.Enqueue($"'{s.Nombre}' reactivado."); await CargarServicios(); }
             }
+            catch (Exception ex) { MensajeError.Mostrar("Error", ex.Message); }
         }
     }
 }

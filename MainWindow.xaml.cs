@@ -1,22 +1,20 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
-using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Frontend;
 using ProyectoRuben.MVVM;
-using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace ProyectoRuben
 {
-    /// <summary>
-    /// Lógica de interacción para MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        private DispatcherTimer timer;
+        private DispatcherTimer _timer;
         private readonly MVDashboard _mvDashboard;
         private readonly IServiceProvider _serviceProvider;
+
+        // ── Vistas ────────────────────────────────────────────────────────────
         private readonly UCReservas _uCReservas;
         private readonly UCClientes _uCClientes;
         private readonly UCServicios _uCServicios;
@@ -24,29 +22,40 @@ namespace ProyectoRuben
         private readonly UCCaja _uCCaja;
         private readonly UCInventario _ucInventario;
         private readonly UCReportes _ucReportes;
+        private readonly UCInformes _ucInformes;    // ← nuevo
+
         private readonly List<UIElement> _dashboardChildren = new();
 
-        public MainWindow(MVDashboard mVDashboard, IServiceProvider serviceProvider, UCReservas uCReservas, UCClientes uCClientes, UCServicios uCServicios, UCProductos uCProductos, UCCaja uCCaja, UCInventario uCInventario, UCReportes uCReportes)
+        public MainWindow(MVDashboard mvDashboard,
+                          IServiceProvider serviceProvider,
+                          UCReservas uCReservas,
+                          UCClientes uCClientes,
+                          UCServicios uCServicios,
+                          UCProductos uCProductos,
+                          UCCaja uCCaja,
+                          UCInventario ucInventario,
+                          UCReportes ucReportes,
+                          UCInformes ucInformes)   // ← nuevo
         {
             InitializeComponent();
-            _mvDashboard = mVDashboard;
+            _mvDashboard = mvDashboard;
             _serviceProvider = serviceProvider;
-            this.DataContext = _mvDashboard;
             _uCReservas = uCReservas;
             _uCClientes = uCClientes;
             _uCServicios = uCServicios;
             _uCProductos = uCProductos;
             _uCCaja = uCCaja;
-            _ucInventario = uCInventario;
-            _ucReportes = uCReportes;
+            _ucInventario = ucInventario;
+            _ucReportes = ucReportes;
+            _ucInformes = ucInformes;
+
+            DataContext = _mvDashboard;
             InicializarVentana();
         }
+
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                await _mvDashboard.Inicializa();
-            }
+            try { await _mvDashboard.Inicializa(); }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al inicializar el dashboard: {ex.Message}",
@@ -56,30 +65,21 @@ namespace ProyectoRuben
 
         private void InicializarVentana()
         {
-            // Configurar el timer para actualizar la fecha y hora
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(1);
-            timer.Tick += Timer_Tick;
-            timer.Start();
+            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _timer.Tick += (_, _) => ActualizarFechaHora();
+            _timer.Start();
             ActualizarFechaHora();
 
             foreach (UIElement child in DashboardContent.Children)
                 _dashboardChildren.Add(child);
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
-        {
-            ActualizarFechaHora();
-        }
-
-        private void ActualizarFechaHora()
-        {
+        private void ActualizarFechaHora() =>
             txtFechaHora.Text = DateTime.Now.ToString("dddd, dd 'de' MMMM yyyy - HH:mm:ss");
-        }
 
-        // ============================================
-        // MÉTODOS DE NAVEGACIÓN DEL MENÚ
-        // ============================================
+        // ══════════════════════════════════════════════════════════════════════
+        // NAVEGACIÓN
+        // ══════════════════════════════════════════════════════════════════════
 
         private async void btnDashboard_Click(object sender, RoutedEventArgs e)
         {
@@ -93,11 +93,8 @@ namespace ProyectoRuben
         private void btnReservas_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Gestión de Reservas";
-
-            var vmReservas = _serviceProvider.GetRequiredService<MVReservas>();
-
-
-            _uCReservas.DataContext = vmReservas;
+            var vm = _serviceProvider.GetRequiredService<MVReservas>();
+            _uCReservas.DataContext = vm;
             DashboardContent.Children.Clear();
             DashboardContent.Children.Add(_uCReservas);
         }
@@ -105,8 +102,8 @@ namespace ProyectoRuben
         private void btnClientes_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Gestión de Clientes";
-            var vmClientes = _serviceProvider.GetRequiredService<MVClientes>();
-            _uCClientes.DataContext = vmClientes;
+            var vm = _serviceProvider.GetRequiredService<MVClientes>();
+            _uCClientes.DataContext = vm;
             DashboardContent.Children.Clear();
             DashboardContent.Children.Add(_uCClientes);
         }
@@ -114,8 +111,8 @@ namespace ProyectoRuben
         private void btnServicios_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Gestión de Servicios";
-            var vmServicios = _serviceProvider.GetRequiredService<MVServicios>();
-            _uCServicios.DataContext = vmServicios;
+            var vm = _serviceProvider.GetRequiredService<MVServicios>();
+            _uCServicios.DataContext = vm;
             DashboardContent.Children.Clear();
             DashboardContent.Children.Add(_uCServicios);
         }
@@ -123,8 +120,8 @@ namespace ProyectoRuben
         private void btnProductos_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Gestión de Productos";
-            var vmProductos = _serviceProvider.GetRequiredService<MVProductos>();
-            _uCProductos.DataContext = vmProductos;
+            var vm = _serviceProvider.GetRequiredService<MVProductos>();
+            _uCProductos.DataContext = vm;
             DashboardContent.Children.Clear();
             DashboardContent.Children.Add(_uCProductos);
         }
@@ -132,105 +129,81 @@ namespace ProyectoRuben
         private void btnFacturacion_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Caja - Punto de Venta";
-            var vmCaja = _serviceProvider.GetRequiredService<MVCaja>();
-            _uCCaja.DataContext = vmCaja;
+            var vm = _serviceProvider.GetRequiredService<MVCaja>();
+            _uCCaja.DataContext = vm;
             DashboardContent.Children.Clear();
             DashboardContent.Children.Add(_uCCaja);
         }
 
         private void btnReportes_Click(object sender, RoutedEventArgs e)
         {
-            txtTituloPagina.Text = "Gestión de Reportes";
-            var vmReportes = _serviceProvider.GetRequiredService<MVReportes>();
-            _ucReportes.DataContext = vmReportes;
+            txtTituloPagina.Text = "Reportes";
+            var vm = _serviceProvider.GetRequiredService<MVReportes>();
+            _ucReportes.DataContext = vm;
             DashboardContent.Children.Clear();
             DashboardContent.Children.Add(_ucReportes);
         }
 
+        private void btnInformes_Click(object sender, RoutedEventArgs e)
+        {
+            txtTituloPagina.Text = "Informes y Análisis";
+            var vm = _serviceProvider.GetRequiredService<MVInformes>();
+            _ucInformes.DataContext = vm;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(_ucInformes);
+        }
+
         private void btnInventario_Click(object sender, RoutedEventArgs e)
         {
-            txtTituloPagina.Text = "Gestión de Stock";
-            var vmInventario = _serviceProvider.GetRequiredService<MVInventario>();
-            _ucInventario.DataContext = vmInventario;  
+            txtTituloPagina.Text = "Control de Stock";
+            var vm = _serviceProvider.GetRequiredService<MVInventario>();
+            _ucInventario.DataContext = vm;
             DashboardContent.Children.Clear();
             DashboardContent.Children.Add(_ucInventario);
         }
 
-        // ============================================
+        // ══════════════════════════════════════════════════════════════════════
         // CONTROLES DE VENTANA
-        // ============================================
+        // ══════════════════════════════════════════════════════════════════════
 
-        private void btnMinimizar_Click(object sender, RoutedEventArgs e)
-        {
-            this.WindowState = WindowState.Minimized;
-        }
+        private void btnMinimizar_Click(object sender, RoutedEventArgs e) =>
+            WindowState = WindowState.Minimized;
 
         private void btnMaximizar_Click(object sender, RoutedEventArgs e)
         {
-            if (this.WindowState == WindowState.Maximized)
-            {
-                this.WindowState = WindowState.Normal;
-                btnMaximizar.Content = "□";
-            }
+            if (WindowState == WindowState.Maximized)
+            { WindowState = WindowState.Normal; btnMaximizar.Content = "□"; }
             else
-            {
-                this.WindowState = WindowState.Maximized;
-                btnMaximizar.Content = "❐";
-            }
+            { WindowState = WindowState.Maximized; btnMaximizar.Content = "❐"; }
         }
 
         private void btnCerrar_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show(
-                "¿Está seguro que desea cerrar la aplicación?",
-                "Confirmar salida",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
+            if (MessageBox.Show("¿Cerrar la aplicación?", "Confirmar",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 Application.Current.Shutdown();
-            }
         }
 
         private void btnCerrarSesion_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show(
-                "¿Desea cerrar la sesión actual?",
-                "Cerrar sesión",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
+            if (MessageBox.Show("¿Cerrar sesión?", "Confirmar",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                // Detener el timer
-                timer.Stop();
-
-                // Abrir ventana de login
-                var loginWindow = _serviceProvider.GetRequiredService<Login>();
-                loginWindow.Show();
-
-                // Cerrar esta ventana
-                this.Close();
+                _timer.Stop();
+                // Login es Transient → instancia nueva y limpia
+                _serviceProvider.GetRequiredService<Login>().Show();
+                Close();
             }
         }
-
 
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            timer?.Stop();
+            _timer?.Stop();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
+        private void Window_Loaded(object sender, RoutedEventArgs e) { }
     }
-
-    // ============================================
-    // VIEWMODEL PARA LAS CITAS
-    // ============================================
 
     public class CitaViewModel
     {

@@ -11,253 +11,253 @@
         WindowStyle="None"
         AllowsTransparency="True">
 
-    <Border CornerRadius="16" ClipToBounds="True" Background="#F5F6F7">
-        <Border.Effect>
-            <DropShadowEffect BlurRadius="30" ShadowDepth="4" Direction="270"
+	<Border CornerRadius="16" ClipToBounds="True" Background="#F5F6F7">
+		<Border.Effect>
+			<DropShadowEffect BlurRadius="30" ShadowDepth="4" Direction="270"
                               Color="#000000" Opacity="0.15"/>
-        </Border.Effect>
+		</Border.Effect>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="64"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="64"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
 
-            <!-- ═══ BARRA TÍTULO ═══ -->
-            <Border Grid.Row="0" Background="#2D3436" CornerRadius="16,16,0,0"
+			<!-- ═══ BARRA TÍTULO ═══ -->
+			<Border Grid.Row="0" Background="#2D3436" CornerRadius="16,16,0,0"
                     MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                <Grid Margin="20,0">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Width="32" Height="32" CornerRadius="8"
+				<Grid Margin="20,0">
+					<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+						<Border Width="32" Height="32" CornerRadius="8"
                                 Background="#D4A574" Margin="0,0,12,0">
-                            <materialDesign:PackIcon Kind="PackagePlus"
+							<materialDesign:PackIcon Kind="PackageVariant"
                                                      Width="18" Height="18"
                                                      Foreground="White"
                                                      HorizontalAlignment="Center"
                                                      VerticalAlignment="Center"/>
-                        </Border>
-                        <TextBlock x:Name="TxtTituloVentana"
+						</Border>
+						<TextBlock x:Name="TxtTituloVentana"
                                    Text="Nuevo Producto"
                                    FontSize="16" FontWeight="SemiBold"
                                    Foreground="White" VerticalAlignment="Center"/>
-                    </StackPanel>
-                    <Button HorizontalAlignment="Right"
+					</StackPanel>
+					<Button HorizontalAlignment="Right"
                             Width="32" Height="32"
                             Background="Transparent" BorderThickness="0"
                             Cursor="Hand" IsCancel="True" Click="Cancelar_Click">
-                        <materialDesign:PackIcon Kind="Close" Width="16" Height="16"
+						<materialDesign:PackIcon Kind="Close" Width="16" Height="16"
                                                  Foreground="#AAAAAA"/>
-                    </Button>
-                </Grid>
-            </Border>
+					</Button>
+				</Grid>
+			</Border>
 
-            <!-- ═══ CONTENIDO ═══ -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="28,20,28,24">
+			<!-- ═══ CONTENIDO ═══ -->
+			<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+				<StackPanel Margin="28,20,28,24">
 
-                    <!-- NOMBRE -->
-                    <TextBlock Text="NOMBRE" FontSize="11" FontWeight="SemiBold"
+					<!-- NOMBRE -->
+					<TextBlock Text="NOMBRE" FontSize="11" FontWeight="SemiBold"
                                Foreground="#636E72" Margin="0,0,0,6"/>
-                    <Border Background="White" CornerRadius="8"
+					<Border Background="White" CornerRadius="8"
                             BorderBrush="#DFE6E9" BorderThickness="1" Margin="0,0,0,14">
-                        <TextBox x:Name="TxtNombre"
+						<TextBox x:Name="TxtNombre"
                                  Text="{Binding ProductoNuevo.Nombre, UpdateSourceTrigger=PropertyChanged}"
                                  Height="42" BorderThickness="0"
                                  Background="Transparent" Foreground="#2D3436"
                                  FontSize="14" Padding="12,0" VerticalContentAlignment="Center">
-                            <TextBox.Template>
-                                <ControlTemplate TargetType="TextBox">
-                                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                        <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </TextBox.Template>
-                        </TextBox>
-                    </Border>
+							<TextBox.Template>
+								<ControlTemplate TargetType="TextBox">
+									<Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+										<ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+									</Border>
+								</ControlTemplate>
+							</TextBox.Template>
+						</TextBox>
+					</Border>
 
-                    <!-- PROVEEDOR -->
-                    <TextBlock Text="PROVEEDOR" FontSize="11" FontWeight="SemiBold"
+					<!-- PROVEEDOR -->
+					<TextBlock Text="PROVEEDOR" FontSize="11" FontWeight="SemiBold"
                                Foreground="#636E72" Margin="0,0,0,6"/>
-                    <Border Background="White" CornerRadius="8"
+					<Border Background="White" CornerRadius="8"
                             BorderBrush="#DFE6E9" BorderThickness="1" Margin="0,0,0,14">
-                        <TextBox x:Name="TxtProveedor"
+						<TextBox x:Name="TxtProveedor"
                                  Text="{Binding ProductoNuevo.Proveedor, UpdateSourceTrigger=PropertyChanged}"
                                  Height="42" BorderThickness="0"
                                  Background="Transparent" Foreground="#2D3436"
                                  FontSize="14" Padding="12,0" VerticalContentAlignment="Center">
-                            <TextBox.Template>
-                                <ControlTemplate TargetType="TextBox">
-                                    <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                        <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </TextBox.Template>
-                        </TextBox>
-                    </Border>
+							<TextBox.Template>
+								<ControlTemplate TargetType="TextBox">
+									<Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+										<ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+									</Border>
+								</ControlTemplate>
+							</TextBox.Template>
+						</TextBox>
+					</Border>
 
-                    <!-- PRECIO Y CANTIDAD -->
-                    <Grid Margin="0,0,0,14">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+					<!-- PRECIO Y CANTIDAD -->
+					<Grid Margin="0,0,0,14">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="16"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="PRECIO (€)" FontSize="11" FontWeight="SemiBold"
+						<StackPanel Grid.Column="0">
+							<TextBlock Text="PRECIO (€)" FontSize="11" FontWeight="SemiBold"
                                        Foreground="#636E72" Margin="0,0,0,6"/>
-                            <Border Background="White" CornerRadius="8"
+							<Border Background="White" CornerRadius="8"
                                     BorderBrush="#DFE6E9" BorderThickness="1">
-                                <Grid>
-                                    <TextBox x:Name="TxtPrecio"
+								<Grid>
+									<TextBox x:Name="TxtPrecio"
                                              Text="{Binding ProductoNuevo.Precio, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:F2}'}"
                                              Height="42" BorderThickness="0"
                                              Background="Transparent" Foreground="#2D3436"
                                              FontSize="14" Padding="12,0" VerticalContentAlignment="Center"
                                              PreviewTextInput="SoloDecimales_PreviewTextInput">
-                                        <TextBox.Template>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </TextBox.Template>
-                                    </TextBox>
-                                    <TextBlock Text="€" FontSize="12" Foreground="#636E72"
+										<TextBox.Template>
+											<ControlTemplate TargetType="TextBox">
+												<Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+													<ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+												</Border>
+											</ControlTemplate>
+										</TextBox.Template>
+									</TextBox>
+									<TextBlock Text="€" FontSize="12" Foreground="#636E72"
                                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                                Margin="0,0,12,0" IsHitTestVisible="False"/>
-                                </Grid>
-                            </Border>
-                        </StackPanel>
+								</Grid>
+							</Border>
+						</StackPanel>
 
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="CANTIDAD INICIAL" FontSize="11" FontWeight="SemiBold"
+						<StackPanel Grid.Column="2">
+							<TextBlock Text="CANTIDAD INICIAL" FontSize="11" FontWeight="SemiBold"
                                        Foreground="#636E72" Margin="0,0,0,6"/>
-                            <Border Background="White" CornerRadius="8"
+							<Border Background="White" CornerRadius="8"
                                     BorderBrush="#DFE6E9" BorderThickness="1">
-                                <Grid>
-                                    <TextBox x:Name="TxtCantidad"
+								<Grid>
+									<TextBox x:Name="TxtCantidad"
                                              Text="{Binding ProductoNuevo.Cantidad, UpdateSourceTrigger=PropertyChanged}"
                                              Height="42" BorderThickness="0"
                                              Background="Transparent" Foreground="#2D3436"
                                              FontSize="14" Padding="12,0" VerticalContentAlignment="Center"
                                              PreviewTextInput="SoloNumeros_PreviewTextInput">
-                                        <TextBox.Template>
-                                            <ControlTemplate TargetType="TextBox">
-                                                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                                    <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </TextBox.Template>
-                                    </TextBox>
-                                    <TextBlock Text="uds" FontSize="12" Foreground="#636E72"
+										<TextBox.Template>
+											<ControlTemplate TargetType="TextBox">
+												<Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+													<ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+												</Border>
+											</ControlTemplate>
+										</TextBox.Template>
+									</TextBox>
+									<TextBlock Text="uds" FontSize="12" Foreground="#636E72"
                                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                                Margin="0,0,12,0" IsHitTestVisible="False"/>
-                                </Grid>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
+								</Grid>
+							</Border>
+						</StackPanel>
+					</Grid>
 
-                    <!-- STOCK MÍNIMO Y STOCK MÁXIMO -->
-                    <Grid Margin="0,0,0,28">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+					<!-- STOCK MÍNIMO Y STOCK MÁXIMO -->
+					<Grid Margin="0,0,0,28">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="16"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
 
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="STOCK MÍNIMO" FontSize="11" FontWeight="SemiBold"
+						<StackPanel Grid.Column="0">
+							<TextBlock Text="STOCK MÍNIMO" FontSize="11" FontWeight="SemiBold"
                                        Foreground="#636E72" Margin="0,0,0,6"/>
-                            <Border Background="White" CornerRadius="8"
+							<Border Background="White" CornerRadius="8"
                                     BorderBrush="#DFE6E9" BorderThickness="1">
-                                <TextBox x:Name="TxtStockMin"
+								<TextBox x:Name="TxtStockMin"
                                          Text="{Binding ProductoNuevo.StockMinimo, UpdateSourceTrigger=PropertyChanged}"
                                          Height="42" BorderThickness="0"
                                          Background="Transparent" Foreground="#2D3436"
                                          FontSize="14" Padding="12,0" VerticalContentAlignment="Center"
                                          PreviewTextInput="SoloNumeros_PreviewTextInput">
-                                    <TextBox.Template>
-                                        <ControlTemplate TargetType="TextBox">
-                                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </TextBox.Template>
-                                </TextBox>
-                            </Border>
-                            <TextBlock Text="Alerta si stock baja de este valor"
+									<TextBox.Template>
+										<ControlTemplate TargetType="TextBox">
+											<Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+												<ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+											</Border>
+										</ControlTemplate>
+									</TextBox.Template>
+								</TextBox>
+							</Border>
+							<TextBlock Text="Alerta si stock baja de este valor"
                                        FontSize="10" Foreground="#B2BEC3" Margin="2,4,0,0"/>
-                        </StackPanel>
+						</StackPanel>
 
-                        <StackPanel Grid.Column="2">
-                            <TextBlock Text="STOCK MÁXIMO" FontSize="11" FontWeight="SemiBold"
+						<StackPanel Grid.Column="2">
+							<TextBlock Text="STOCK MÁXIMO" FontSize="11" FontWeight="SemiBold"
                                        Foreground="#636E72" Margin="0,0,0,6"/>
-                            <Border Background="White" CornerRadius="8"
+							<Border Background="White" CornerRadius="8"
                                     BorderBrush="#DFE6E9" BorderThickness="1">
-                                <TextBox x:Name="TxtStockMax"
+								<TextBox x:Name="TxtStockMax"
                                          Text="{Binding ProductoNuevo.StockMaximo, UpdateSourceTrigger=PropertyChanged}"
                                          Height="42" BorderThickness="0"
                                          Background="Transparent" Foreground="#2D3436"
                                          FontSize="14" Padding="12,0" VerticalContentAlignment="Center"
                                          PreviewTextInput="SoloNumeros_PreviewTextInput">
-                                    <TextBox.Template>
-                                        <ControlTemplate TargetType="TextBox">
-                                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                                                <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </TextBox.Template>
-                                </TextBox>
-                            </Border>
-                            <TextBlock Text="Capacidad máxima del almacén"
+									<TextBox.Template>
+										<ControlTemplate TargetType="TextBox">
+											<Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+												<ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+											</Border>
+										</ControlTemplate>
+									</TextBox.Template>
+								</TextBox>
+							</Border>
+							<TextBlock Text="Capacidad máxima del almacén"
                                        FontSize="10" Foreground="#B2BEC3" Margin="2,4,0,0"/>
-                        </StackPanel>
-                    </Grid>
+						</StackPanel>
+					</Grid>
 
-                    <!-- BOTONES -->
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+					<!-- BOTONES -->
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="12"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
 
-                        <Button Grid.Column="0" Content="Cancelar"
+						<Button Grid.Column="0" Content="Cancelar"
                                 Height="44" Background="#F5F6F7"
                                 Foreground="#636E72" FontSize="14" FontWeight="SemiBold"
                                 BorderThickness="1" BorderBrush="#DFE6E9"
                                 Cursor="Hand" IsCancel="True" Click="Cancelar_Click">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border CornerRadius="8"
+							<Button.Template>
+								<ControlTemplate TargetType="Button">
+									<Border CornerRadius="8"
                                             Background="{TemplateBinding Background}"
                                             BorderBrush="{TemplateBinding BorderBrush}"
                                             BorderThickness="{TemplateBinding BorderThickness}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
+										<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+									</Border>
+								</ControlTemplate>
+							</Button.Template>
+						</Button>
 
-                        <Button Grid.Column="2" x:Name="BtnGuardar"
+						<Button Grid.Column="2" x:Name="BtnGuardar"
                                 Content="Guardar"
                                 Height="44" Background="#D4A574"
                                 Foreground="White" FontSize="14" FontWeight="SemiBold"
                                 BorderThickness="0" Cursor="Hand"
                                 IsDefault="True" Click="Guardar_Click">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border CornerRadius="8" Background="{TemplateBinding Background}">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                        </Button>
-                    </Grid>
+							<Button.Template>
+								<ControlTemplate TargetType="Button">
+									<Border CornerRadius="8" Background="{TemplateBinding Background}">
+										<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+									</Border>
+								</ControlTemplate>
+							</Button.Template>
+						</Button>
+					</Grid>
 
-                </StackPanel>
-            </ScrollViewer>
-        </Grid>
-    </Border>
+				</StackPanel>
+			</ScrollViewer>
+		</Grid>
+	</Border>
 </Window>

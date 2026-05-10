@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+	<Nullable>disable</Nullable>
+	<NoWarn>CS8618;CS8625;CS8603;CS8600;CS8601;CS8602;CS8612;CS8767;CS1030;CS0108</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

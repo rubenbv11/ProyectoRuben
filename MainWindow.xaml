@@ -107,6 +107,9 @@
                             <Button x:Name="btnReportes" Content="Reportes" 
                                    Style="{StaticResource MenuButtonStyle}" 
                                    Margin="15,0,0,0" Click="btnReportes_Click"/>
+							<Button x:Name="btnInformes" Content="Informes"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Margin="15,0,0,0" Click="btnInformes_Click"/>
                         </StackPanel>
                     </Expander>
 
