@@ -18,6 +18,9 @@ public partial class Servicio
     [StringLength(100)]
     public string Nombre { get; set; } = null!;
 
+    [StringLength(50)]
+    public string Categoria { get; set; } = "General";
+
     [Column(TypeName = "text")]
     public string? Descripcion { get; set; }
 
@@ -37,13 +40,6 @@ public partial class Servicio
 
     [Column(TypeName = "datetime")]
     public DateTime? FechaCreacion { get; set; }
-
-    /// <summary>
-    /// Categoría del servicio para visualización. No mapeada a BD — se puede rellenar
-    /// en el futuro añadiendo la columna o calculándola desde la descripción.
-    /// </summary>
-    [NotMapped]
-    public string? Categoria { get; set; }
 
     [InverseProperty("Servicio")]
     public virtual ICollection<Reserva> Reservas { get; set; } = new List<Reserva>();

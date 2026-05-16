@@ -159,9 +159,11 @@ namespace ProyectoRuben.MVVM
         private (DateTime desde, DateTime hasta) ObtenerRango()
         {
             var hoy = DateTime.Today;
+            // Semana europea: lunes=1 ... domingo=7. DayOfWeek: domingo=0, lunes=1...
+            int diasDesdelunes = ((int)hoy.DayOfWeek + 6) % 7; // 0=lunes, 6=domingo
             return PeriodoSeleccionado switch
             {
-                "Esta semana" => (hoy.AddDays(-(int)hoy.DayOfWeek + 1), hoy),
+                "Esta semana" => (hoy.AddDays(-diasDesdelunes), hoy),
                 "Este mes" => (new DateTime(hoy.Year, hoy.Month, 1), hoy),
                 "Este trimestre" => (new DateTime(hoy.Year, ((hoy.Month - 1) / 3) * 3 + 1, 1), hoy),
                 "Este año" => (new DateTime(hoy.Year, 1, 1), hoy),
@@ -191,10 +193,12 @@ namespace ProyectoRuben.MVVM
 
                 var todasFacturas = await GetAllAsync(_facturaRepository);
                 var facturasPeriodo = todasFacturas
-                    .Where(f => f.Fecha.Date >= desde && f.Fecha.Date <= hasta && f.Estado == "Pagada")
+                    .Where(f => f.Fecha.Date >= desde && f.Fecha.Date <= hasta
+                             && (f.Estado == "Pagada" || string.IsNullOrEmpty(f.Estado)))
                     .ToList();
                 var facturasAnteriores = todasFacturas
-                    .Where(f => f.Fecha.Date >= desdeAnt && f.Fecha.Date <= hastaAnt && f.Estado == "Pagada")
+                    .Where(f => f.Fecha.Date >= desdeAnt && f.Fecha.Date <= hastaAnt
+                             && (f.Estado == "Pagada" || string.IsNullOrEmpty(f.Estado)))
                     .ToList();
 
                 if (!facturasPeriodo.Any()) { SinDatos = true; Cargando = false; return; }

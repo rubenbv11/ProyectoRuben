@@ -18,6 +18,9 @@ public partial class Producto
     [StringLength(100)]
     public string Nombre { get; set; } = null!;
 
+    [StringLength(50)]
+    public string Categoria { get; set; } = "General";
+
     [Column(TypeName = "text")]
     public string? Descripcion { get; set; }
 
@@ -48,11 +51,6 @@ public partial class Producto
     [InverseProperty("Producto")]
     public virtual ICollection<ServicioProducto> ServicioProductos { get; set; } = new List<ServicioProducto>();
 
-    /// <summary>
-    /// Propiedad calculada: true cuando el stock está por debajo o igual al mínimo configurado.
-    /// Usada por la UI (UCInventario) para mostrar alertas visuales.
-    /// No mapeada a BD.
-    /// </summary>
     [NotMapped]
     public bool AlertaStock => Cantidad <= (StockMinimo ?? 0);
 }
