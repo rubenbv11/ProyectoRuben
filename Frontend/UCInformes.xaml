@@ -495,7 +495,191 @@
 							</StackPanel>
 						</Border>
 					</Grid>
+					<!-- ══ FILA 4: Detalle de facturas ══ -->
+					<Border Background="White" CornerRadius="14" Padding="24" Margin="0,16,0,16">
+						<Border.Effect>
+							<DropShadowEffect BlurRadius="10" ShadowDepth="1" Direction="270" Color="#000000" Opacity="0.05"/>
+						</Border.Effect>
+						<StackPanel>
 
+							<!-- Cabecera -->
+							<Grid Margin="0,0,0,16">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="Auto"/>
+								</Grid.ColumnDefinitions>
+
+								<StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+									<materialDesign:PackIcon Kind="Receipt" Width="20" Height="20"
+															 Foreground="{StaticResource AccentBrush}"
+															 VerticalAlignment="Center" Margin="0,0,10,0"/>
+									<TextBlock Text="Detalle de facturas" FontSize="15" FontWeight="SemiBold"
+											   Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+									<Border CornerRadius="99" Background="#FFF3E0" Padding="8,3" Margin="10,0,0,0"
+											VerticalAlignment="Center">
+										<TextBlock FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}">
+											<Run Text="{Binding TotalFacturas}"/>
+											<Run Text=" registros"/>
+										</TextBlock>
+									</Border>
+								</StackPanel>
+
+								<!-- Buscador -->
+								<Border Grid.Column="2" CornerRadius="8" BorderThickness="1"
+										BorderBrush="{StaticResource LightGrayBrush}" Padding="10,6">
+									<StackPanel Orientation="Horizontal">
+										<materialDesign:PackIcon Kind="Magnify" Width="16" Height="16"
+																 Foreground="{StaticResource TextLightBrush}"
+																 VerticalAlignment="Center" Margin="0,0,6,0"/>
+										<TextBox Text="{Binding FiltroBusqueda, UpdateSourceTrigger=PropertyChanged}"
+												 Width="220" BorderThickness="0" Padding="0"
+												 VerticalAlignment="Center" FontSize="13"
+												 Foreground="{StaticResource TextBrush}"
+												 materialDesign:HintAssist.Hint="Buscar por cliente, método, estado..."
+												 Style="{StaticResource MaterialDesignTextBox}"/>
+									</StackPanel>
+								</Border>
+							</Grid>
+
+							<!-- DataGrid -->
+							<DataGrid ItemsSource="{Binding FacturasFiltradas}"
+									  AutoGenerateColumns="False"
+									  IsReadOnly="True"
+									  CanUserSortColumns="True"
+									  GridLinesVisibility="Horizontal"
+									  HorizontalGridLinesBrush="#F0F0F0"
+									  HeadersVisibility="Column"
+									  SelectionMode="Single"
+									  Background="Transparent"
+									  BorderThickness="0"
+									  MaxHeight="400">
+
+								<DataGrid.Resources>
+									<!-- Estilo cabecera -->
+									<Style x:Key="ColHeaderStyle" TargetType="DataGridColumnHeader">
+										<Setter Property="Background"   Value="Transparent"/>
+										<Setter Property="Foreground"   Value="{StaticResource TextLightBrush}"/>
+										<Setter Property="FontSize"     Value="11"/>
+										<Setter Property="FontWeight"   Value="SemiBold"/>
+										<Setter Property="Padding"      Value="8,10"/>
+										<Setter Property="BorderThickness" Value="0"/>
+									</Style>
+								</DataGrid.Resources>
+
+								<!-- Estilo fila -->
+								<DataGrid.RowStyle>
+									<Style TargetType="DataGridRow">
+										<Setter Property="Background" Value="Transparent"/>
+										<Setter Property="BorderThickness" Value="0"/>
+										<Style.Triggers>
+											<Trigger Property="IsMouseOver" Value="True">
+												<Setter Property="Background" Value="#FFF8F2"/>
+											</Trigger>
+										</Style.Triggers>
+									</Style>
+								</DataGrid.RowStyle>
+
+								<!-- Estilo celda -->
+								<DataGrid.CellStyle>
+									<Style TargetType="DataGridCell">
+										<Setter Property="BorderThickness" Value="0"/>
+										<Setter Property="Padding"         Value="8,10"/>
+										<Setter Property="Foreground"      Value="{StaticResource TextBrush}"/>
+										<Setter Property="FontSize"        Value="13"/>
+										<Setter Property="Background"      Value="Transparent"/>
+										<Style.Triggers>
+											<Trigger Property="IsSelected" Value="True">
+												<Setter Property="Background" Value="#FFF3E0"/>
+												<Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+											</Trigger>
+										</Style.Triggers>
+									</Style>
+								</DataGrid.CellStyle>
+
+								<DataGrid.Columns>
+									<!-- Nº -->
+									<DataGridTextColumn Header="Nº" Binding="{Binding Id}"
+														Width="60" HeaderStyle="{StaticResource ColHeaderStyle}"/>
+									<!-- Fecha -->
+									<DataGridTextColumn Header="Fecha" Binding="{Binding Fecha}"
+														Width="110" HeaderStyle="{StaticResource ColHeaderStyle}"/>
+									<!-- Cliente -->
+									<DataGridTextColumn Header="Cliente" Binding="{Binding Cliente}"
+														Width="*" HeaderStyle="{StaticResource ColHeaderStyle}"/>
+									<!-- Método -->
+									<DataGridTextColumn Header="Método" Binding="{Binding MetodoPago}"
+														Width="110" HeaderStyle="{StaticResource ColHeaderStyle}"/>
+									<!-- Subtotal -->
+									<DataGridTextColumn Header="Subtotal" Binding="{Binding SubtotalTexto}"
+														Width="100" HeaderStyle="{StaticResource ColHeaderStyle}"/>
+									<!-- Descuento -->
+									<DataGridTextColumn Header="Descuento" Binding="{Binding DescuentoTexto}"
+														Width="100" HeaderStyle="{StaticResource ColHeaderStyle}"/>
+									<!-- Total -->
+									<DataGridTemplateColumn Header="Total" Width="110"
+															HeaderStyle="{StaticResource ColHeaderStyle}"
+															SortMemberPath="Total">
+										<DataGridTemplateColumn.CellTemplate>
+											<DataTemplate>
+												<TextBlock Text="{Binding TotalTexto}" FontWeight="SemiBold"
+														   Foreground="{StaticResource AccentBrush}"
+														   Padding="8,10" FontSize="13"/>
+											</DataTemplate>
+										</DataGridTemplateColumn.CellTemplate>
+									</DataGridTemplateColumn>
+									<!-- Estado -->
+									<DataGridTemplateColumn Header="Estado" Width="100"
+															HeaderStyle="{StaticResource ColHeaderStyle}"
+															SortMemberPath="Estado">
+										<DataGridTemplateColumn.CellTemplate>
+											<DataTemplate>
+												<Border CornerRadius="99" Padding="8,3" Margin="4,6"
+														HorizontalAlignment="Left">
+													<Border.Style>
+														<Style TargetType="Border">
+															<Setter Property="Background" Value="#F5F5F5"/>
+															<Style.Triggers>
+																<DataTrigger Binding="{Binding Estado}" Value="Pagada">
+																	<Setter Property="Background" Value="#E8F5E9"/>
+																</DataTrigger>
+																<DataTrigger Binding="{Binding Estado}" Value="Pendiente">
+																	<Setter Property="Background" Value="#FFF3E0"/>
+																</DataTrigger>
+																<DataTrigger Binding="{Binding Estado}" Value="Anulada">
+																	<Setter Property="Background" Value="#FFEBEE"/>
+																</DataTrigger>
+															</Style.Triggers>
+														</Style>
+													</Border.Style>
+													<TextBlock Text="{Binding Estado}" FontSize="11" FontWeight="SemiBold">
+														<TextBlock.Style>
+															<Style TargetType="TextBlock">
+																<Setter Property="Foreground" Value="{StaticResource TextLightBrush}"/>
+																<Style.Triggers>
+																	<DataTrigger Binding="{Binding Estado}" Value="Pagada">
+																		<Setter Property="Foreground" Value="#2E7D32"/>
+																	</DataTrigger>
+																	<DataTrigger Binding="{Binding Estado}" Value="Pendiente">
+																		<Setter Property="Foreground" Value="#EF6C00"/>
+																	</DataTrigger>
+																	<DataTrigger Binding="{Binding Estado}" Value="Anulada">
+																		<Setter Property="Foreground" Value="#C62828"/>
+																	</DataTrigger>
+																</Style.Triggers>
+															</Style>
+														</TextBlock.Style>
+													</TextBlock>
+												</Border>
+											</DataTemplate>
+										</DataGridTemplateColumn.CellTemplate>
+									</DataGridTemplateColumn>
+								</DataGrid.Columns>
+							</DataGrid>
+
+						</StackPanel>
+					</Border>
+					<!-- FIN FILA 4 -->
 				</StackPanel>
 			</StackPanel>
 		</ScrollViewer>

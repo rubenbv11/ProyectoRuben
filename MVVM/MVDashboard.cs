@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
-using pruebaNavegacion.MVVM; // Namespace donde está MVBase
+using pruebaNavegacion.MVVM;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,51 +12,49 @@ namespace ProyectoRuben.MVVM
 {
     public class MVDashboard : MVBase
     {
-        // --- Repositorios (Inyectados) ---
+        // ── Repositorios ──────────────────────────────────────────────────────
         private readonly IReservaRepository _reservaRepository;
         private readonly IFacturaRepository _facturaRepository;
         private readonly IProductoRepository _productoRepository;
         private readonly IClienteRepository _clienteRepository;
 
-        // --- Variables Privadas ---
-        private string _reservasHoy;
-        private string _clientesAtendidosMes;
-        private string _ingresosHoy;
-        private string _productosBajoStock;
-        private List<CitaItem> _proximasCitas;
-
-        // --- Propiedades Públicas (con notificación SetProperty) ---
+        // ── Propiedades enlazadas al Dashboard ────────────────────────────────
+        private string _reservasHoy = "-";
         public string ReservasHoy
         {
             get => _reservasHoy;
             set => SetProperty(ref _reservasHoy, value);
         }
 
+        private string _clientesAtendidosMes = "-";
         public string ClientesAtendidosMes
         {
             get => _clientesAtendidosMes;
             set => SetProperty(ref _clientesAtendidosMes, value);
         }
 
+        private string _ingresosHoy = "0,00 €";
         public string IngresosHoy
         {
             get => _ingresosHoy;
             set => SetProperty(ref _ingresosHoy, value);
         }
 
+        private string _productosBajoStock = "-";
         public string ProductosBajoStock
         {
             get => _productosBajoStock;
             set => SetProperty(ref _productosBajoStock, value);
         }
 
+        private List<CitaItem> _proximasCitas = new();
         public List<CitaItem> ProximasCitas
         {
             get => _proximasCitas;
             set => SetProperty(ref _proximasCitas, value);
         }
 
-        // --- Constructor con Inyección de Dependencias ---
+        // ── Constructor ───────────────────────────────────────────────────────
         public MVDashboard(IReservaRepository reservaRepository,
                            IFacturaRepository facturaRepository,
                            IProductoRepository productoRepository,
@@ -66,16 +64,9 @@ namespace ProyectoRuben.MVVM
             _facturaRepository = facturaRepository;
             _productoRepository = productoRepository;
             _clienteRepository = clienteRepository;
-
-            // Valores por defecto
-            _reservasHoy = "-";
-            _clientesAtendidosMes = "-";
-            _ingresosHoy = "€0,00";
-            _productosBajoStock = "-";
-            _proximasCitas = new List<CitaItem>();
         }
 
-        // --- Método Inicializa (Lógica de Negocio) ---
+        // ── Carga principal ───────────────────────────────────────────────────
         public async Task Inicializa()
         {
             try
@@ -83,58 +74,86 @@ namespace ProyectoRuben.MVVM
                 var hoy = DateTime.Today;
                 var primerDiaMes = new DateTime(hoy.Year, hoy.Month, 1);
 
-                // 1. Reservas de Hoy
-                var reservasHoy = await _reservaRepository.FindAsync(r => r.Fecha.Date == hoy);
-
-                // 2. Clientes únicos atendidos este mes
-                var reservasMes = await _reservaRepository.FindAsync(
-                    r => r.Fecha >= primerDiaMes && r.Estado == "Completada");
-
-                // 3. Ingresos Hoy
-                var facturasHoy = await _facturaRepository.FindAsync(f => f.Fecha.Date == hoy);
-                var ingresos = facturasHoy.Sum(f => f.Total);
-
-                // 4. Stock Bajo
-                var productosActivos = await _productoRepository.FindAsync(
-                    p => p.Activo == true && p.Cantidad <= (p.StockMinimo ?? 0));
-
-                // 5. Tabla de próximas citas
-                var citas = reservasHoy
+                // ──────────────────────────────────────────────────────────────
+                // 1. Reservas de hoy CON INCLUDES (la clave del fix)
+                //    Usamos Query() con las propiedades de navegación para que
+                //    Cliente, Servicio y Empleado no lleguen como null.
+                // ──────────────────────────────────────────────────────────────
+                var reservasHoy = await _reservaRepository
+                    .Query(asNoTracking: true,
+                           r => r.Cliente,
+                           r => r.Servicio,
+                           r => r.Empleado)
+                    .Where(r => r.Fecha == hoy)          // comparación directa de date sin .Date
                     .OrderBy(r => r.Hora)
-                    .Select(r => new CitaItem
-                    {
-                        Hora = r.Hora.ToString(@"hh\:mm"),
-                        Cliente = r.Cliente?.Nombre ?? "Desconocido",
-                        Servicio = r.Servicio?.Nombre ?? "Varios",
-                        Empleado = r.Empleado?.Nombre ?? "Sin asignar",
-                        Estado = r.Estado
-                    })
-                    .ToList();
+                    .ToListAsync();
 
-                // Actualizar UI en el hilo del Dispatcher
+                // ──────────────────────────────────────────────────────────────
+                // 2. Clientes únicos atendidos este mes
+                // ──────────────────────────────────────────────────────────────
+                var clientesMes = await _reservaRepository
+                    .Query(asNoTracking: true)
+                    .Where(r => r.Fecha >= primerDiaMes && r.Estado == "Completada")
+                    .Select(r => r.ClienteId)
+                    .Distinct()
+                    .CountAsync();
+
+                // ──────────────────────────────────────────────────────────────
+                // 3. Ingresos de hoy (facturas pagadas)
+                // ──────────────────────────────────────────────────────────────
+                var ingresos = await _facturaRepository
+                    .Query(asNoTracking: true)
+                    .Where(f => f.Fecha == hoy && f.Estado == "Pagada")
+                    .SumAsync(f => (decimal?)f.Total) ?? 0m;
+
+                // ──────────────────────────────────────────────────────────────
+                // 4. Productos con stock bajo
+                // ──────────────────────────────────────────────────────────────
+                var stockBajo = await _productoRepository
+                    .Query(asNoTracking: true)
+                    .Where(p => p.Activo == true && p.Cantidad <= (p.StockMinimo ?? 0))
+                    .CountAsync();
+
+                // ──────────────────────────────────────────────────────────────
+                // 5. Construir filas de la tabla de citas
+                // ──────────────────────────────────────────────────────────────
+                var citas = reservasHoy.Select(r => new CitaItem
+                {
+                    Hora = r.Hora.ToString(@"hh\:mm"),
+                    Cliente = r.Cliente?.Nombre ?? "Sin cliente",
+                    Servicio = r.Servicio?.Nombre ?? "Sin servicio",
+                    Empleado = r.Empleado?.Nombre ?? "Sin asignar",
+                    Estado = r.Estado
+                }).ToList();
+
+                // ──────────────────────────────────────────────────────────────
+                // 6. Actualizar UI en el hilo principal
+                // ──────────────────────────────────────────────────────────────
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     ReservasHoy = reservasHoy.Count.ToString();
-                    ClientesAtendidosMes = reservasMes.Select(r => r.ClienteId).Distinct().Count().ToString();
-                    IngresosHoy = ingresos.ToString("C", CultureInfo.CurrentCulture);
-                    ProductosBajoStock = productosActivos.Count.ToString();
+                    ClientesAtendidosMes = clientesMes.ToString();
+                    IngresosHoy = ingresos.ToString("N2", new CultureInfo("es-ES")) + " €";
+                    ProductosBajoStock = stockBajo.ToString();
                     ProximasCitas = citas;
                 });
             }
             catch (Exception ex)
             {
-                SnackbarMessageQueue.Enqueue($"Error cargando datos: {ex.Message}");
+                SnackbarMessageQueue.Enqueue($"Error cargando dashboard: {ex.Message}");
             }
         }
-    }   // cierra clase MVDashboard
+    }
 
-    // Clase auxiliar para el DataGrid
+    /// <summary>
+    /// Modelo de vista para cada fila de la tabla "Próximas Citas del Día".
+    /// </summary>
     public class CitaItem
     {
-        public string Hora { get; set; }
-        public string Cliente { get; set; }
-        public string Servicio { get; set; }
-        public string Empleado { get; set; }
-        public string Estado { get; set; }
+        public string Hora { get; set; } = string.Empty;
+        public string Cliente { get; set; } = string.Empty;
+        public string Servicio { get; set; } = string.Empty;
+        public string Empleado { get; set; } = string.Empty;
+        public string Estado { get; set; } = string.Empty;
     }
-}   // cierra namespace ProyectoRuben.MVVM
+}

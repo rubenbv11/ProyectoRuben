@@ -70,6 +70,13 @@ namespace ProyectoRuben.MVVM
         public ICommand DesactivarProductoCommand { get; }
         public ICommand ReactivarProductoCommand { get; }
 
+        /// <summary>
+        /// Ajuste rápido de stock inline en la card.
+        /// El code-behind pasa Tuple(Producto, delta) donde delta = +1 o -1.
+        /// </summary>
+        public ICommand AjustarStockCommand { get; }
+
+        // ─────────────────────────────────────────────────────────────────────
         public MVProductos(IProductoRepository productoRepository)
         {
             _productoRepository = productoRepository ?? throw new ArgumentNullException(nameof(productoRepository));
@@ -81,6 +88,13 @@ namespace ProyectoRuben.MVVM
             EditarProductoCommand = new RelayCommand(p => AbrirFormularioEdicion(p as Producto));
             DesactivarProductoCommand = new RelayCommand(async p => { if (p is int id) await DesactivarProducto(id); });
             ReactivarProductoCommand = new RelayCommand(async p => { if (p is int id) await ReactivarProducto(id); });
+
+            // param = Tuple<Producto, int>  (producto, +1 o -1)
+            AjustarStockCommand = new RelayCommand(async param =>
+            {
+                if (param is Tuple<Producto, int> t)
+                    await AjustarStock(t.Item1, t.Item2);
+            });
 
             _ = CargarProductos();
         }
@@ -120,6 +134,44 @@ namespace ProyectoRuben.MVVM
             EstaVacio = filtrado.Count == 0;
             TotalStockBajo = _todosActivos.Count(p => p.AlertaStock);
             HayStockBajo = TotalStockBajo > 0;
+        }
+
+        // ── Ajuste rápido de stock ────────────────────────────────────────────
+        private async Task AjustarStock(Producto producto, int delta)
+        {
+            if (producto == null) return;
+
+            var nuevaCantidad = producto.Cantidad + delta;
+            if (nuevaCantidad < 0)
+            {
+                SnackbarMessageQueue.Enqueue("El stock no puede ser negativo.");
+                return;
+            }
+
+            // 1. Actualizar UI INMEDIATAMENTE (INotifyPropertyChanged lo propaga al instante)
+            producto.Cantidad = nuevaCantidad;
+            TotalStockBajo = _todosActivos.Count(p => p.AlertaStock);
+            HayStockBajo = TotalStockBajo > 0;
+
+            // 2. Persistir en BD en segundo plano (sin bloquear la UI)
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var tracked = await _productoRepository.GetByIdAsync(producto.Id);
+                    if (tracked == null) return;
+                    tracked.Cantidad = nuevaCantidad;
+                    await _productoRepository.UpdateAsync(tracked);
+                    SnackbarMessageQueue.Enqueue($"✓ {producto.Nombre}: {nuevaCantidad} uds.");
+                }
+                catch (Exception ex)
+                {
+                    // Revertir en UI si falla el guardado
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                        producto.Cantidad = nuevaCantidad - delta);
+                    SnackbarMessageQueue.Enqueue($"Error al guardar stock: {ex.Message}");
+                }
+            });
         }
 
         // ── Formulario ────────────────────────────────────────────────────────
@@ -174,9 +226,12 @@ namespace ProyectoRuben.MVVM
                 { MensajeAdvertencia.Mostrar("Validación", "El nombre es obligatorio."); return false; }
                 var t = await _productoRepository.GetByIdAsync(ProductoNuevo.Id);
                 if (t == null) { MensajeError.Mostrar("Error", "Producto no encontrado."); return false; }
-                t.Nombre = ProductoNuevo.Nombre; t.Proveedor = ProductoNuevo.Proveedor;
-                t.Precio = ProductoNuevo.Precio; t.Cantidad = ProductoNuevo.Cantidad;
-                t.StockMinimo = ProductoNuevo.StockMinimo; t.StockMaximo = ProductoNuevo.StockMaximo;
+                t.Nombre = ProductoNuevo.Nombre;
+                t.Proveedor = ProductoNuevo.Proveedor;
+                t.Precio = ProductoNuevo.Precio;
+                t.Cantidad = ProductoNuevo.Cantidad;
+                t.StockMinimo = ProductoNuevo.StockMinimo;
+                t.StockMaximo = ProductoNuevo.StockMaximo;
                 await UpdateAsync(_productoRepository, t);
                 SnackbarMessageQueue.Enqueue($"'{t.Nombre}' actualizado.");
                 await CargarProductos(); InicializarProductoNuevo(); return true;
