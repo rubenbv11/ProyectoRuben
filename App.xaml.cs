@@ -54,20 +54,17 @@ namespace ProyectoRuben
             services.AddSingleton<MVServicios>();
             services.AddSingleton<MVProductos>();
             services.AddSingleton<MVCaja>();
-            services.AddSingleton<MVInventario>();
-            services.AddSingleton<MVReportes>();
-            services.AddSingleton<MVInformes>();  // ← nuevo
+            services.AddSingleton<MVInformes>();
 
             // ── Vistas → Singleton ────────────────────────────────────────────
             services.AddSingleton<MainWindow>();
+            services.AddSingleton<UCDashboard>();
             services.AddSingleton<UCReservas>();
             services.AddSingleton<UCClientes>();
             services.AddSingleton<UCServicios>();
             services.AddSingleton<UCProductos>();
             services.AddSingleton<UCCaja>();
-            services.AddSingleton<UCInventario>();
-            services.AddSingleton<UCReportes>();
-            services.AddSingleton<UCInformes>();   // ← nuevo
+            services.AddSingleton<UCInformes>();
 
             // ── Ventanas modales → Transient ──────────────────────────────────
             services.AddTransient<Login>();

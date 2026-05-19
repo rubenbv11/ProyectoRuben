@@ -298,7 +298,60 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                        </DataGrid.Columns>
+							<DataGridTemplateColumn Header="" Width="110">
+								<DataGridTemplateColumn.CellTemplate>
+									<DataTemplate>
+										<Button Height="32" Padding="10,0"
+												Cursor="Hand"
+												Tag="{Binding}"
+												Click="BtnCobrar_Click"
+												ToolTip="Enviar a Caja y cobrar esta reserva">
+											<Button.Style>
+												<Style TargetType="Button">
+													<Setter Property="Background" Value="#E8F5E9"/>
+													<Setter Property="BorderThickness" Value="1"/>
+													<Setter Property="BorderBrush" Value="#C8E6C9"/>
+													<Setter Property="Template">
+														<Setter.Value>
+															<ControlTemplate TargetType="Button">
+																<Border CornerRadius="8"
+																		Background="{TemplateBinding Background}"
+																		BorderBrush="{TemplateBinding BorderBrush}"
+																		BorderThickness="{TemplateBinding BorderThickness}">
+																	<ContentPresenter HorizontalAlignment="Center"
+																					  VerticalAlignment="Center"
+																					  Margin="{TemplateBinding Padding}"/>
+																</Border>
+															</ControlTemplate>
+														</Setter.Value>
+													</Setter>
+													<!-- Ocultar si ya está Completada o Cancelada -->
+													<Style.Triggers>
+														<DataTrigger Binding="{Binding Estado}" Value="Completada">
+															<Setter Property="Visibility" Value="Collapsed"/>
+														</DataTrigger>
+														<DataTrigger Binding="{Binding Estado}" Value="Cancelada">
+															<Setter Property="Visibility" Value="Collapsed"/>
+														</DataTrigger>
+													</Style.Triggers>
+												</Style>
+											</Button.Style>
+											<StackPanel Orientation="Horizontal">
+												<materialDesign:PackIcon Kind="CashRegister"
+																		 Width="14" Height="14"
+																		 Foreground="#2E7D32"
+																		 VerticalAlignment="Center"
+																		 Margin="0,0,5,0"/>
+												<TextBlock Text="Cobrar"
+														   FontSize="12" FontWeight="SemiBold"
+														   Foreground="#2E7D32"
+														   VerticalAlignment="Center"/>
+											</StackPanel>
+										</Button>
+									</DataTemplate>
+								</DataGridTemplateColumn.CellTemplate>
+							</DataGridTemplateColumn>
+						</DataGrid.Columns>
                     </DataGrid>
 
                     <!-- Estado vacio -->

@@ -487,5 +487,41 @@ namespace ProyectoRuben.MVVM
             RecalcularTotales();
             BusquedaCliente = BusquedaServicio = BusquedaProducto = string.Empty;
         }
+
+        public async Task CargarDesdeReservaAsync(Reserva reserva)
+        {
+            if (reserva == null) return;
+
+            try
+            {
+                // Limpiar estado anterior
+                LimpiarTodo();
+
+                // Esperar a que las listas estén cargadas (se cargan en el constructor async)
+                // Si todavía no hay datos, esperar un tick
+                if (!_todosClientes.Any())
+                    await Task.Delay(300);
+
+                // 1. Seleccionar el cliente
+                var cliente = _todosClientes.FirstOrDefault(c => c.Id == reserva.ClienteId);
+                if (cliente != null)
+                    SeleccionarCliente(cliente);
+
+                // 2. Añadir el servicio al ticket
+                var servicio = _todosServicios.FirstOrDefault(s => s.Id == reserva.ServicioId);
+                if (servicio != null)
+                    AgregarServicio(servicio);
+
+                // 3. Vincular la reserva
+                ReservaVinculada = reserva;
+
+                SnackbarMessageQueue.Enqueue($"Reserva #{reserva.Id} cargada — {cliente?.Nombre ?? "cliente"}");
+            }
+            catch (Exception ex)
+            {
+                SnackbarMessageQueue.Enqueue($"Error al cargar reserva: {ex.Message}");
+            }
+        }
+
     }
 }

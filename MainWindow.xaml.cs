@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using ProyectoRuben.Backend.Servicios;
 using ProyectoRuben.Frontend;
 using ProyectoRuben.MVVM;
 using System;
@@ -15,47 +16,86 @@ namespace ProyectoRuben
         private readonly IServiceProvider _serviceProvider;
 
         // ── Vistas ────────────────────────────────────────────────────────────
+        private readonly UCDashboard _ucDashboard;
         private readonly UCReservas _uCReservas;
         private readonly UCClientes _uCClientes;
         private readonly UCServicios _uCServicios;
         private readonly UCProductos _uCProductos;
         private readonly UCCaja _uCCaja;
-        private readonly UCInventario _ucInventario;
-        private readonly UCReportes _ucReportes;
-        private readonly UCInformes _ucInformes;    // ← nuevo
+        private readonly UCInformes _ucInformes;
 
         private readonly List<UIElement> _dashboardChildren = new();
 
         public MainWindow(MVDashboard mvDashboard,
                           IServiceProvider serviceProvider,
+                          UCDashboard ucDashboard,
                           UCReservas uCReservas,
                           UCClientes uCClientes,
                           UCServicios uCServicios,
                           UCProductos uCProductos,
                           UCCaja uCCaja,
-                          UCInventario ucInventario,
-                          UCReportes ucReportes,
-                          UCInformes ucInformes)   // ← nuevo
+                          UCInformes ucInformes)
         {
             InitializeComponent();
             _mvDashboard = mvDashboard;
             _serviceProvider = serviceProvider;
+            _ucDashboard = ucDashboard;
             _uCReservas = uCReservas;
             _uCClientes = uCClientes;
             _uCServicios = uCServicios;
             _uCProductos = uCProductos;
             _uCCaja = uCCaja;
-            _ucInventario = ucInventario;
-            _ucReportes = ucReportes;
             _ucInformes = ucInformes;
 
             DataContext = _mvDashboard;
             InicializarVentana();
+            InicializarVistas();
+        }
+
+        /// <summary>
+        /// Inyecta las acciones delegadas entre vistas (Opción B).
+        /// MainWindow actúa como mediador: UCReservas no conoce UCCaja ni viceversa.
+        /// </summary>
+        private void InicializarVistas()
+        {
+            // ── UCReservas: botón Cobrar en la lista ──────────────────────────
+            _uCReservas.OnCobrarReserva = (reserva) =>
+            {
+                txtTituloPagina.Text = "Caja - Punto de Venta";
+                var vm = _serviceProvider.GetRequiredService<MVCaja>();
+                _uCCaja.DataContext = vm;
+                DashboardContent.Children.Clear();
+                DashboardContent.Children.Add(_uCCaja);
+                _ = vm.CargarDesdeReservaAsync(reserva);
+            };
+
+            // ── UCDashboard: botón Cobrar en las citas del día ────────────────
+            _ucDashboard.OnCobrarCita = async (reservaId) =>
+            {
+                txtTituloPagina.Text = "Caja - Punto de Venta";
+                var vm = _serviceProvider.GetRequiredService<MVCaja>();
+                _uCCaja.DataContext = vm;
+                DashboardContent.Children.Clear();
+                DashboardContent.Children.Add(_uCCaja);
+
+                // Cargamos la reserva completa desde BD para pasarla al VM de Caja
+                var reservaRepo = _serviceProvider.GetRequiredService<IReservaRepository>();
+                var reserva = await reservaRepo.GetByIdAsync(reservaId);
+                if (reserva != null)
+                    _ = vm.CargarDesdeReservaAsync(reserva);
+            };
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            try { await _mvDashboard.Inicializa(); }
+            try
+            {
+                // Mostrar UCDashboard al arrancar en lugar de los children del XAML
+                _ucDashboard.DataContext = _mvDashboard;
+                DashboardContent.Children.Clear();
+                DashboardContent.Children.Add(_ucDashboard);
+                await _mvDashboard.Inicializa();
+            }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error al inicializar el dashboard: {ex.Message}",
@@ -84,9 +124,9 @@ namespace ProyectoRuben
         private async void btnDashboard_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Dashboard";
+            _ucDashboard.DataContext = _mvDashboard;
             DashboardContent.Children.Clear();
-            foreach (var child in _dashboardChildren)
-                DashboardContent.Children.Add(child);
+            DashboardContent.Children.Add(_ucDashboard);
             await _mvDashboard.Inicializa();
         }
 
@@ -135,15 +175,6 @@ namespace ProyectoRuben
             DashboardContent.Children.Add(_uCCaja);
         }
 
-        private void btnReportes_Click(object sender, RoutedEventArgs e)
-        {
-            txtTituloPagina.Text = "Reportes";
-            var vm = _serviceProvider.GetRequiredService<MVReportes>();
-            _ucReportes.DataContext = vm;
-            DashboardContent.Children.Clear();
-            DashboardContent.Children.Add(_ucReportes);
-        }
-
         private void btnInformes_Click(object sender, RoutedEventArgs e)
         {
             txtTituloPagina.Text = "Informes y Análisis";
@@ -151,15 +182,6 @@ namespace ProyectoRuben
             _ucInformes.DataContext = vm;
             DashboardContent.Children.Clear();
             DashboardContent.Children.Add(_ucInformes);
-        }
-
-        private void btnInventario_Click(object sender, RoutedEventArgs e)
-        {
-            txtTituloPagina.Text = "Control de Stock";
-            var vm = _serviceProvider.GetRequiredService<MVInventario>();
-            _ucInventario.DataContext = vm;
-            DashboardContent.Children.Clear();
-            DashboardContent.Children.Add(_ucInventario);
         }
 
         // ══════════════════════════════════════════════════════════════════════
@@ -190,7 +212,6 @@ namespace ProyectoRuben
                     MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 _timer.Stop();
-                // Login es Transient → instancia nueva y limpia
                 _serviceProvider.GetRequiredService<Login>().Show();
                 Close();
             }

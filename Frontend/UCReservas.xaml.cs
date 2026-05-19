@@ -11,6 +11,13 @@ namespace ProyectoRuben.Frontend
     {
         private readonly IServiceProvider _serviceProvider;
 
+        /// <summary>
+        /// MainWindow asigna esta acción al inicializar.
+        /// Al pulsar "Cobrar" en una reserva, se invoca con el ID
+        /// y MainWindow navega a Caja pre-cargando esa reserva.
+        /// </summary>
+        public Action<Reserva> OnCobrarReserva { get; set; }
+
         public UCReservas(IServiceProvider serviceProvider)
         {
             InitializeComponent();
@@ -19,57 +26,31 @@ namespace ProyectoRuben.Frontend
 
         private MVReservas ViewModel => DataContext as MVReservas;
 
-        // ══════════════════════════════════════════════════════════════════════
-        // MENÚ CONTEXTUAL — click derecho sobre una fila del DataGrid
-        // ══════════════════════════════════════════════════════════════════════
-
-        /// <summary>
-        /// Obtiene la Reserva sobre la que se hizo click derecho.
-        /// El DataContext de la fila es la Reserva; lo buscamos subiendo por el árbol visual.
-        /// </summary>
-        private Reserva ObtenerReservaDelContextMenu(object menuItemSender)
+        // ── Botón "Cobrar" en la fila ─────────────────────────────────────────
+        private void BtnCobrar_Click(object sender, RoutedEventArgs e)
         {
-            if (menuItemSender is MenuItem mi &&
-                mi.CommandParameter is Reserva r)
-                return r;
-
-            // Fallback: leer la fila seleccionada del DataGrid
-            var dg = FindDataGrid();
-            return dg?.SelectedItem as Reserva;
+            if (sender is Button btn && btn.Tag is Reserva reserva)
+                OnCobrarReserva?.Invoke(reserva);
         }
 
-        private DataGrid FindDataGrid()
-        {
-            // El DataGrid está dentro de este UserControl; lo buscamos por nombre si lo tiene,
-            // o simplemente devolvemos null y el caller usa el item del ContextMenu.
-            return null;
-        }
+        // ══════════════════════════════════════════════════════════════════════
+        // MENÚ CONTEXTUAL
+        // ══════════════════════════════════════════════════════════════════════
 
-        // ── Editar ────────────────────────────────────────────────────────────
         private void MenuEditar_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel == null) return;
 
-            // Obtener la reserva del DataContext de la fila (viene via CommandParameter o SelectedItem)
             Reserva reserva = null;
-
             if (sender is MenuItem mi && mi.DataContext is Reserva r)
                 reserva = r;
-
             if (reserva == null) return;
 
-            // Abrir el mismo diálogo de agregar pero con los datos pre-cargados
             var dialogo = new AgregarReserva(ViewModel);
-
-            // Pre-cargar datos de la reserva en el ViewModel
             ViewModel.ReservaEnEdicion = reserva;
             ViewModel.FechaReserva = reserva.Fecha;
-            ViewModel.HoraReserva = DateTime.Today + reserva.Hora;
             ViewModel.HoraHH = reserva.Hora.Hours.ToString("D2");
             ViewModel.HoraMM = reserva.Hora.Minutes.ToString("D2");
-
-            // Cliente y servicio se seleccionarán en el diálogo por el usuario
-            // (pre-selección requiere que las listas estén cargadas, se hace en Loaded)
             dialogo.ReservaAEditar = reserva;
             dialogo.ShowDialog();
 
@@ -77,7 +58,6 @@ namespace ProyectoRuben.Frontend
                 _ = ViewModel.Inicializa();
         }
 
-        // ── Eliminar ──────────────────────────────────────────────────────────
         private async void MenuEliminar_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel == null) return;
@@ -85,35 +65,42 @@ namespace ProyectoRuben.Frontend
             Reserva reserva = null;
             if (sender is MenuItem mi && mi.DataContext is Reserva r)
                 reserva = r;
-
             if (reserva == null) return;
 
-            // Diálogo de confirmación
             var dialogo = new DialogoEliminar(
                 $"¿Seguro que deseas eliminar la reserva de {reserva.Cliente?.Nombre ?? "este cliente"}?")
-            {
-                Owner = Window.GetWindow(this)
-            };
+            { Owner = Window.GetWindow(this) };
 
             if (dialogo.ShowDialog() == true)
                 await ViewModel.EliminarReserva(reserva.Id);
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // BOTÓN NUEVA RESERVA
-        // ══════════════════════════════════════════════════════════════════════
         private async void Agregar_Reserva(object sender, RoutedEventArgs e)
         {
             if (ViewModel == null) return;
-
-            // Limpiar cualquier reserva en edición
             ViewModel.ReservaEnEdicion = null;
+            var dialogo = new AgregarReserva(ViewModel);
+            dialogo.ShowDialog();
+            if (dialogo.DialogResult == true)
+                await ViewModel.Inicializa();
+        }
+
+        private void dgReservas_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (ViewModel == null) return;
+            var reserva = (sender as DataGrid)?.SelectedItem as Reserva;
+            if (reserva == null) return;
 
             var dialogo = new AgregarReserva(ViewModel);
+            ViewModel.ReservaEnEdicion = reserva;
+            ViewModel.FechaReserva = reserva.Fecha;
+            ViewModel.HoraHH = reserva.Hora.Hours.ToString("D2");
+            ViewModel.HoraMM = reserva.Hora.Minutes.ToString("D2");
+            dialogo.ReservaAEditar = reserva;
             dialogo.ShowDialog();
 
             if (dialogo.DialogResult == true)
-                await ViewModel.Inicializa();
+                _ = ViewModel.Inicializa();
         }
     }
 }
