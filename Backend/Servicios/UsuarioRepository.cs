@@ -1,17 +1,14 @@
-using System;
+Ôªøusing System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProyectoRuben.Backen.Modelo;
+using ProyectoRuben.Backend.Servicios; // ‚Üê a√±adir este using
 
 namespace pruebaNavegacion.Backend.Servicios
 {
-    /// <summary>
-    /// ImplementaciÛn de <see cref="IUsuarioRepository"/> basada en <see cref="GenericRepository{T}"/>.
-    /// Proporciona consultas especÌficas para <see cref="Usuario"/>.
-    /// </summary>
     public class UsuarioRepository : GenericRepository<Usuario>, IUsuarioRepository
     {
         private readonly ILogger<UsuarioRepository> _logger;
@@ -22,7 +19,6 @@ namespace pruebaNavegacion.Backend.Servicios
             _logger = logger;
         }
 
-        /// <inheritdoc/>
         public async Task<Usuario?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email)) return null;
@@ -39,7 +35,6 @@ namespace pruebaNavegacion.Backend.Servicios
             }
         }
 
-        /// <inheritdoc/>
         public async Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(email)) return false;
@@ -56,7 +51,6 @@ namespace pruebaNavegacion.Backend.Servicios
             }
         }
 
-        /// <inheritdoc/>
         public async Task<bool> LoginAsync(string usernameOrEmail, string password, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(usernameOrEmail) || string.IsNullOrEmpty(password))
@@ -72,7 +66,7 @@ namespace pruebaNavegacion.Backend.Servicios
 
                 var storedHash = user.Contrasena;
 
-                // Intentar verificar con BCrypt si la librerÌa est· presente en runtime (sin dependencia directa)
+                // Intentar verificar con BCrypt si la librer√≠a est√° presente en runtime
                 try
                 {
                     var bcryptType = AppDomain.CurrentDomain.GetAssemblies()
@@ -89,6 +83,9 @@ namespace pruebaNavegacion.Backend.Servicios
                         if (verifyMethod != null)
                         {
                             var result = (bool)verifyMethod.Invoke(null, new object[] { password, storedHash })!;
+
+                            if (result) SesionUsuario.IniciarSesion(user);
+
                             return result;
                         }
                     }
@@ -98,8 +95,11 @@ namespace pruebaNavegacion.Backend.Servicios
                     _logger.LogDebug(ex, "BCrypt verification attempt failed; falling back to plain compare.");
                 }
 
-                // Fallback: comparaciÛn directa (˙til en entornos de desarrollo o hashes no presentes)
-                return string.Equals(storedHash, password, StringComparison.Ordinal);
+                bool loginCorrecto = string.Equals(storedHash, password, StringComparison.Ordinal);
+
+                if (loginCorrecto) SesionUsuario.IniciarSesion(user);
+
+                return loginCorrecto;
             }
             catch (Exception ex)
             {

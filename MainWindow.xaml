@@ -7,225 +7,250 @@
         Background="#F5F6F7"
         Loaded="MainWindow_Loaded">
 
-    <Window.Resources>
-        <Style x:Key="MenuButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Padding" Value="20,0,0,0"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
+	<Window.Resources>
+		<Style x:Key="MenuButtonStyle" TargetType="Button">
+			<Setter Property="Background" Value="Transparent"/>
+			<Setter Property="Foreground" Value="White"/>
+			<Setter Property="FontSize" Value="14"/>
+			<Setter Property="FontWeight" Value="Medium"/>
+			<Setter Property="Height" Value="50"/>
+			<Setter Property="HorizontalContentAlignment" Value="Left"/>
+			<Setter Property="Padding" Value="20,0,0,0"/>
+			<Setter Property="BorderThickness" Value="0"/>
+			<Setter Property="Cursor" Value="Hand"/>
+		</Style>
 
-        <Style x:Key="StatCardStyle" TargetType="Border">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="CornerRadius" Value="10"/>
-            <Setter Property="Padding" Value="20"/>
-            <Setter Property="Margin" Value="10"/>
-        </Style>
-    </Window.Resources>
+		<Style x:Key="StatCardStyle" TargetType="Border">
+			<Setter Property="Background" Value="White"/>
+			<Setter Property="CornerRadius" Value="10"/>
+			<Setter Property="Padding" Value="20"/>
+			<Setter Property="Margin" Value="10"/>
+		</Style>
+	</Window.Resources>
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="250"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0">
-            <Border.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                    <GradientStop Color="{StaticResource PrimaryColor}" Offset="0"/>
-                    <GradientStop Color="{StaticResource SecondaryColor}" Offset="1"/>
-                </LinearGradientBrush>
-            </Border.Background>
+		<!-- ══ SIDEBAR ══ -->
+		<Border Grid.Column="0">
+			<Border.Background>
+				<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+					<GradientStop Color="{StaticResource PrimaryColor}" Offset="0"/>
+					<GradientStop Color="{StaticResource SecondaryColor}" Offset="1"/>
+				</LinearGradientBrush>
+			</Border.Background>
 
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
 
-                <StackPanel Grid.Row="0" Margin="0,20,0,30">
-                    <Image Source="/Recursos/Imagenes/logo.jpg" Width="120" Height="65" Margin="0,0,0,15"/>
-                    <TextBlock Text="Peluquería Charo" FontSize="18" FontWeight="Bold" 
+				<!-- Logo y título -->
+				<StackPanel Grid.Row="0" Margin="0,20,0,30">
+					<Image Source="/Recursos/Imagenes/logo.jpg" Width="120" Height="65" Margin="0,0,0,15"/>
+					<TextBlock Text="Peluquería Charo" FontSize="18" FontWeight="Bold"
                                Foreground="White" HorizontalAlignment="Center"/>
-                    <TextBlock Text="Sistema de Gestión" FontSize="12" Foreground="#EEEEEE" 
+					<TextBlock Text="Sistema de Gestión" FontSize="12" Foreground="#EEEEEE"
                                HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                </StackPanel>
+				</StackPanel>
 
-                <StackPanel Grid.Row="1">
-                    <Button x:Name="btnDashboard" Content="Dashboard" 
-                            Style="{StaticResource MenuButtonStyle}" 
+				<!-- Menú de navegación -->
+				<StackPanel Grid.Row="1">
+					<Button x:Name="btnDashboard" Content="Dashboard"
+                            Style="{StaticResource MenuButtonStyle}"
                             Click="btnDashboard_Click"/>
 
-                    <Rectangle Height="1" Fill="#44FFFFFF" Margin="20,10"/>
+					<Rectangle Height="1" Fill="#44FFFFFF" Margin="20,10"/>
 
-                    <Expander IsExpanded="True" Background="Transparent" Foreground="White" Padding="10,5">
-                        <Expander.Header>
-                            <TextBlock Text="Gestión Diaria" FontWeight="SemiBold" FontSize="14" Foreground="White"/>
-                        </Expander.Header>
-                        <StackPanel>
-                            <Button x:Name="btnReservas" Content="Reservas" 
-                                   Style="{StaticResource MenuButtonStyle}" 
-                                   Margin="15,0,0,0" Click="btnReservas_Click"/>
-                            <Button x:Name="btnClientes" Content="Clientes" 
-                                   Style="{StaticResource MenuButtonStyle}" 
-                                   Margin="15,0,0,0" Click="btnClientes_Click"/>
-                        </StackPanel>
-                    </Expander>
+					<Expander IsExpanded="True" Background="Transparent" Foreground="White" Padding="10,5">
+						<Expander.Header>
+							<TextBlock Text="Gestión Diaria" FontWeight="SemiBold" FontSize="14" Foreground="White"/>
+						</Expander.Header>
+						<StackPanel>
+							<Button x:Name="btnReservas" Content="Reservas"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Margin="15,0,0,0" Click="btnReservas_Click"/>
+							<Button x:Name="btnClientes" Content="Clientes"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Margin="15,0,0,0" Click="btnClientes_Click"/>
+						</StackPanel>
+					</Expander>
 
-                    <Rectangle Height="1" Fill="#44FFFFFF" Margin="20,5"/>
+					<Rectangle Height="1" Fill="#44FFFFFF" Margin="20,5"/>
 
-                    <Expander IsExpanded="True" Background="Transparent" Foreground="White" Padding="10,5">
-                        <Expander.Header>
-                            <TextBlock Text="Catálogo" FontWeight="SemiBold" FontSize="14" Foreground="White"/>
-                        </Expander.Header>
-                        <StackPanel>
-                            <Button x:Name="btnServicios" Content="Servicios" 
-                                   Style="{StaticResource MenuButtonStyle}" 
-                                   Margin="15,0,0,0" Click="btnServicios_Click"/>
-                            <Button x:Name="btnProductos" Content="Productos" 
-                                   Style="{StaticResource MenuButtonStyle}" 
-                                   Margin="15,0,0,0" Click="btnProductos_Click"/>
-                        </StackPanel>
-                    </Expander>
+					<Expander IsExpanded="True" Background="Transparent" Foreground="White" Padding="10,5">
+						<Expander.Header>
+							<TextBlock Text="Catálogo" FontWeight="SemiBold" FontSize="14" Foreground="White"/>
+						</Expander.Header>
+						<StackPanel>
+							<Button x:Name="btnServicios" Content="Servicios"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Margin="15,0,0,0" Click="btnServicios_Click"/>
+							<Button x:Name="btnProductos" Content="Productos"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Margin="15,0,0,0" Click="btnProductos_Click"/>
+						</StackPanel>
+					</Expander>
 
-                    <Rectangle Height="1" Fill="#44FFFFFF" Margin="20,5"/>
+					<Rectangle Height="1" Fill="#44FFFFFF" Margin="20,5"/>
 
-                    <Expander IsExpanded="False" Background="Transparent" Foreground="White" Padding="10,5">
-                        <Expander.Header>
-                            <TextBlock Text="Finanzas" FontWeight="SemiBold" FontSize="14" Foreground="White"/>
-                        </Expander.Header>
-                        <StackPanel>
-                            <Button x:Name="btnFacturacion" Content="Facturación" 
-                                   Style="{StaticResource MenuButtonStyle}" 
-                                   Margin="15,0,0,0" Click="btnFacturacion_Click"/>
-                            <Button x:Name="btnInformes" Content="Informes"
+					<Expander IsExpanded="False" Background="Transparent" Foreground="White" Padding="10,5">
+						<Expander.Header>
+							<TextBlock Text="Finanzas" FontWeight="SemiBold" FontSize="14" Foreground="White"/>
+						</Expander.Header>
+						<StackPanel>
+							<Button x:Name="btnFacturacion" Content="Facturación"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Margin="15,0,0,0" Click="btnFacturacion_Click"/>
+							<Button x:Name="btnInformes" Content="Informes"
                                     Style="{StaticResource MenuButtonStyle}"
                                     Margin="15,0,0,0" Click="btnInformes_Click"/>
-                        </StackPanel>
-                    </Expander>
+						</StackPanel>
+					</Expander>
 
-                    <Rectangle Height="1" Fill="#44FFFFFF" Margin="20,5"/>
+					<Rectangle Height="1" Fill="#44FFFFFF" Margin="20,5"/>
 
-                </StackPanel>
+					<!-- Sección Administración — solo visible para Administradores -->
+					<Expander x:Name="expanderAdmin"
+                              IsExpanded="False"
+                              Background="Transparent"
+                              Foreground="White"
+                              Padding="10,5"
+                              Visibility="Collapsed">
+						<Expander.Header>
+							<TextBlock Text="⚙ Administración" FontWeight="SemiBold" FontSize="14" Foreground="White"/>
+						</Expander.Header>
+						<StackPanel>
+							<Button x:Name="btnAdministracion" Content="Usuarios y Permisos"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Margin="15,0,0,0" Click="btnAdministracion_Click"/>
+						</StackPanel>
+					</Expander>
 
-                <StackPanel Grid.Row="2" Margin="0,0,0,20">
-                    <Rectangle Height="1" Fill="#44FFFFFF" Margin="20,0,20,10"/>
+				</StackPanel>
 
-                    <Border Background="#33FFFFFF" CornerRadius="8" Padding="15,10" Margin="15,0,15,10">
-                        <StackPanel>
-                            <TextBlock x:Name="txtUsuarioNombre" Text="Administrador" 
+				<!-- Info usuario + cerrar sesión -->
+				<StackPanel Grid.Row="2" Margin="0,0,0,20">
+					<Rectangle Height="1" Fill="#44FFFFFF" Margin="20,0,20,10"/>
+
+					<Border Background="#33FFFFFF" CornerRadius="8" Padding="15,10" Margin="15,0,15,10">
+						<StackPanel>
+							<!-- Ya no hardcodeado — se rellena desde SesionUsuario en code-behind -->
+							<TextBlock x:Name="txtUsuarioNombre"
                                        FontWeight="Bold" Foreground="White" FontSize="14"/>
-                            <TextBlock x:Name="txtUsuarioRol" Text="Admin" 
+							<TextBlock x:Name="txtUsuarioRol"
                                        Foreground="#EEEEEE" FontSize="11" Margin="0,2,0,0"/>
-                        </StackPanel>
-                    </Border>
+						</StackPanel>
+					</Border>
 
-                    <Button x:Name="btnCerrarSesion" Content="Cerrar Sesión" 
-                           Style="{StaticResource MenuButtonStyle}" 
-                           Click="btnCerrarSesion_Click"/>
-                </StackPanel>
-            </Grid>
-        </Border>
+					<Button x:Name="btnCerrarSesion" Content="Cerrar Sesión"
+                            Style="{StaticResource MenuButtonStyle}"
+                            Click="btnCerrarSesion_Click"/>
+				</StackPanel>
+			</Grid>
+		</Border>
 
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+		<!-- ══ CONTENIDO PRINCIPAL ══ -->
+		<Grid Grid.Column="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="60"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="White">
-                <Grid>
-                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="30,0,0,0">
-                        <TextBlock x:Name="txtTituloPagina" Text="Dashboard" FontSize="24" 
+			<!-- Topbar -->
+			<Border Grid.Row="0" Background="White">
+				<Grid>
+					<StackPanel VerticalAlignment="Center" Orientation="Horizontal" Margin="30,0,0,0">
+						<TextBlock x:Name="txtTituloPagina" Text="Dashboard" FontSize="24"
                                    FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}"/>
-                        <TextBlock x:Name="txtFechaHora" Text="Cargando fecha..." 
-                                   FontSize="14" Foreground="#666666" 
+						<TextBlock x:Name="txtFechaHora" Text="Cargando fecha..."
+                                   FontSize="14" Foreground="#666666"
                                    VerticalAlignment="Bottom" Margin="20,0,0,3"/>
-                    </StackPanel>
+					</StackPanel>
 
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" 
+					<StackPanel Orientation="Horizontal" VerticalAlignment="Center"
                                 HorizontalAlignment="Right" Margin="0,0,30,0">
-                        <Button x:Name="btnMinimizar" Content="─" Width="40" Height="40" 
-                                Background="Transparent" BorderThickness="0" Cursor="Hand" 
+						<Button x:Name="btnMinimizar" Content="─" Width="40" Height="40"
+                                Background="Transparent" BorderThickness="0" Cursor="Hand"
                                 FontSize="16" Foreground="#666666" Margin="0,0,5,0"
                                 Click="btnMinimizar_Click"/>
-                        <Button x:Name="btnMaximizar" Content="□" Width="40" Height="40" 
-                                Background="Transparent" BorderThickness="0" Cursor="Hand" 
+						<Button x:Name="btnMaximizar" Content="□" Width="40" Height="40"
+                                Background="Transparent" BorderThickness="0" Cursor="Hand"
                                 FontSize="16" Foreground="#666666" Margin="0,0,5,0"
                                 Click="btnMaximizar_Click"/>
-                        <Button x:Name="btnCerrar" Content="✕" Width="40" Height="40" 
-                                Background="Transparent" BorderThickness="0" Cursor="Hand" 
-                                FontSize="16" Foreground="#666666" 
+						<Button x:Name="btnCerrar" Content="✕" Width="40" Height="40"
+                                Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                FontSize="16" Foreground="#666666"
                                 Click="btnCerrar_Click"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
+					</StackPanel>
+				</Grid>
+			</Border>
 
-            <Grid x:Name="DashboardContent" Grid.Row="1" Margin="20">
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
+			<!-- Área de contenido dinámico -->
+			<Grid x:Name="DashboardContent" Grid.Row="1" Margin="20">
+				<ScrollViewer VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel>
-                        <Grid Margin="0,10,0,20">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+					<StackPanel>
+						<Grid Margin="0,10,0,20">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="*"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
 
-                            <Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="Reservas Hoy" FontSize="14" Foreground="#666666"/>
-                                    <TextBlock Text="{Binding ReservasHoy}" FontSize="32"
+							<Border Grid.Column="0" Style="{StaticResource StatCardStyle}">
+								<StackPanel>
+									<TextBlock Text="Reservas Hoy" FontSize="14" Foreground="#666666"/>
+									<TextBlock Text="{Binding ReservasHoy}" FontSize="32"
                                                FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                                Margin="0,10,0,0"/>
-                                    <TextBlock Text="Datos en tiempo real" FontSize="12" Foreground="Green" Margin="0,5,0,0"/>
-                                </StackPanel>
-                            </Border>
+									<TextBlock Text="Datos en tiempo real" FontSize="12" Foreground="Green" Margin="0,5,0,0"/>
+								</StackPanel>
+							</Border>
 
-                            <Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="Clientes Atendidos" FontSize="14" Foreground="#666666"/>
-                                    <TextBlock Text="{Binding ClientesAtendidosMes}" FontSize="32"
+							<Border Grid.Column="1" Style="{StaticResource StatCardStyle}">
+								<StackPanel>
+									<TextBlock Text="Clientes Atendidos" FontSize="14" Foreground="#666666"/>
+									<TextBlock Text="{Binding ClientesAtendidosMes}" FontSize="32"
                                                FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                                Margin="0,10,0,0"/>
-                                    <TextBlock Text="Este mes" FontSize="12" Foreground="#666666" Margin="0,5,0,0"/>
-                                </StackPanel>
-                            </Border>
+									<TextBlock Text="Este mes" FontSize="12" Foreground="#666666" Margin="0,5,0,0"/>
+								</StackPanel>
+							</Border>
 
-                            <Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="Ingresos Hoy" FontSize="14" Foreground="#666666"/>
-                                    <TextBlock Text="{Binding IngresosHoy}" FontSize="32"
+							<Border Grid.Column="2" Style="{StaticResource StatCardStyle}">
+								<StackPanel>
+									<TextBlock Text="Ingresos Hoy" FontSize="14" Foreground="#666666"/>
+									<TextBlock Text="{Binding IngresosHoy}" FontSize="32"
                                                FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                                Margin="0,10,0,0"/>
-                                    <TextBlock Text="+15% vs promedio" FontSize="12" Foreground="Green" Margin="0,5,0,0"/>
-                                </StackPanel>
-                            </Border>
+									<TextBlock Text="+15% vs promedio" FontSize="12" Foreground="Green" Margin="0,5,0,0"/>
+								</StackPanel>
+							</Border>
 
-                            <Border Grid.Column="3" Style="{StaticResource StatCardStyle}">
-                                <StackPanel>
-                                    <TextBlock Text="Stock Bajo" FontSize="14" Foreground="#666666"/>
-                                    <TextBlock Text="{Binding ProductosBajoStock}" FontSize="32"
+							<Border Grid.Column="3" Style="{StaticResource StatCardStyle}">
+								<StackPanel>
+									<TextBlock Text="Stock Bajo" FontSize="14" Foreground="#666666"/>
+									<TextBlock Text="{Binding ProductosBajoStock}" FontSize="32"
                                                FontWeight="Bold" Foreground="Orange"
                                                Margin="0,10,0,0"/>
-                                    <TextBlock Text="Requieren atención" FontSize="12" Foreground="Orange" Margin="0,5,0,0"/>
-                                </StackPanel>
-                            </Border>
-                        </Grid>
+									<TextBlock Text="Requieren atención" FontSize="12" Foreground="Orange" Margin="0,5,0,0"/>
+								</StackPanel>
+							</Border>
+						</Grid>
 
-                        <Border Style="{StaticResource StatCardStyle}" Margin="10,0">
-                            <StackPanel>
-                                <TextBlock Text="Próximas Citas del Día" FontSize="18"
+						<Border Style="{StaticResource StatCardStyle}" Margin="10,0">
+							<StackPanel>
+								<TextBlock Text="Próximas Citas del Día" FontSize="18"
                                            FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}"
                                            Margin="0,0,0,15"/>
-                                <DataGrid x:Name="dgProximasCitas"
+								<DataGrid x:Name="dgProximasCitas"
                                           ItemsSource="{Binding ProximasCitas}"
                                           AutoGenerateColumns="False"
                                           IsReadOnly="True"
@@ -235,19 +260,19 @@
                                           BorderThickness="0"
                                           RowHeight="40"
                                           MaxHeight="400">
-                                    <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Hora"     Binding="{Binding Hora}"     Width="80"/>
-                                        <DataGridTextColumn Header="Cliente"  Binding="{Binding Cliente}"  Width="*"/>
-                                        <DataGridTextColumn Header="Servicio" Binding="{Binding Servicio}" Width="*"/>
-                                        <DataGridTextColumn Header="Empleado" Binding="{Binding Empleado}" Width="*"/>
-                                        <DataGridTextColumn Header="Estado"   Binding="{Binding Estado}"   Width="120"/>
-                                    </DataGrid.Columns>
-                                </DataGrid>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-            </Grid>
-        </Grid>
-    </Grid>
+									<DataGrid.Columns>
+										<DataGridTextColumn Header="Hora"     Binding="{Binding Hora}"     Width="80"/>
+										<DataGridTextColumn Header="Cliente"  Binding="{Binding Cliente}"  Width="*"/>
+										<DataGridTextColumn Header="Servicio" Binding="{Binding Servicio}" Width="*"/>
+										<DataGridTextColumn Header="Empleado" Binding="{Binding Empleado}" Width="*"/>
+										<DataGridTextColumn Header="Estado"   Binding="{Binding Estado}"   Width="120"/>
+									</DataGrid.Columns>
+								</DataGrid>
+							</StackPanel>
+						</Border>
+					</StackPanel>
+				</ScrollViewer>
+			</Grid>
+		</Grid>
+	</Grid>
 </Window>

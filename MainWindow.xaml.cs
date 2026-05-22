@@ -23,6 +23,7 @@ namespace ProyectoRuben
         private readonly UCProductos _uCProductos;
         private readonly UCCaja _uCCaja;
         private readonly UCInformes _ucInformes;
+        private readonly UCAdministracion _ucAdministracion;
 
         private readonly List<UIElement> _dashboardChildren = new();
 
@@ -34,7 +35,8 @@ namespace ProyectoRuben
                           UCServicios uCServicios,
                           UCProductos uCProductos,
                           UCCaja uCCaja,
-                          UCInformes ucInformes)
+                          UCInformes ucInformes,
+                          UCAdministracion ucAdministracion)
         {
             InitializeComponent();
             _mvDashboard = mvDashboard;
@@ -46,16 +48,13 @@ namespace ProyectoRuben
             _uCProductos = uCProductos;
             _uCCaja = uCCaja;
             _ucInformes = ucInformes;
+            _ucAdministracion = ucAdministracion;
 
             DataContext = _mvDashboard;
             InicializarVentana();
             InicializarVistas();
         }
 
-        /// <summary>
-        /// Inyecta las acciones delegadas entre vistas (Opción B).
-        /// MainWindow actúa como mediador: UCReservas no conoce UCCaja ni viceversa.
-        /// </summary>
         private void InicializarVistas()
         {
             // ── UCReservas: botón Cobrar en la lista ──────────────────────────
@@ -78,29 +77,11 @@ namespace ProyectoRuben
                 DashboardContent.Children.Clear();
                 DashboardContent.Children.Add(_uCCaja);
 
-                // Cargamos la reserva completa desde BD para pasarla al VM de Caja
                 var reservaRepo = _serviceProvider.GetRequiredService<IReservaRepository>();
                 var reserva = await reservaRepo.GetByIdAsync(reservaId);
                 if (reserva != null)
                     _ = vm.CargarDesdeReservaAsync(reserva);
             };
-        }
-
-        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Mostrar UCDashboard al arrancar en lugar de los children del XAML
-                _ucDashboard.DataContext = _mvDashboard;
-                DashboardContent.Children.Clear();
-                DashboardContent.Children.Add(_ucDashboard);
-                await _mvDashboard.Inicializa();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al inicializar el dashboard: {ex.Message}",
-                    "Error de inicio", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
 
         private void InicializarVentana()
@@ -112,6 +93,32 @@ namespace ProyectoRuben
 
             foreach (UIElement child in DashboardContent.Children)
                 _dashboardChildren.Add(child);
+        }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var usuario = SesionUsuario.UsuarioActual;
+                if (usuario != null)
+                {
+                    txtUsuarioNombre.Text = usuario.Nombre;
+                    txtUsuarioRol.Text = usuario.Rol;
+
+                    if (SesionUsuario.EsAdministrador)
+                        expanderAdmin.Visibility = Visibility.Visible;
+                }
+
+                _ucDashboard.DataContext = _mvDashboard;
+                DashboardContent.Children.Clear();
+                DashboardContent.Children.Add(_ucDashboard);
+                await _mvDashboard.Inicializa();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al inicializar el dashboard: {ex.Message}",
+                    "Error de inicio", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ActualizarFechaHora() =>
@@ -184,6 +191,16 @@ namespace ProyectoRuben
             DashboardContent.Children.Add(_ucInformes);
         }
 
+        private async void btnAdministracion_Click(object sender, RoutedEventArgs e)
+        {
+            txtTituloPagina.Text = "Administración - Usuarios y Permisos";
+            var vm = _serviceProvider.GetRequiredService<MVAdministracion>();
+            _ucAdministracion.DataContext = vm;
+            DashboardContent.Children.Clear();
+            DashboardContent.Children.Add(_ucAdministracion);
+            await vm.CargarAsync();
+        }
+
         // ══════════════════════════════════════════════════════════════════════
         // CONTROLES DE VENTANA
         // ══════════════════════════════════════════════════════════════════════
@@ -212,6 +229,7 @@ namespace ProyectoRuben
                     MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 _timer.Stop();
+                SesionUsuario.CerrarSesion(); // ← limpiar sesión al salir
                 _serviceProvider.GetRequiredService<Login>().Show();
                 Close();
             }
