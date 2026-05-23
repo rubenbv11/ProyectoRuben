@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ProyectoRuben.Backen.Modelo;
-using ProyectoRuben.Backend.Servicios; // ← añadir este using
+using ProyectoRuben.Backend.Servicios;
+using BCrypt.Net;
 
 namespace pruebaNavegacion.Backend.Servicios
 {
@@ -59,43 +60,17 @@ namespace pruebaNavegacion.Backend.Servicios
             try
             {
                 var user = await Query(asNoTracking: true)
-                    .FirstOrDefaultAsync(u => u.Email == usernameOrEmail || u.Nombre == usernameOrEmail, cancellationToken);
+                    .FirstOrDefaultAsync(u => u.Email == usernameOrEmail
+                                           || u.Nombre == usernameOrEmail, cancellationToken);
 
                 if (user == null || string.IsNullOrEmpty(user.Contrasena))
                     return false;
 
-                var storedHash = user.Contrasena;
+                // BCrypt directo — sin reflexión
+                bool loginCorrecto = BCrypt.Net.BCrypt.Verify(password, user.Contrasena);
 
-                // Intentar verificar con BCrypt si la librería está presente en runtime
-                try
-                {
-                    var bcryptType = AppDomain.CurrentDomain.GetAssemblies()
-                        .SelectMany(a =>
-                        {
-                            try { return a.GetTypes(); }
-                            catch { return Array.Empty<Type>(); }
-                        })
-                        .FirstOrDefault(t => t.FullName == "BCrypt.Net.BCrypt");
-
-                    if (bcryptType != null)
-                    {
-                        var verifyMethod = bcryptType.GetMethod("Verify", new[] { typeof(string), typeof(string) });
-                        if (verifyMethod != null)
-                        {
-                            var result = (bool)verifyMethod.Invoke(null, new object[] { password, storedHash })!;
-
-                            if (result) SesionUsuario.IniciarSesion(user);
-
-                            return result;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogDebug(ex, "BCrypt verification attempt failed; falling back to plain compare.");
-                }
-
-                bool loginCorrecto = string.Equals(storedHash, password, StringComparison.Ordinal);
+                _logger.LogInformation("Login: usuario={U}, resultado={R}",
+                    usernameOrEmail, loginCorrecto);
 
                 if (loginCorrecto) SesionUsuario.IniciarSesion(user);
 

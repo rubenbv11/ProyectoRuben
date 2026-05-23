@@ -57,16 +57,16 @@ namespace ProyectoRuben
             services.AddSingleton<MVInformes>();
             services.AddSingleton<MVAdministracion>();
 
-            // ── Vistas → Transient MainWindow, Singleton el resto ─────────────
-            services.AddTransient<MainWindow>();   // ← Transient para poder recrearla al volver a login
-            services.AddSingleton<UCDashboard>();
-            services.AddSingleton<UCReservas>();
-            services.AddSingleton<UCClientes>();
-            services.AddSingleton<UCServicios>();
-            services.AddSingleton<UCProductos>();
-            services.AddSingleton<UCCaja>();
-            services.AddSingleton<UCInformes>();
-            services.AddSingleton<UCAdministracion>();
+            // ── Vistas → Transient (se recrean en cada login) ─────────────────
+            services.AddTransient<MainWindow>();
+            services.AddTransient<UCDashboard>();
+            services.AddTransient<UCReservas>();
+            services.AddTransient<UCClientes>();
+            services.AddTransient<UCServicios>();
+            services.AddTransient<UCProductos>();
+            services.AddTransient<UCCaja>();
+            services.AddTransient<UCInformes>();
+            services.AddTransient<UCAdministracion>();
 
             // ── Ventanas modales → Transient ──────────────────────────────────
             services.AddTransient<Login>();
@@ -74,10 +74,9 @@ namespace ProyectoRuben
             services.AddTransient<AgregarCliente>();
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             var culture = new CultureInfo("es-ES");
-
             CultureInfo.DefaultThreadCurrentCulture = culture;
             CultureInfo.DefaultThreadCurrentUICulture = culture;
             Thread.CurrentThread.CurrentCulture = culture;
@@ -87,6 +86,22 @@ namespace ProyectoRuben
                 typeof(FrameworkElement),
                 new FrameworkPropertyMetadata(
                     XmlLanguage.GetLanguage(culture.IetfLanguageTag)));
+
+            // ── Migración BCrypt automática ───────────────────────────────────
+            var context = _serviceProvider
+                .GetRequiredService<GestioninventarioyserviciosContext>();
+            var usuarios = context.Usuarios.ToList();
+            bool hayCambios = false;
+            foreach (var u in usuarios)
+            {
+                if (!u.Contrasena.StartsWith("$2"))
+                {
+                    u.Contrasena = BCrypt.Net.BCrypt.HashPassword(u.Contrasena);
+                    hayCambios = true;
+                }
+            }
+            if (hayCambios) await context.SaveChangesAsync();
+            // ─────────────────────────────────────────────────────────────────
 
             _serviceProvider.GetRequiredService<Login>().Show();
             base.OnStartup(e);

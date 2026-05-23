@@ -263,7 +263,7 @@ namespace ProyectoRuben.MVVM
                     {
                         ClienteId = ClienteSeleccionado.Id,
                         ServicioId = ServicioSeleccionado.Id,
-                        EmpleadoId = 1, // TODO: sustituir por el usuario logueado
+                        EmpleadoId = SesionUsuario.UsuarioActual?.Id ?? 1,
                         Fecha = fechaFinal.Date,
                         Hora = fechaFinal.TimeOfDay,
                         Estado = "Pendiente",

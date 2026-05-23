@@ -442,10 +442,11 @@ namespace ProyectoRuben.MVVM
                 var factura = new Factura
                 {
                     ClienteId = ClienteSeleccionado.Id,
-                    UsuarioId = 1, // TODO: usuario logueado
+                    UsuarioId = SesionUsuario.UsuarioActual?.Id ?? 1,
                     ReservaId = ReservaVinculada?.Id,
                     Fecha = DateTime.Now,
                     Subtotal = Subtotal,
+                    Impuesto = Math.Round(Subtotal * 0.21m, 2), 
                     Descuento = DescuentoAplicado,
                     Total = Total,
                     MetodoPago = MetodoPago,

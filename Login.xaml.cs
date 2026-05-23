@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using ProyectoRuben.Backend.Servicios;
+using ProyectoRuben.Frontend;
 using pruebaNavegacion.Backend.Servicios;
 using System;
 using System.Windows;
@@ -32,10 +34,12 @@ namespace ProyectoRuben
 
                 if (!isAuthenticated)
                 {
-                    MessageBox.Show("Usuario o clave incorrectos.", "Error de autenticación",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    MensajeError.Mostrar("Error de autenticación", "Usuario o clave incorrectos.", 3);
                     return;
                 }
+
+                var nombre = SesionUsuario.UsuarioActual?.Nombre ?? "Usuario";
+                MensajeInformacion.Mostrar("Acceso correcto", $"Bienvenido, {nombre}.", 2);
 
                 var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
                 mainWindow.Show();
@@ -43,8 +47,7 @@ namespace ProyectoRuben
             }
             else
             {
-                MessageBox.Show("Por favor, introduzca usuario y clave.", "Datos incompletos",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MensajeAdvertencia.Mostrar("Datos incompletos", "Por favor, introduzca usuario y clave.", 3);
             }
         }
 
