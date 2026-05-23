@@ -57,8 +57,8 @@ namespace ProyectoRuben
             services.AddSingleton<MVInformes>();
             services.AddSingleton<MVAdministracion>();
 
-            // ── Vistas → Singleton ────────────────────────────────────────────
-            services.AddSingleton<MainWindow>();
+            // ── Vistas → Transient MainWindow, Singleton el resto ─────────────
+            services.AddTransient<MainWindow>();   // ← Transient para poder recrearla al volver a login
             services.AddSingleton<UCDashboard>();
             services.AddSingleton<UCReservas>();
             services.AddSingleton<UCClientes>();
