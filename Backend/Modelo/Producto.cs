@@ -75,7 +75,8 @@ public partial class Producto : INotifyPropertyChanged
     /// Categoría del producto para agrupar en UCCaja.
     /// No mapeada a BD.
     /// </summary>
-    [NotMapped]
+    [Column("Categoria")]
+    [StringLength(50)]
     public string? Categoria { get; set; }
 
     /// <summary>

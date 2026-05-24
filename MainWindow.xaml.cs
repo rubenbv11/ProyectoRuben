@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
 using ProyectoRuben.Frontend;
 using ProyectoRuben.MVVM;
@@ -15,7 +17,6 @@ namespace ProyectoRuben
         private readonly MVDashboard _mvDashboard;
         private readonly IServiceProvider _serviceProvider;
 
-        // ── Vistas ────────────────────────────────────────────────────────────
         private readonly UCDashboard _ucDashboard;
         private readonly UCReservas _uCReservas;
         private readonly UCClientes _uCClientes;
@@ -57,7 +58,6 @@ namespace ProyectoRuben
 
         private void InicializarVistas()
         {
-            // ── UCReservas: botón Cobrar en la lista ──────────────────────────
             _uCReservas.OnCobrarReserva = (reserva) =>
             {
                 txtTituloPagina.Text = "Caja - Punto de Venta";
@@ -68,7 +68,6 @@ namespace ProyectoRuben
                 _ = vm.CargarDesdeReservaAsync(reserva);
             };
 
-            // ── UCDashboard: botón Cobrar en las citas del día ────────────────
             _ucDashboard.OnCobrarCita = async (reservaId) =>
             {
                 txtTituloPagina.Text = "Caja - Punto de Venta";
@@ -77,8 +76,10 @@ namespace ProyectoRuben
                 DashboardContent.Children.Clear();
                 DashboardContent.Children.Add(_uCCaja);
 
-                var reservaRepo = _serviceProvider.GetRequiredService<IReservaRepository>();
-                var reserva = await reservaRepo.GetByIdAsync(reservaId);
+                var contextFactory = _serviceProvider
+                    .GetRequiredService<IDbContextFactory<GestioninventarioyserviciosContext>>();
+                await using var ctx = await contextFactory.CreateDbContextAsync();
+                var reserva = await ctx.Reservas.FindAsync(reservaId);
                 if (reserva != null)
                     _ = vm.CargarDesdeReservaAsync(reserva);
             };
@@ -123,10 +124,6 @@ namespace ProyectoRuben
 
         private void ActualizarFechaHora() =>
             txtFechaHora.Text = DateTime.Now.ToString("dddd, dd 'de' MMMM yyyy - HH:mm:ss");
-
-        // ══════════════════════════════════════════════════════════════════════
-        // NAVEGACIÓN
-        // ══════════════════════════════════════════════════════════════════════
 
         private async void btnDashboard_Click(object sender, RoutedEventArgs e)
         {
@@ -201,10 +198,6 @@ namespace ProyectoRuben
             await vm.CargarAsync();
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // CONTROLES DE VENTANA
-        // ══════════════════════════════════════════════════════════════════════
-
         private void btnMinimizar_Click(object sender, RoutedEventArgs e) =>
             WindowState = WindowState.Minimized;
 
@@ -229,8 +222,9 @@ namespace ProyectoRuben
                     MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 _timer.Stop();
-                SesionUsuario.CerrarSesion(); // ← limpiar sesión al salir
-                _serviceProvider.GetRequiredService<Login>().Show();
+                SesionUsuario.CerrarSesion();
+                var login = _serviceProvider.GetRequiredService<Login>();
+                login.Show();
                 Close();
             }
         }

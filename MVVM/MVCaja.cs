@@ -1,4 +1,5 @@
 ﻿using di.proyecto.clase._2025.Frontend.Mensajes;
+using Microsoft.Extensions.DependencyInjection;
 using ProyectoRuben.Backen.Modelo;
 using ProyectoRuben.Backend.Servicios;
 using ProyectoRuben.Frontend;
@@ -13,16 +14,13 @@ using System.Windows.Input;
 
 namespace ProyectoRuben.MVVM
 {
-    // ── Grupo de categoría para el acordeón del catálogo ─────────────────────
     public class GrupoServicio : MVBase
     {
         public string Categoria { get; set; } = string.Empty;
         public string Icono { get; set; } = "Scissors";
         public ObservableCollection<Servicio> Items { get; set; } = new();
-
         private bool _expandido = true;
         public bool Expandido { get => _expandido; set => SetProperty(ref _expandido, value); }
-
         public ICommand ToggleCommand { get; }
         public GrupoServicio() => ToggleCommand = new RelayCommand(_ => Expandido = !Expandido);
     }
@@ -32,21 +30,18 @@ namespace ProyectoRuben.MVVM
         public string Categoria { get; set; } = string.Empty;
         public string Icono { get; set; } = "PackageVariant";
         public ObservableCollection<Producto> Items { get; set; } = new();
-
         private bool _expandido = true;
         public bool Expandido { get => _expandido; set => SetProperty(ref _expandido, value); }
-
         public ICommand ToggleCommand { get; }
         public GrupoProducto() => ToggleCommand = new RelayCommand(_ => Expandido = !Expandido);
     }
 
-    // ── Línea del ticket ──────────────────────────────────────────────────────
     public class LineaTicket : ValidatableViewModel
     {
         private string _descripcion = string.Empty;
         private int _cantidad = 1;
         private decimal _precioUnitario;
-        private string _tipo = "Servicio"; // "Servicio" | "Producto"
+        private string _tipo = "Servicio";
 
         public string Descripcion
         {
@@ -67,7 +62,6 @@ namespace ProyectoRuben.MVVM
         public decimal Importe => Cantidad * PrecioUnitario;
     }
 
-    // ── ViewModel Caja ────────────────────────────────────────────────────────
     public class MVCaja : MVBase
     {
         private readonly IFacturaRepository _facturaRepository;
@@ -75,8 +69,8 @@ namespace ProyectoRuben.MVVM
         private readonly IClienteRepository _clienteRepository;
         private readonly IServicioRepository _servicioRepository;
         private readonly IProductoRepository _productoRepository;
+        private readonly IServiceProvider _serviceProvider;
 
-        // ── Cliente / Reserva ─────────────────────────────────────────────────
         private Cliente? _clienteSeleccionado;
         public Cliente? ClienteSeleccionado
         {
@@ -102,7 +96,6 @@ namespace ProyectoRuben.MVVM
         public string NombreCliente => ClienteSeleccionado?.Nombre ?? string.Empty;
         public string TelefonoCliente => ClienteSeleccionado?.Telefono ?? string.Empty;
 
-        // ── Búsqueda ──────────────────────────────────────────────────────────
         private string _busquedaCliente = string.Empty;
         public string BusquedaCliente
         {
@@ -162,12 +155,10 @@ namespace ProyectoRuben.MVVM
             set => SetProperty(ref _gruposProductos, value);
         }
 
-        // Listas completas en memoria
-        private System.Collections.Generic.List<Cliente> _todosClientes = new();
-        private System.Collections.Generic.List<Servicio> _todosServicios = new();
-        private System.Collections.Generic.List<Producto> _todosProductos = new();
+        private List<Cliente> _todosClientes = new();
+        private List<Servicio> _todosServicios = new();
+        private List<Producto> _todosProductos = new();
 
-        // ── Ticket ────────────────────────────────────────────────────────────
         private ObservableCollection<LineaTicket> _lineasTicket = new();
         public ObservableCollection<LineaTicket> LineasTicket
         {
@@ -175,7 +166,6 @@ namespace ProyectoRuben.MVVM
             set => SetProperty(ref _lineasTicket, value);
         }
 
-        // ── Totales ───────────────────────────────────────────────────────────
         private decimal _descuento;
         public decimal Descuento
         {
@@ -195,7 +185,6 @@ namespace ProyectoRuben.MVVM
         public decimal DescuentoAplicado { get => _descuentoAplicado; private set { SetProperty(ref _descuentoAplicado, value); OnPropertyChanged(nameof(DescuentoTexto)); } }
         public string DescuentoTexto => "-" + DescuentoAplicado.ToString("F2") + " €";
 
-        // ── Pago ──────────────────────────────────────────────────────────────
         private string _metodoPago = "Efectivo";
         public string MetodoPago { get => _metodoPago; set => SetProperty(ref _metodoPago, value); }
 
@@ -204,19 +193,16 @@ namespace ProyectoRuben.MVVM
             "Efectivo", "Tarjeta", "Transferencia", "Mixto"
         };
 
-        // ── Estado carga ──────────────────────────────────────────────────────
         private bool _ticketVacio = true;
         public bool TicketVacio { get => _ticketVacio; set => SetProperty(ref _ticketVacio, value); }
 
         private bool _cobrando;
         public bool Cobrando { get => _cobrando; set => SetProperty(ref _cobrando, value); }
 
-        // ── Panel activo (servicios / productos) ──────────────────────────────
         private bool _panelServicios = true;
         public bool PanelServicios { get => _panelServicios; set { SetProperty(ref _panelServicios, value); OnPropertyChanged(nameof(PanelProductos)); } }
         public bool PanelProductos => !_panelServicios;
 
-        // ── Comandos ──────────────────────────────────────────────────────────
         public ICommand SeleccionarClienteCommand { get; }
         public ICommand LimpiarClienteCommand { get; }
         public ICommand AgregarServicioCommand { get; }
@@ -230,18 +216,19 @@ namespace ProyectoRuben.MVVM
         public ICommand MostrarProductosCommand { get; }
         public ICommand SeleccionarMetodoPagoCommand { get; }
 
-        // ═════════════════════════════════════════════════════════════════════
         public MVCaja(IFacturaRepository facturaRepository,
                       IReservaRepository reservaRepository,
                       IClienteRepository clienteRepository,
                       IServicioRepository servicioRepository,
-                      IProductoRepository productoRepository)
+                      IProductoRepository productoRepository,
+                      IServiceProvider serviceProvider)
         {
             _facturaRepository = facturaRepository;
             _reservaRepository = reservaRepository;
             _clienteRepository = clienteRepository;
             _servicioRepository = servicioRepository;
             _productoRepository = productoRepository;
+            _serviceProvider = serviceProvider;
 
             SeleccionarClienteCommand = new RelayCommand(p => SeleccionarCliente(p as Cliente));
             LimpiarClienteCommand = new RelayCommand(_ => LimpiarCliente());
@@ -259,7 +246,6 @@ namespace ProyectoRuben.MVVM
             _ = CargarCatalogos();
         }
 
-        // ── Carga catálogos ───────────────────────────────────────────────────
         private async Task CargarCatalogos()
         {
             try
@@ -281,7 +267,6 @@ namespace ProyectoRuben.MVVM
             }
         }
 
-        // ── Filtros ───────────────────────────────────────────────────────────
         private void FiltrarClientes()
         {
             var filtro = _busquedaCliente.Trim();
@@ -313,7 +298,6 @@ namespace ProyectoRuben.MVVM
             ProductosFiltrados = new ObservableCollection<Producto>(lista);
         }
 
-        // Iconos por categoría de servicio
         private static readonly Dictionary<string, string> _iconosServicio = new()
         {
             ["Corte"] = "Scissors",
@@ -324,7 +308,6 @@ namespace ProyectoRuben.MVVM
             ["General"] = "TagMultiple",
         };
 
-        // Iconos por categoría de producto
         private static readonly Dictionary<string, string> _iconosProducto = new()
         {
             ["Cabello"] = "HairDryer",
@@ -339,9 +322,7 @@ namespace ProyectoRuben.MVVM
 
         private void ActualizarGruposServicios()
         {
-            // Preservar estado expandido de grupos existentes
             var estadoActual = _gruposServicios.ToDictionary(g => g.Categoria, g => g.Expandido);
-
             var grupos = _serviciosFiltrados
                 .GroupBy(s => string.IsNullOrEmpty(s.Categoria) ? "General" : s.Categoria)
                 .OrderBy(g => g.Key)
@@ -352,14 +333,12 @@ namespace ProyectoRuben.MVVM
                     Items = new ObservableCollection<Servicio>(g.OrderBy(s => s.Nombre)),
                     Expandido = estadoActual.TryGetValue(g.Key, out var exp) ? exp : true,
                 });
-
             GruposServicios = new ObservableCollection<GrupoServicio>(grupos);
         }
 
         private void ActualizarGruposProductos()
         {
             var estadoActual = _gruposProductos.ToDictionary(g => g.Categoria, g => g.Expandido);
-
             var grupos = _productosFiltrados
                 .GroupBy(p => string.IsNullOrEmpty(p.Categoria) ? "General" : p.Categoria)
                 .OrderBy(g => g.Key)
@@ -370,11 +349,9 @@ namespace ProyectoRuben.MVVM
                     Items = new ObservableCollection<Producto>(g.OrderBy(p => p.Nombre)),
                     Expandido = estadoActual.TryGetValue(g.Key, out var exp) ? exp : true,
                 });
-
             GruposProductos = new ObservableCollection<GrupoProducto>(grupos);
         }
 
-        // ── Operaciones ───────────────────────────────────────────────────────
         private void SeleccionarCliente(Cliente? c)
         {
             if (c == null) return;
@@ -427,7 +404,6 @@ namespace ProyectoRuben.MVVM
             TicketVacio = !LineasTicket.Any();
         }
 
-        // ── Cobrar ────────────────────────────────────────────────────────────
         private async Task Cobrar()
         {
             if (ClienteSeleccionado == null)
@@ -446,7 +422,7 @@ namespace ProyectoRuben.MVVM
                     ReservaId = ReservaVinculada?.Id,
                     Fecha = DateTime.Now,
                     Subtotal = Subtotal,
-                    Impuesto = Math.Round(Subtotal * 0.21m, 2), 
+                    Impuesto = Math.Round(Subtotal * 0.21m, 2),
                     Descuento = DescuentoAplicado,
                     Total = Total,
                     MetodoPago = MetodoPago,
@@ -457,10 +433,33 @@ namespace ProyectoRuben.MVVM
 
                 await AddAsync(_facturaRepository, factura);
 
+                foreach (var linea in LineasTicket.Where(l => l.Tipo == "Producto"))
+                {
+                    var producto = _todosProductos.FirstOrDefault(p => p.Nombre == linea.Descripcion);
+                    if (producto != null)
+                    {
+                        producto.Cantidad -= linea.Cantidad;
+                        if (producto.Cantidad < 0) producto.Cantidad = 0;
+                        await UpdateAsync(_productoRepository, producto);
+                    }
+                }
+
+                // Recargar productos en MVCaja
+                _todosProductos = await GetAllAsync(_productoRepository);
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    ProductosFiltrados = new ObservableCollection<Producto>(
+                        _todosProductos.Where(p => p.Activo == true && p.Cantidad > 0));
+                });
+
+                // Refrescar MVProductos sin dependencia circular
+                var mvProductos = _serviceProvider.GetRequiredService<MVProductos>();
+                await mvProductos.CargarProductos();
+
                 if (ReservaVinculada != null)
                 {
-                    var r = await _reservaRepository.GetByIdAsync(ReservaVinculada.Id);
-                    if (r != null) { r.Estado = "Completada"; await UpdateAsync(_reservaRepository, r); }
+                    ReservaVinculada.Estado = "Completada";
+                    await UpdateAsync(_reservaRepository, ReservaVinculada);
                 }
 
                 MensajeInformacion.Mostrar("✓ Cobro realizado",
@@ -495,25 +494,19 @@ namespace ProyectoRuben.MVVM
 
             try
             {
-                // Limpiar estado anterior
                 LimpiarTodo();
 
-                // Esperar a que las listas estén cargadas (se cargan en el constructor async)
-                // Si todavía no hay datos, esperar un tick
                 if (!_todosClientes.Any())
                     await Task.Delay(300);
 
-                // 1. Seleccionar el cliente
                 var cliente = _todosClientes.FirstOrDefault(c => c.Id == reserva.ClienteId);
                 if (cliente != null)
                     SeleccionarCliente(cliente);
 
-                // 2. Añadir el servicio al ticket
                 var servicio = _todosServicios.FirstOrDefault(s => s.Id == reserva.ServicioId);
                 if (servicio != null)
                     AgregarServicio(servicio);
 
-                // 3. Vincular la reserva
                 ReservaVinculada = reserva;
 
                 SnackbarMessageQueue.Enqueue($"Reserva #{reserva.Id} cargada — {cliente?.Nombre ?? "cliente"}");
@@ -523,6 +516,5 @@ namespace ProyectoRuben.MVVM
                 SnackbarMessageQueue.Enqueue($"Error al cargar reserva: {ex.Message}");
             }
         }
-
     }
 }

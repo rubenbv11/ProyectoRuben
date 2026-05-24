@@ -263,7 +263,7 @@
 															<Border Grid.Column="1" Background="#FFF4EC" CornerRadius="6"
 																	Padding="8,3" VerticalAlignment="Center">
 																<TextBlock FontSize="12" FontWeight="Bold" Foreground="#D4A574">
-																	<Run Text="{Binding Costo, StringFormat='{}{0:F0}', Mode=OneWay}"/>
+																	<Run Text="{Binding Costo, StringFormat='{}{0:F2}', Mode=OneWay}"/>
 																	<Run Text="€"/>
 																</TextBlock>
 															</Border>
@@ -354,7 +354,7 @@
 															<Border Grid.Column="1" Background="#E8F5E9" CornerRadius="6"
 																	Padding="8,3" VerticalAlignment="Center">
 																<TextBlock FontSize="12" FontWeight="Bold" Foreground="#2E7D32">
-																	<Run Text="{Binding Precio, StringFormat='{}{0:F0}', Mode=OneWay}"/>
+																	<Run Text="{Binding Precio, StringFormat='{}{0:F2}', Mode=OneWay}"/>
 																	<Run Text="€"/>
 																</TextBlock>
 															</Border>

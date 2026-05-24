@@ -62,7 +62,7 @@
                                                  Foreground="{StaticResource TextLightBrush}"/>
 					</Button>
 
-					<!-- Exportar -->
+					<!-- Exportar
 					<Button Height="40" Padding="16,0" Cursor="Hand"
                             Background="{StaticResource AccentBrush}" BorderThickness="0"
                             Command="{Binding ExportarExcelCommand}">
@@ -80,6 +80,7 @@
                                        Foreground="White" VerticalAlignment="Center"/>
 						</StackPanel>
 					</Button>
+					 -->
 				</StackPanel>
 			</Grid>
 		</Border>
